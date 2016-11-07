@@ -1,0 +1,11 @@
+Config: {Tmax: 1.0, Tmin: 1.0, neuron_type: log_exp, nupdates: 10000, random_seed: 42424242,
+random_skip: 1000000, tauref: 100, tausyn: 100, meanactoutput: 1}
+bias: 
+- 0.0
+- 0.0
+- 0.0
+initialstate: [0, 0, 0]
+weight:
+- [0.0, 1.0, 0.0]
+- [1.0, 0.0, 1.0]
+- [0.0, 1.0, 0.0]
