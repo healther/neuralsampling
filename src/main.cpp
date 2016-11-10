@@ -9,11 +9,6 @@
 #include "myrandom.h"
 #include "neuron.h"
 #include "network.h"
-// #include "neuron.h"
-// #include "neuron_exp.h"
-// #include "neuron_tail.h"
-// #include "neuron_cuto.h"
-// #include "neuron_exp_erf.h"
 
 
 int main(int argc, char const *argv[])
@@ -135,3 +130,9 @@ int main(int argc, char const *argv[])
 
     return 0;
 }
+
+
+
+
+
+

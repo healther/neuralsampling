@@ -39,4 +39,6 @@ public:
     double activation(const double pot);
 };
 
+
+
 #endif // NEURON_H

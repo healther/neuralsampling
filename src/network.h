@@ -34,7 +34,7 @@ public:
             TInteraction _neuron_interaction_type);
     ~Network() {};
     
-    std::vector<bool> states;
+    std::vector<int> states;
 
     // std::vector<bool> get_state();
     void get_state();
