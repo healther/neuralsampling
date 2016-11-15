@@ -1,0 +1,14 @@
+Config: {Tmax: 1.0, Tmin: 1.0, neuron_type: erf_tail, nupdates: 2, random_seed: 42424242,
+random_skip: 1000000, tauref: 100, tausyn: 100, meanactoutput: 1, network_update_scheme: InOrder}
+Network: {linearsize: 60, dimension: 1, initialstate: {mean_activity: 0.5, rseed: 42424242} }
+bias:
+- 0.0
+- 0.0
+- 0.0
+- 0.0
+initialstate: [100, 150, 100, 150]
+weight:
+- [0.0, 1.0, 0.0, 0.0]
+- [1.0, 0.0, 1.0, 0.0]
+- [0.0, 1.0, 0.0, 1.0]
+- [0.0, 0.0, 1.0, 0.0]

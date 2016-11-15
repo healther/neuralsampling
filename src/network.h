@@ -5,6 +5,7 @@
 #include <random>
 #include <algorithm>
 
+enum TUpdateScheme { InOrder, BatchRandom, Random };
 extern std::mt19937_64 mt_random;
 
 #include "neuron.h"
@@ -12,6 +13,7 @@ extern std::mt19937_64 mt_random;
 class Network
 {
 private:
+    const TUpdateScheme update_scheme;
     const TActivation neuron_activation_type;
     const TInteraction neuron_interaction_type;
 
@@ -25,11 +27,13 @@ private:
 
     void generate_connected_neuron_ids();
 
+
 public:
     Network(std::vector<double> &_biases, 
             std::vector<std::vector<double> > &_weights, 
             std::vector<int> &_initialstate,
             int _tauref, int _tausyn,
+            TUpdateScheme _update_scheme,
             TActivation _neuron_activation_type,
             TInteraction _neuron_interaction_type);
     ~Network() {};

@@ -45,12 +45,13 @@ int main(int argc, char const *argv[])
     double Tmax = configNode["Tmax"].as<double>();
     double T = (Tmax-Tmin)/nupdates + Tmin;
     std::string neuron_type = configNode["neuron_type"].as<std::string>();
+    std::string network_update_scheme = configNode["network_update_scheme"].as<std::string>();
 
     int meanactoutput = configNode["meanactoutput"].as<int>();
 
     // create corresponding network
-    TInteraction neuron_interaction_type = Rect;
-    TActivation neuron_activation_type = Log;
+    TInteraction neuron_interaction_type;
+    TActivation neuron_activation_type;
     if (neuron_type=="log_rect") {
         neuron_interaction_type = Rect;
         neuron_activation_type = Log;
@@ -79,8 +80,21 @@ int main(int argc, char const *argv[])
         return -1;
     }
 
+    TUpdateScheme network_update_scheme_type;
+    if (network_update_scheme=="InOrder"){
+        network_update_scheme_type = InOrder;
+    } else if (network_update_scheme=="BatchRandom") {
+        network_update_scheme_type = BatchRandom;
+    } else if (network_update_scheme=="Random") {
+        network_update_scheme_type = Random;
+    } else {
+        return -1;
+    }
+
+    std::cout << neuron_interaction_type << neuron_activation_type << network_update_scheme_type << std::endl;
+
     Network net(bias, weights, initialstate, tauref, tausyn,
-        neuron_activation_type, neuron_interaction_type);
+        network_update_scheme_type, neuron_activation_type, neuron_interaction_type);
 
     // and output initial configuration
     net.get_state();
@@ -103,7 +117,6 @@ int main(int argc, char const *argv[])
     // seed random number generator and discard for higher entropy
     mt_random.seed(random_seed);
     mt_random.discard(random_skip);
-
 
     // actual simulation
     for (int i = 0; i < nupdates; ++i)

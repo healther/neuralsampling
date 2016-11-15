@@ -2,6 +2,9 @@
 #include <vector>
 #include <cmath>
 
+#include <random>
+#include <algorithm>
+
 #include "neuron.h"
 #include "network.h"
 
@@ -11,8 +14,10 @@ Network::Network(std::vector<double> &_biases,
             std::vector<std::vector<double> > &_weights,
             std::vector<int> &_initialstate,
             int _tauref, int _tausyn,
+            TUpdateScheme _update_scheme,
             TActivation _neuron_activation_type,
             TInteraction _neuron_interaction_type):
+    update_scheme(_update_scheme),
     neuron_activation_type(_neuron_activation_type),
     neuron_interaction_type(_neuron_interaction_type)
 {
@@ -31,6 +36,7 @@ Network::Network(std::vector<double> &_biases,
         );
         states[i] = neurons[i].get_state();
     }
+
     generate_connected_neuron_ids();
 }
 
@@ -74,14 +80,23 @@ void Network::get_internalstate()
 
 void Network::update_state(double T)
 {
-    std::vector<int> random_inds(biases.size()) ;
-    std::iota (std::begin(random_inds), std::end(random_inds), 0);
-    std::shuffle ( random_inds.begin(), random_inds.end(), mt_random);
+    std::vector<int> update_inds(biases.size()) ;
+
+    if (update_scheme==Random) {
+        std::uniform_int_distribution<int> random_ints(0, biases.size());
+        for (unsigned int i = 0; i < biases.size(); ++i) {
+            update_inds[i] = random_ints(mt_random);
+        }
+    } else {
+        std::iota (std::begin(update_inds), std::end(update_inds), 0);
+        if (update_scheme==BatchRandom) {
+            std::shuffle ( update_inds.begin(), update_inds.end(), mt_random);
+        }
+    }
 
     for (unsigned int i = 0; i < biases.size(); ++i)
     {
-        // int ii = i;
-        int ii = random_inds[i];
+        int ii = update_inds[i];
         double pot = biases[ii];
         if (boptimized)
         {

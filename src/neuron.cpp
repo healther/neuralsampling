@@ -92,9 +92,9 @@ double Neuron::get_interaction()
 
 double Neuron::activation(const double pot)
 {
-    if (0==interaction_type) {
+    if (Log==activation_type) {
         return 1./(1.+std::exp(-pot));
-    } else if (1==interaction_type) {
+    } else if (Erf==activation_type) {
         return .5 + .5*std::erf(.41631118*pot);
     }
 }
