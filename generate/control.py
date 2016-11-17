@@ -30,7 +30,7 @@ python generate/control.py {job_file}
 """
 
 
-def experiment(dictionary, bgenerate=True, generate_folder='tmp', brun=False):
+def experiment(dictionary, bgenerate_sim=True, bgenerate_job=True, generate_folder='tmp', brun=True):
     print("{}: Extracting onetime information".format(datetime.datetime.now()))
     replacements = dictionary.pop("replacements")
     sim_folder_template = dictionary.pop("sim_folder_template")
@@ -39,13 +39,13 @@ def experiment(dictionary, bgenerate=True, generate_folder='tmp', brun=False):
 
     ### generate folders
     print("{}: Expanding input dictionary according to {} rules".format(datetime.datetime.now(), len(replacements)))
-    if bgenerate:
+    if bgenerate_sim:
         print("    Generating {} simulation files".format(np.prod([len(r) for k, r in replacements.iteritems()])))
     folders = []
     for ed in config.expanddict(dictionary, replacements):
         d = misc.flatten_dictionary(ed)
         folder = sim_folder_template.format(**d)
-        if bgenerate:
+        if bgenerate_sim:
             misc.ensure_folder_exists(folder)
 
             ed['outfile'] = os.path.join(folder, 'output')
@@ -58,7 +58,7 @@ def experiment(dictionary, bgenerate=True, generate_folder='tmp', brun=False):
         folders.append(folder)
 
     ### generate run files
-    if bgenerate:
+    if bgenerate_job:
         n_sims_per_job = executable_configuration["n_sims_per_job"]
         n_job_files = int(len(folders)/n_sims_per_job) + 1
         print("{}: Generating {} slurm-jobfiles for {} simulations".format(datetime.datetime.now(), n_job_files, len(folders)))
@@ -69,7 +69,8 @@ def experiment(dictionary, bgenerate=True, generate_folder='tmp', brun=False):
         misc.ensure_folder_exists(generate_folder)
         for i in range(n_job_files):
             job_file = generate_folder + os.sep + str(current_time).strip() + \
-                    '{}.yaml'.format(i).replace(" ", "_")
+                    '{}.yaml'.format(i)
+            job_file = job_file.replace(" ", "_")
             job_dictionary = {'type': "Run", 'sim_files': [os.path.join(sf, 'sim.yaml')
                     for sf in folders[i*n_sims_per_job:(i+1)*n_sims_per_job]]}
             with open(job_file, 'w') as f:
@@ -85,6 +86,9 @@ def experiment(dictionary, bgenerate=True, generate_folder='tmp', brun=False):
         print("{}: Spawning slurm jobs".format(datetime.datetime.now()))
         for moab_file in moab_files:
             subprocess.call(["msub", moab_file])
+
+    print("{} Finshed".format(datetime.datetime.now()))
+
 
 def run(dictionary):
     nproc = int(os.getenv('SLURM_NPROCS', '1'))
@@ -122,7 +126,7 @@ if __name__=="__main__":
     try:
         d = yaml.load(open(sys.argv[1], 'r'))
         if d["type"] == "Experiment":
-            conf = d.pop("generate_config", default={})
+            conf = d.pop("generate_config", {})
             experiment(d, **conf)
         elif d["type"] == "Run":
             run(d)
