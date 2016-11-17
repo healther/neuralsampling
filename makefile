@@ -12,6 +12,8 @@ test: tests/test_neuron tests/test_network
 	tests/test_neuron
 	tests/test_network
 	python generate/config.py
+	python generate/misc.py
+	python generate/weights.py
 
 clean:
 	$(RM) build/*
