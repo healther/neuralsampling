@@ -1,4 +1,5 @@
 import collections
+import os
 
 def flatten_dictionary(d, parent_key='', sep='_'):
     """Returns a flat dictionary with concatenated keys for a nested dictionary d

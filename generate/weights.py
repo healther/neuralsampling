@@ -26,7 +26,7 @@ def generate_initialstate(num_sampler, mean_activity=0.5, tauref=100, rseed=4242
     return np.random.randint( 0, int(high), num_sampler)
 
 
-def generate_NN_connection_matrix(linearsize=10, dimension=2):
+def generate_NN_connection_matrix(linearsize=10, dimension=2, weight=1.):
     """Returns the normed nearest neighbor connected weight matrix
 
     Input:
@@ -55,7 +55,7 @@ def generate_NN_connection_matrix(linearsize=10, dimension=2):
                     for d in range(dimension)
                     for o in [linearsize**d, -linearsize**d]
                     ]
-        weights[nid, connlist] = 1.
+        weights[nid, connlist] = weight
     return weights
 
 
