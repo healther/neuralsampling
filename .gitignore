@@ -1,3 +1,10 @@
+neuralsampler
+test_neuron
+test_network
+
+# compiled python
+*.pyc
+
 # Compiled Object files
 *.slo
 *.lo
