@@ -1,17 +1,16 @@
 Config: {Tmax: 1., Tmin: 1., neuron_type: nt, nupdates: 100000, random_seed: rsu,
-random_skip: 1000000, tauref: tau, tausyn: tau, meanactoutput: 0, network_update_scheme: nu}
-Network: {connection_function: generate_NN_connection_matrix, connection: {linearsize: 60, dimension: 1}, 
+random_skip: 1000000, tauref: tau, tausyn: tau, meanactoutput: 1, network_update_scheme: nu}
+Network: {connection_function: generate_NN_connection_matrix, connection: {linearsize: 40, dimension: 2, weight: w}, 
     initialstate_function: generate_initialstate, initialstate: {tauref: tau, mean_activity: ma, rseed: rsi},
     bias_function: generate_bias, bias: {factor: 1., offset: 0.}}
 replacements: {nt: [log_rect], tau: [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64],
-#    rsu: [42424242, 42424243, 42424244, 42424245, 42424246, 42424247, 42424248, 42424249, 42424250],
-    rsu: [42424242],
+    rsu: [42424242, 42424243, 42424244, 42424245, 42424246, 42424247, 42424248, 42424249, 42424250],
     nu: [InOrder, BatchRandom, Random], 
-#    rsi: [42424242, 42424243, 42424244, 42424245, 42424246, 42424247, 42424248, 42424249, 42424250],
-    rsi: [42424242],
-#    ma: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
-    ma: [0.5],
+    rsi: [42424242, 42424243, 42424244, 42424245, 42424246, 42424247, 42424248, 42424249, 42424250],
+    ma: [0.1, 0.3, 0.5, 0.7, 0.9],
+    w: [0.5, 1., 1.5, 2., 2.5],
 }
-sim_folder_template: "simulation/simulation_artifacts/{Config_neuron_type}_{Config_network_update_scheme}_{Config_tausyn}_{Config_random_seed}_{Network_initialstate_mean_activity}_{Network_initialstate_rseed}"
-exec_conf: {n_sims_per_job: 8, nodes: 1, processors_per_node: 8, walltime: "24:00:00"}
+sim_folder_template: "simulation/simulation_artifacts/{Config_neuron_type}_{Config_network_update_scheme}_{Config_tausyn}_{Network_connection_weight}_{Config_random_seed}_{Network_initialstate_mean_activity}_{Network_initialstate_rseed}"
+exec_conf: {n_sims_per_job: 1600, nodes: 1, processors_per_node: 8, walltime: "24:00:00"}
 type: Experiment
+generate_config: {bgenerate: True, generate_folder: jobfolder, brun: True}
