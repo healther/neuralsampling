@@ -122,7 +122,7 @@ if __name__=="__main__":
     try:
         d = yaml.load(open(sys.argv[1], 'r'))
         if d["type"] == "Experiment":
-            conf = d.pop("generate_config")
+            conf = d.pop("generate_config", default={})
             experiment(d, **conf)
         elif d["type"] == "Run":
             run(d)
