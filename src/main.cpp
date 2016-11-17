@@ -2,9 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <boost/lexical_cast.hpp>
-#include "yaml-cpp/yaml.h"
 
+#include "main.h"
 
 #include "myrandom.h"
 #include "neuron.h"
@@ -13,11 +12,20 @@
 
 int main(int argc, char const *argv[])
 {
+    std::cout << argv[1] << std::endl;
     YAML::Node baseNode = YAML::LoadFile(argv[1]);
     YAML::Node configNode = baseNode["Config"];
     YAML::Node biasNode = baseNode["bias"];
     YAML::Node weightNode = baseNode["weight"];
     YAML::Node initialStateNode = baseNode["initialstate"];
+    if (!biasNode || !weightNode || !initialStateNode) {
+        std::cout << "Corrupted configuration file" << std::endl;
+        return -1;
+    }
+
+
+    YAML::Node simulationFolderNode = baseNode["outfile"];
+    bool b_output_file = baseNode["outfile"];
 
     std::vector<double> bias;
     for(YAML::const_iterator it=biasNode.begin(); it!=biasNode.end(); it++) {
@@ -91,7 +99,16 @@ int main(int argc, char const *argv[])
         return -1;
     }
 
-    std::cout << neuron_interaction_type << neuron_activation_type << network_update_scheme_type << std::endl;
+    std::streambuf *buf;
+    std::ofstream of;
+    if (b_output_file) {
+        of.open(simulationFolderNode.as<std::string>() ) ;
+        buf = of.rdbuf();;
+    } else {
+        buf = std::cout.rdbuf();
+    }
+    std::ostream output(buf);
+    output << neuron_interaction_type << neuron_activation_type << network_update_scheme_type << std::endl;
 
     Network net(bias, weights, initialstate, tauref, tausyn,
         network_update_scheme_type, neuron_activation_type, neuron_interaction_type);
@@ -102,16 +119,16 @@ int main(int argc, char const *argv[])
     for (unsigned int i = 0; i < bias.size(); ++i)
     {
         if (meanactoutput==0) {
-            std::cout << net.states[i];
+            output << net.states[i];
         }
         else {
             sumact += net.states[i];
         }
     }
     if (meanactoutput==0) {
-        std::cout << std::endl;
+        output << std::endl;
     } else {
-        std::cout << sumact << std::endl;
+        output << sumact << std::endl;
     }
 
     // seed random number generator and discard for higher entropy
@@ -128,19 +145,19 @@ int main(int argc, char const *argv[])
         for (unsigned int j = 0; j < bias.size(); ++j)
         {
             if (meanactoutput==0) {
-                std::cout << net.states[j];
+                output << net.states[j];
             }
             else {
                 sumact += net.states[j];
             }
         }
         if (meanactoutput==0) {
-            std::cout << std::endl;
+            output << std::endl;
         } else {
-            std::cout << sumact << std::endl;
+            output << sumact << std::endl;
         }
     }
-
+    of.close();
     return 0;
 }
 

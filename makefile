@@ -1,19 +1,22 @@
-CPPFLAGS=-O0 -g
+CPPFLAGS=-O3
 LDFLAGS=
 LDLIBS=-lm -lyaml-cpp
-INCLUDEPATH=-I/usr/local/include
-LIBPATH=-L/usr/local/lib
+INCLUDEPATH=
+LIBPATH=
 
 OBJS=neuralsampler network.o neuron.o
 
 all: bin/neuralsampler tests/test_neuron tests/test_network
 
-test:
+test: tests/test_neuron tests/test_network
 	tests/test_neuron
 	tests/test_network
+	python generate/config.py
 
 clean:
-	$(RM) $(OBJS)
+	$(RM) build/*
+	$(RM) bin/*
+	$(RM) test/*
 	$(RM) src/*.gch
 
 build/network.o: src/network.cpp src/neuron.h src/network.h
@@ -28,7 +31,7 @@ build/neuron.o: src/neuron.cpp src/neuron.h
 tests/test_neuron: src/neuron_test.cpp src/neuron.cpp src/neuron.h
 	g++ $(INCLUDEPATH) $(LIBPATH) $(LDFLAGS) $(CPPFLAGS) src/neuron_test.cpp build/neuron.o $(LDLIBS) -o tests/test_neuron
 
-bin/neuralsampler: build/neuron.o build/network.o src/myrandom.h src/neuron.h src/network.h src/main.cpp
+bin/neuralsampler: build/neuron.o build/network.o src/myrandom.h src/neuron.h src/network.h src/main.h src/main.cpp
 	g++ $(INCLUDEPATH) $(LIBPATH) $(LDFLAGS) $(CPPFLAGS) -o bin/neuralsampler build/neuron.o build/network.o src/main.cpp $(LDLIBS)
 
 

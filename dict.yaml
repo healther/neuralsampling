@@ -1,14 +1,17 @@
-Config: {Tmax: 1.0, Tmin: 1.0, neuron_type: erf_tail, nupdates: 2, random_seed: 42424242,
-random_skip: 1000000, tauref: 100, tausyn: 100, meanactoutput: 1, network_update_scheme: InOrder}
-Network: {linearsize: 60, dimension: 1, initialstate: {mean_activity: 0.5, rseed: 42424242} }
-bias:
-- 0.0
-- 0.0
-- 0.0
-- 0.0
-initialstate: [100, 150, 100, 150]
-weight:
-- [0.0, 1.0, 0.0, 0.0]
-- [1.0, 0.0, 1.0, 0.0]
-- [0.0, 1.0, 0.0, 1.0]
-- [0.0, 0.0, 1.0, 0.0]
+Config: {Tmax: 1., Tmin: 1., neuron_type: nt, nupdates: 100000, random_seed: rsu,
+random_skip: 1000000, tauref: tau, tausyn: tau, meanactoutput: 0, network_update_scheme: nu}
+Network: {connection_function: generate_NN_connection_matrix, connection: {linearsize: 60, dimension: 1}, 
+    initialstate_function: generate_initialstate, initialstate: {tauref: tau, mean_activity: ma, rseed: rsi},
+    bias_function: generate_bias, bias: {factor: 1., offset: 0.}}
+replacements: {nt: [log_rect], tau: [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64],
+#    rsu: [42424242, 42424243, 42424244, 42424245, 42424246, 42424247, 42424248, 42424249, 42424250],
+    rsu: [42424242],
+    nu: [InOrder, BatchRandom, Random], 
+#    rsi: [42424242, 42424243, 42424244, 42424245, 42424246, 42424247, 42424248, 42424249, 42424250],
+    rsi: [42424242],
+#    ma: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+    ma: [0.5],
+}
+sim_folder_template: "simulation/simulation_artifacts/{Config_neuron_type}_{Config_network_update_scheme}_{Config_tausyn}_{Config_random_seed}_{Network_initialstate_mean_activity}_{Network_initialstate_rseed}"
+exec_conf: {n_sims_per_job: 8, nodes: 1, processors_per_node: 8, walltime: "24:00:00"}
+type: Experiment
