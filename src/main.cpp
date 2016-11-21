@@ -16,8 +16,21 @@ int main(int argc, char const *argv[])
     YAML::Node baseNode = YAML::LoadFile(argv[1]);
     YAML::Node configNode = baseNode["Config"];
     YAML::Node biasNode = baseNode["bias"];
+    if (!biasNode) {
+        YAML::Node biasFileNode = baseNode["bias_file"];
+        biasNode = YAML::LoadFile(biasFileNode.as<std::string>());
+    }
     YAML::Node weightNode = baseNode["weight"];
+    if (!weightNode) {
+        YAML::Node weightFileNode = baseNode["weight_file"];
+        weightNode = YAML::LoadFile(weightFileNode.as<std::string>());
+    }
     YAML::Node initialStateNode = baseNode["initialstate"];
+    if (!initialStateNode) {
+        YAML::Node initialStateFileNode = baseNode["initialstate_file"];
+        initialStateNode = YAML::LoadFile(initialStateFileNode.as<std::string>());
+    }
+
     if (!biasNode || !weightNode || !initialStateNode) {
         std::cout << "Corrupted configuration file" << std::endl;
         return -1;
@@ -158,6 +171,9 @@ int main(int argc, char const *argv[])
         }
     }
     of.close();
+
+    std::remove(argv[1]);
+
     return 0;
 }
 

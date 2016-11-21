@@ -83,7 +83,7 @@ void Network::update_state(double T)
     std::vector<int> update_inds(biases.size()) ;
 
     if (update_scheme==Random) {
-        std::uniform_int_distribution<int> random_ints(0, biases.size());
+        std::uniform_int_distribution<int> random_ints(0, biases.size()-1);
         for (unsigned int i = 0; i < biases.size(); ++i) {
             update_inds[i] = random_ints(mt_random);
         }
@@ -104,7 +104,7 @@ void Network::update_state(double T)
             for (unsigned int j = 0; j < connected_neuron_ids[ii].size(); ++j)
             {
                 conid = connected_neuron_ids[ii][j];
-                pot += neurons[conid].get_interaction() * weights[i][conid];
+                pot += neurons[conid].get_interaction() * weights[ii][conid];
             }
         } else {    // not boptimized
             for (unsigned int j = 0; j < biases.size(); ++j)
