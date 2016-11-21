@@ -9,6 +9,7 @@ import numpy as np
 
 import config
 import misc
+import analysis
 import weights
 
 moab_stub = """#!/bin/bash
@@ -30,11 +31,12 @@ python generate/control.py {job_file}
 """
 
 
-def experiment(dictionary, bgenerate_sim=True, bgenerate_job=True, generate_folder='tmp', brun=True):
+def experiment(dictionary, bgenerate_sim=True, bgenerate_job=True, generate_folder='tmp', brun=True, bcollect=True):
     print("{}: Extracting onetime information".format(datetime.datetime.now()))
     replacements = dictionary.pop("replacements")
     sim_folder_template = dictionary.pop("sim_folder_template")
     executable_configuration = dictionary.pop("exec_conf")
+    analysis_dictionary = dictionary.pop("analysis")
     dictionary.pop('type')
 
     ### generate folders
@@ -86,6 +88,35 @@ def experiment(dictionary, bgenerate_sim=True, bgenerate_job=True, generate_fold
         print("{}: Spawning slurm jobs".format(datetime.datetime.now()))
         for moab_file in moab_files:
             subprocess.call(["msub", moab_file])
+
+    if bcollect:
+        print("{}: Starting to collect data".format(datetime.datetime.now()))
+        analysis_function = getattr(analysis, analysis_dictionary["collect_function"])
+
+        args = []
+        for i in range(len(folders)/1000 + 1):
+            arg = {'folders': folders[i*1000:(i+1)*1000], 
+                    'analysis_function': analysis_function,
+                    'collected_file': analysis_dictionary["outfile"]+"{:03d}".format(i),
+                    }
+            args.append(arg)
+
+        pool = mp.Pool(8)
+        pool.map(misc.collect_results_caller, args)
+        pool.close()
+        pool.join()
+
+        collected = {}
+        for a in args:
+            d = yaml.load(open(a["collected_file"], 'r'))
+            collected.update(d)
+
+        with open(analysis_dictionary["outfile"], 'w') as f:
+            yaml.dump(collected, f)
+
+    if bplot:
+        raise NotImplementedError()
+
 
     print("{} Finshed".format(datetime.datetime.now()))
 

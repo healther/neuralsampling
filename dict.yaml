@@ -10,7 +10,8 @@ replacements: {nt: [log_rect], tau: [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64],
     ma: [0.1, 0.3, 0.5, 0.7, 0.9],
     w: [0.5, 1., 1.5, 2., 2.5],
 }
+analysis: { collect_function: collect_mean_std_mean, outfile: collected/simulation_artifacts}
 sim_folder_template: "simulation/simulation_artifacts/{Config_neuron_type}_{Config_network_update_scheme}_{Config_tausyn}_{Network_connection_weight}_{Config_random_seed}_{Network_initialstate_mean_activity}_{Network_initialstate_rseed}"
 exec_conf: {n_sims_per_job: 1600, nodes: 1, processors_per_node: 8, walltime: "24:00:00"}
 type: Experiment
-generate_config: {bgenerate_sim: False, bgenerate_job: True, generate_folder: jobfolder, brun: True}
+generate_config: {bgenerate_sim: True, bgenerate_job: True, generate_folder: jobfolder, brun: True, bcollect: False}

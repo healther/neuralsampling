@@ -1,5 +1,6 @@
 import collections
 import os
+import yaml
 
 def flatten_dictionary(d, parent_key='', sep='_'):
     """Returns a flat dictionary with concatenated keys for a nested dictionary d
@@ -25,6 +26,20 @@ def ensure_folder_exists(folder):
     except OSError as e:
         if e.errno!=17:
             raise
+
+
+def collect_results_caller(args):
+    collect_results(**args)
+
+
+def collect_results(folders, analysis_function, collected_file):
+    collected = {}
+    for f in folders:
+        collected.update(analysis_function( f ))
+
+    with open(collected_file, 'w') as f:
+        yaml.dump(collected, f)
+
 
 
 if __name__ == "__main__":
