@@ -14,4 +14,4 @@ analysis: { collect_function: collect_mean_std_mean, outfile: collected/simulati
 sim_folder_template: "simulation/simulation_artifacts/{Config_neuron_type}_{Config_network_update_scheme}_{Config_tausyn}_{Network_connection_weight}_{Config_random_seed}_{Network_initialstate_mean_activity}_{Network_initialstate_rseed}"
 exec_conf: {n_sims_per_job: 1600, nodes: 1, processors_per_node: 8, walltime: "24:00:00"}
 type: Experiment
-generate_config: {bgenerate_sim: True, bgenerate_job: True, generate_folder: jobfolder, brun: True, bcollect: False}
+generate_config: {bgenerate_sim: False, bgenerate_job: False, generate_folder: jobfolder, brun: False, bcollect: False, bplot: True}

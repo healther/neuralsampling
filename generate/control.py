@@ -11,6 +11,7 @@ import config
 import misc
 import analysis
 import weights
+import plot
 
 moab_stub = """#!/bin/bash
 #MSUB -V
@@ -27,11 +28,12 @@ module load sqlite-3.8.5-gcc-6.2.0-kd7qe6o
 module load python-2.7.12-gcc-6.2.0-csrr54f
 module load py-pyyaml-3.11-gcc-6.2.0-2kgymdu
 
+echo {job_file}
 python generate/control.py {job_file}
 """
 
 
-def experiment(dictionary, bgenerate_sim=True, bgenerate_job=True, generate_folder='tmp', brun=True, bcollect=True):
+def experiment(dictionary, bgenerate_sim=True, bgenerate_job=True, generate_folder='tmp', brun=True, bcollect=True, bplot=True):
     print("{}: Extracting onetime information".format(datetime.datetime.now()))
     replacements = dictionary.pop("replacements")
     sim_folder_template = dictionary.pop("sim_folder_template")
@@ -95,7 +97,7 @@ def experiment(dictionary, bgenerate_sim=True, bgenerate_job=True, generate_fold
 
         args = []
         for i in range(len(folders)/1000 + 1):
-            arg = {'folders': folders[i*1000:(i+1)*1000], 
+            arg = {'folders': folders[i*1000:(i+1)*1000],
                     'analysis_function': analysis_function,
                     'collected_file': analysis_dictionary["outfile"]+"{:03d}".format(i),
                     }
@@ -115,7 +117,13 @@ def experiment(dictionary, bgenerate_sim=True, bgenerate_job=True, generate_fold
             yaml.dump(collected, f)
 
     if bplot:
-        raise NotImplementedError()
+        print("Plotting")
+        for w in replacements["w"]:
+            for rt in replacements["nu"]:
+                plot.colormap(analysis_dictionary["outfile"], 'tau', 'initialactivity', 'mean',
+                        restrictions={'weight': [w], 'randomtype': [rt]},
+                        plotfolder= 'plots',
+                        plotname='w{}_rt{}.pdf'.format(w, rt))
 
 
     print("{} Finshed".format(datetime.datetime.now()))
