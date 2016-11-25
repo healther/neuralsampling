@@ -72,20 +72,20 @@ void Network::produce_output(std::ostream& stream)
         {
             activity += neurons[i].get_state();
         }
-        stream << activity << std::endl;
+        stream << activity << "\n";
     } else if (output_scheme==BinaryStateOutput) {
         for (unsigned int i = 0; i < biases.size(); ++i)
         {
             stream << neurons[i].get_state();
         }
-        stream << std::endl;
+        stream << "\n";
     } else if (output_scheme==SpikesOutput) {
         for (unsigned int i = 0; i < biases.size(); ++i) {
             if (neurons[i].has_spiked()) {
                 stream << i << " ";
             }
         }
-        stream << std::endl;
+        stream << "\n";
     } else {
         throw;
     }
