@@ -1,6 +1,7 @@
 neuralsampler
 test_neuron
 test_network
+*.tmp
 
 # compiled python
 *.pyc

@@ -7,6 +7,8 @@ LIBPATH=
 
 OBJS=neuralsampler network.o neuron.o
 
+bin: bin/neuralsampler
+
 all: bin/neuralsampler tests/test_neuron tests/test_network
 
 test: tests/test_neuron tests/test_network
@@ -15,6 +17,7 @@ test: tests/test_neuron tests/test_network
 	python generate/config.py
 	python generate/misc.py
 	python generate/weights.py
+	python generate/analysis.py
 
 clean:
 	$(RM) build/*
