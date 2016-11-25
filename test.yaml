@@ -1,0 +1,11 @@
+Config: {Tmax: 1., Tmin: 1., neuron_type: log_rect, nupdates: 1000000,
+    random_seed: 42424242, random_skip: 1000000, tauref: 10,
+    tausyn: 10, output_scheme: BinaryState,
+    network_update_scheme: InOrder, remove_config_file: false}
+bias: [0.5, -0.9, -1.5, 1.3]
+weight:
+- [0.0, 1.2, 1.8, 2.2]
+- [1.2, 0.0, -1.2, -1.3]
+- [1.8, -1.2, 0.0, 0.3]
+- [2.2, -1.3, 0.3, 0.0]
+initialstate: [0, 5, 10, 15]

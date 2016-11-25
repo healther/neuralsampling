@@ -31,6 +31,7 @@ public:
     void update_interaction();
 
     bool spike(const double pot);
+    bool has_spiked();
 
     int get_internalstate();
     int get_state();

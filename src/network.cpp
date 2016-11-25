@@ -14,9 +14,11 @@ Network::Network(std::vector<double> &_biases,
             std::vector<std::vector<double> > &_weights,
             std::vector<int> &_initialstate,
             int _tauref, int _tausyn,
+            TOutputScheme _output_scheme,
             TUpdateScheme _update_scheme,
             TActivation _neuron_activation_type,
             TInteraction _neuron_interaction_type):
+    output_scheme(_output_scheme),
     update_scheme(_update_scheme),
     neuron_activation_type(_neuron_activation_type),
     neuron_interaction_type(_neuron_interaction_type)
@@ -59,6 +61,33 @@ void Network::generate_connected_neuron_ids()
     if (n_connections*4<biases.size()*biases.size())
     {
         boptimized = true;
+    }
+}
+
+void Network::produce_output(std::ostream& stream)
+{
+    if (output_scheme==MeanActivityOutput) {
+        int activity = 0;
+        for (unsigned int i = 0; i < biases.size(); ++i)
+        {
+            activity += neurons[i].get_state();
+        }
+        stream << activity << std::endl;
+    } else if (output_scheme==BinaryStateOutput) {
+        for (unsigned int i = 0; i < biases.size(); ++i)
+        {
+            stream << neurons[i].get_state();
+        }
+        stream << std::endl;
+    } else if (output_scheme==SpikesOutput) {
+        for (unsigned int i = 0; i < biases.size(); ++i) {
+            if (neurons[i].has_spiked()) {
+                stream << i << " ";
+            }
+        }
+        stream << std::endl;
+    } else {
+        throw;
     }
 }
 

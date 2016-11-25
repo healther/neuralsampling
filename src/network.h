@@ -1,11 +1,13 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+#include <ostream>
 #include <vector>
 #include <random>
 #include <algorithm>
 
 enum TUpdateScheme { InOrder, BatchRandom, Random };
+enum TOutputScheme { MeanActivityOutput, BinaryStateOutput, SpikesOutput };
 extern std::mt19937_64 mt_random;
 
 #include "neuron.h"
@@ -13,6 +15,7 @@ extern std::mt19937_64 mt_random;
 class Network
 {
 private:
+    const TOutputScheme output_scheme;
     const TUpdateScheme update_scheme;
     const TActivation neuron_activation_type;
     const TInteraction neuron_interaction_type;
@@ -33,6 +36,7 @@ public:
             std::vector<std::vector<double> > &_weights, 
             std::vector<int> &_initialstate,
             int _tauref, int _tausyn,
+            TOutputScheme _output_scheme,
             TUpdateScheme _update_scheme,
             TActivation _neuron_activation_type,
             TInteraction _neuron_interaction_type);
@@ -41,6 +45,7 @@ public:
     std::vector<int> states;
 
     // std::vector<bool> get_state();
+    void produce_output(std::ostream& stream);
     void get_state();
     void get_internalstate();
     void update_state(double T);

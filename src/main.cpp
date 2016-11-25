@@ -36,7 +36,6 @@ int main(int argc, char const *argv[])
         return -1;
     }
 
-
     YAML::Node simulationFolderNode = baseNode["outfile"];
     bool b_output_file = baseNode["outfile"];
 
@@ -67,8 +66,8 @@ int main(int argc, char const *argv[])
     double T = (Tmax-Tmin)/nupdates + Tmin;
     std::string neuron_type = configNode["neuron_type"].as<std::string>();
     std::string network_update_scheme = configNode["network_update_scheme"].as<std::string>();
-
-    int meanactoutput = configNode["meanactoutput"].as<int>();
+    std::string output_scheme = configNode["output_scheme"].as<std::string>();
+    bool b_remove_config_file = configNode["remove_config_file"].as<bool>();
 
     // create corresponding network
     TInteraction neuron_interaction_type;
@@ -109,6 +108,19 @@ int main(int argc, char const *argv[])
     } else if (network_update_scheme=="Random") {
         network_update_scheme_type = Random;
     } else {
+        std::cout << "Use network_update_scheme [InOrder, BatchRandom, Random]" << std::endl;
+        return -1;
+    }
+
+    TOutputScheme network_output_scheme_type;
+    if (output_scheme=="MeanActivity") {
+        network_output_scheme_type = MeanActivityOutput;
+    } else if (output_scheme=="BinaryState") {
+        network_output_scheme_type = BinaryStateOutput;
+    } else if (output_scheme=="Spikes") {
+        network_output_scheme_type = SpikesOutput;
+    } else {
+        std::cout << "Use network_output_scheme [MeanActivity, BinaryState, Spikes]" << std::endl;
         return -1;
     }
 
@@ -121,28 +133,20 @@ int main(int argc, char const *argv[])
         buf = std::cout.rdbuf();
     }
     std::ostream output(buf);
-    output << neuron_interaction_type << neuron_activation_type << network_update_scheme_type << std::endl;
+    output << "Remove config file at the end: " << b_remove_config_file << std::endl;
+    output << "Outputformat Updatescheme Activationtype Interactiontype: "
+        << network_output_scheme_type << network_update_scheme_type
+        << neuron_interaction_type << neuron_activation_type << std::endl;
 
     Network net(bias, weights, initialstate, tauref, tausyn,
-        network_update_scheme_type, neuron_activation_type, neuron_interaction_type);
+        network_output_scheme_type,
+        network_update_scheme_type, 
+        neuron_activation_type, 
+        neuron_interaction_type);
 
     // and output initial configuration
     net.get_state();
-    int sumact = 0;
-    for (unsigned int i = 0; i < bias.size(); ++i)
-    {
-        if (meanactoutput==0) {
-            output << net.states[i];
-        }
-        else {
-            sumact += net.states[i];
-        }
-    }
-    if (meanactoutput==0) {
-        output << std::endl;
-    } else {
-        output << sumact << std::endl;
-    }
+    net.produce_output(output);
 
     // seed random number generator and discard for higher entropy
     mt_random.seed(random_seed);
@@ -154,26 +158,14 @@ int main(int argc, char const *argv[])
         T = (Tmax-Tmin)*(i+1)/nupdates + Tmin;
         net.update_state(T);
         net.get_state();
-        sumact = 0;
-        for (unsigned int j = 0; j < bias.size(); ++j)
-        {
-            if (meanactoutput==0) {
-                output << net.states[j];
-            }
-            else {
-                sumact += net.states[j];
-            }
-        }
-        if (meanactoutput==0) {
-            output << std::endl;
-        } else {
-            output << sumact << std::endl;
-        }
+        net.produce_output(output);
     }
     of.close();
 
-    std::remove(argv[1]);
-
+    if (b_remove_config_file){
+        std::remove(argv[1]);
+    }
+    
     return 0;
 }
 

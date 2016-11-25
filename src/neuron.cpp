@@ -71,6 +71,11 @@ bool Neuron::spike(const double pot)
     return activation(pot - std::log(tauref)) > r;
 }
 
+bool Neuron::has_spiked()
+{
+    return state==0;
+}
+
 
 
 int Neuron::get_internalstate()
