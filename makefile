@@ -18,12 +18,14 @@ test: tests/test_neuron tests/test_network
 	python generate/misc.py
 	python generate/weights.py
 	python generate/analysis.py
+	python generate/tsp.py
 
 clean:
 	$(RM) build/*
 	$(RM) bin/*
 	$(RM) test/*
 	$(RM) src/*.gch
+	$(RM) *.tmp
 
 build/network.o: src/network.cpp src/neuron.h src/network.h
 	$(CXX) $(CPPFLAGS) -c src/network.cpp -o build/network.o

@@ -3,7 +3,7 @@ from __future__ import division, print_function
 import sys
 from copy import deepcopy
 from collections import defaultdict, Counter
-from itertools import islice
+from itertools import islice, product
 import numpy as np
 import yaml
 
@@ -60,8 +60,27 @@ def get_state_from_string(statestring):
 
 
 def calculate_dkl(ptheo, fsampl):
+    """Calculates the relative entropy when encoding fsampl with the optimal encoding of ptheo
+
+    Input:
+        ptheo   list    theoretical probabilities for all states
+        fsample list    frequencies for all sampled states
+    Output:
+        dkl     float   Kullback Leibler divergence
+
+    >>> calculate_dkl([0.5,0.25,0.25], [2,1,1])
+    (0.0, 4)
+    >>> calculate_dkl([0.5,0.25,0.25], [5,2,3])
+    (0.010067756775344432, 10)"""
     totn = np.sum(fsampl)
     return np.sum(f/totn * np.log(f/totn/p) for p,f in zip(ptheo, fsampl) if f!=0), totn
+
+
+def energy_for_network(w,b, states=None):
+    if states==None:
+        states = [z for z in product([0,1], repeat=len(w))]
+    return [ -.5*np.dot(z, np.dot(w, z))-np.dot(b,z) for z in states]
+
 
 
 def compare_sampling(outputfilename, configfilename, updates=[int(n) for n in np.logspace(3,8,11)]):
@@ -72,7 +91,7 @@ def compare_sampling(outputfilename, configfilename, updates=[int(n) for n in np
 
     states = np.array([ get_state_from_string(k) 
                     for k in all_keys])
-    energies = [ -.5*np.dot(z, np.dot(w, z))-np.dot(b,z) for z in states]
+    energies = energy_for_network(w,b, states)
     Z = np.sum(np.exp(-e) for e in energies)
     probabilities = [np.exp(-e)/Z for e in energies]
 
@@ -96,7 +115,7 @@ def compare_sampling(outputfilename, configfilename, updates=[int(n) for n in np
 if __name__ == '__main__':
     if len(sys.argv)==1:
         import doctest
-        doctest.testmod()
+        print(doctest.testmod())
     elif len(sys.argv)==3:
         updates, dkls = compare_sampling(sys.argv[1], sys.argv[2])
         for u, d in zip(updates, dkls):

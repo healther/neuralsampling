@@ -81,6 +81,6 @@ def expanddict(dict_to_expand, expansions):
 
 if __name__ == "__main__":
     import doctest
-    doctest.testmod()
+    print(doctest.testmod())
 
 

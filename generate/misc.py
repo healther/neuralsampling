@@ -44,5 +44,5 @@ def collect_results(folders, analysis_function, collected_file):
 
 if __name__ == "__main__":
     import doctest
-    doctest.testmod()
+    print(doctest.testmod())
 
