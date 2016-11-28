@@ -87,13 +87,21 @@ def generate_bias(weights, factor=1., offset=0.):
 
 
 def generate(dictionary):
+    """Generates the weight, bias and initialstate list (of lists) for dictionary
+
+    expects the entries 'connection_function', 'initialstate_function' and
+    'bias_function' to refer to functions in this file and their parameter
+    dictionaries in the 'connection', 'bias', 'initialstate' entries of
+    dictionary.
+    """
     connection_function = globals()[dictionary["connection_function"]]
     initialstate_function = globals()[dictionary["initialstate_function"]]
     bias_function = globals()[dictionary["bias_function"]]
 
     weight = connection_function(**dictionary["connection"])
     bias = bias_function(weights=weight, **dictionary["bias"])
-    initialstate = initialstate_function(num_sampler=len(weight), **dictionary["initialstate"])
+    initialstate = initialstate_function(num_sampler=len(weight),
+            **dictionary["initialstate"])
 
     return weight.tolist(), bias.tolist(), initialstate.tolist()
 
