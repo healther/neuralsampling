@@ -29,10 +29,12 @@ def ensure_folder_exists(folder):
 
 
 def collect_results_caller(args):
+    """Wrapper for multiprocessing pool calls"""
     collect_results(**args)
 
 
 def collect_results(folders, analysis_function, collected_file):
+    """Calls analysis_function on all folders and dumps results into collected_file"""
     collected = {}
     for f in folders:
         collected.update(analysis_function( f ))
@@ -41,6 +43,44 @@ def collect_results(folders, analysis_function, collected_file):
         yaml.dump(collected, f)
 
 
+def statestring_from_int(stateint, n_neurons):
+    """Returns the string of {0,1} of length n_neurons corresponding to stateint
+
+    Input:
+        stateint    int     integer representation of the state
+        n_neurons   int     number of neurons in the system
+
+    Output:
+        statestring string  list of n_{0,1} according to stateint
+
+    >>> statestring_from_int(0, 5)
+    '00000'
+    >>> statestring_from_int(31,5)
+    '11111'
+    >>> statestring_from_int(27, 5)
+    '11011'
+    """
+    return "{0:0{width}b}".format(stateint, width=n_neurons)
+
+
+def statelist_from_int(stateint, n_neurons):
+    """Returns the binary list of length n_neurons corresponding to stateint
+
+    Input:
+        stateint    int     integer representation of the state
+        n_neurons   int     number of neurons in the system
+
+    Output:
+        statelist   list    list of n_neurons {0,1} according to stateint
+
+    >>> statelist_from_int(0, 5)
+    [0, 0, 0, 0, 0]
+    >>> statelist_from_int(31,5)
+    [1, 1, 1, 1, 1]
+    >>> statelist_from_int(27, 5)
+    [1, 1, 0, 1, 1]
+    """
+    return [int(s) for s in "{0:0{width}b}".format(stateint, width=n_neurons)]
 
 if __name__ == "__main__":
     import doctest

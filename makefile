@@ -16,9 +16,10 @@ test: tests/test_neuron tests/test_network
 	tests/test_network
 	python generate/config.py
 	python generate/misc.py
-	python generate/weights.py
+	python generate/ising.py
 	python generate/analysis.py
 	python generate/tsp.py
+	python generate/collect.py
 
 clean:
 	$(RM) build/*
