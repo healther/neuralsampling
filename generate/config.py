@@ -1,17 +1,16 @@
-
+### TBD: separation of functionality analysis/misc/collect/single problems
 import copy
 import yaml
 import uuid
 
 
 def find_key_from_identifier(dict_to_expand, identifier):
-    """Returns a list of keys to all leaves of dict_to_expand that value are identifier
+    """Return a list of keys to all leaves of dict_to_expand that value are identifier.
 
     >>> d = { 1: 'blub', 2: {3: 'blub', 4: 'hello'}}
     >>> find_key_from_identifier(d, 'blub')
     [[1], [2, 3]]
     """
-
     keypositions = []
     for k,v in dict_to_expand.iteritems():
         if v==identifier:
@@ -29,7 +28,7 @@ def find_key_from_identifier(dict_to_expand, identifier):
 
 
 def update_dict(dic, value, key, *keys):
-    """Sets dic[k0][k1]...[kn] = value for keys=[k0, k1, ..., kn]
+    """Set dic[k0][k1]...[kn] = value for keys=[k0, k1, ..., kn].
     
     >>> d = { 1: 'blub', 2: {3: 'blub', 4: 'hello'}}
     >>> keys = find_key_from_identifier(d, 'blub')
@@ -38,7 +37,8 @@ def update_dict(dic, value, key, *keys):
     {1: 'ch', 2: {3: 'blub', 4: 'hello'}}
     >>> update_dict(d, 'ch', *keys[1])
     >>> d
-    {1: 'ch', 2: {3: 'ch', 4: 'hello'}}"""
+    {1: 'ch', 2: {3: 'ch', 4: 'hello'}}
+    """
     if keys:
         update_dict(dic[key], value, *keys)
     else:
@@ -46,8 +46,7 @@ def update_dict(dic, value, key, *keys):
 
 
 def expanddict(dict_to_expand, expansions):
-    """Returns a list of copies of dict_to_expand with a kartesian product of all expansions
-
+    """Return a list of copies of dict_to_expand with a kartesian product of all expansions.
 
     Input:
         dict_to_expand: dictionary with values to replace
@@ -61,7 +60,6 @@ def expanddict(dict_to_expand, expansions):
     >>> expanddict(d, e)
     [{1: 'a', 2: {3: 'a', 4: 11}}, {1: 'b', 2: {3: 'b', 4: 11}}, {1: 'a', 2: {3: 'a', 4: 12}}, {1: 'b', 2: {3: 'b', 4: 12}}]
     """
-
     expanded_dicts = [dict_to_expand]
     for ident, values in expansions.iteritems():
         keypositions = find_key_from_identifier(dict_to_expand, ident)

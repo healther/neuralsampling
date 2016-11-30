@@ -1,3 +1,4 @@
+### TBD: separation of functionality analysis/misc/collect/single problems
 from __future__ import division, print_function
 
 import sys
@@ -9,7 +10,7 @@ import yaml
 
 
 def frequencies_in_file(filename, skiprows=3, updates=[1000,10000,100000]):
-    r"""Returns the histogram of the lines in filename skipping skiprows
+    r"""Return the histogram of the lines in filename skipping skiprows.
 
     Input:
         filename    string  filename of the file to analyse
@@ -23,7 +24,6 @@ def frequencies_in_file(filename, skiprows=3, updates=[1000,10000,100000]):
     >>> frequencies_in_file('testfile.tmp', 0, [1,2,5])
     [Counter({'000\n': 1}), Counter({'100': 1, '000\n': 1, '010\n': 1})]
     """
-
     output = []
     dupdates = [u1-u2 for u1, u2 in zip(updates[1:], updates[:-1])]
 
@@ -38,14 +38,14 @@ def frequencies_in_file(filename, skiprows=3, updates=[1000,10000,100000]):
 
 
 def get_weights_biases_from_config(configfilename):
-    """Returns the weight and bias entries of the config file in configfilename"""
+    """Return the weight and bias entries of the config file in configfilename."""
     d = yaml.load(open(configfilename, 'r'))
 
     return np.array(d['weight']), np.array(d['bias'])
 
 
 def get_state_from_string(statestring):
-    """Takes binary line of output and returns a list of ints
+    """Take binary line of output and returns a list of ints.
 
     Input:
         statestring     string
@@ -61,7 +61,7 @@ def get_state_from_string(statestring):
 
 
 def calculate_dkl(ptheo, fsampl, norm_theo=False):
-    """Calculates the relative entropy when encoding fsampl with the optimal encoding of ptheo
+    """Calculate the relative entropy when encoding fsampl with the optimal encoding of ptheo.
 
     Input:
         ptheo       list    theoretical probabilities for all states
@@ -73,7 +73,8 @@ def calculate_dkl(ptheo, fsampl, norm_theo=False):
     >>> calculate_dkl([0.5,0.25,0.25], [2,1,1])
     0.0
     >>> calculate_dkl([0.5,0.25,0.25], [5,2,3])
-    0.010067756775344432"""
+    0.010067756775344432
+    """
     if norm_theo:
         ptheo /= sum(ptheo)
     totn = np.sum(fsampl)
@@ -81,7 +82,7 @@ def calculate_dkl(ptheo, fsampl, norm_theo=False):
 
 
 def energy_for_network(w,b, states=None):
-    """Calculates the energy of the states, based on weights w and biases b
+    """Calculate the energy of the states, based on weights w and biases b.
 
     Input:
         w       ndarray     weights of the network
@@ -96,14 +97,31 @@ def energy_for_network(w,b, states=None):
     [-0.0, -0.5, 0.5, -1.0]
     >>> energy_for_network(np.array([[0.,1.],[1.,0.]]), np.array([-.5, .5]), [[0,0],[1,1]])
     [-0.0, -1.0]
-"""
+    """
     if states==None:
         states = [z for z in product([0,1], repeat=len(w))]
     return [ -.5*np.dot(z, np.dot(w, z))-np.dot(b,z) for z in states]
 
 
+def get_minma(W, b):
+    """Return a list of minmal energy states for BM (W, b).
+
+    Input:
+        W   array   weight matrix
+        b   array   bias vector
+
+    Output:
+        minimal_states  list    list of the minimal energy states as ints
+
+    >>> get_minma([[0., 1.], [1., 0.]], [-.5, .5])
+    array([3])
+    """
+    e = energy_for_network(W, b)
+    return np.nonzero(e==min(e))[0]
+
+
 def probabilities_from_energies(energies):
-    """Calculates the Boltzmann probabilities for the set of energies
+    """Calculate the Boltzmann probabilities for the set of energies.
 
     Input:
         energies        list    list of energy of the single states
@@ -126,7 +144,7 @@ def probabilities_from_energies(energies):
 
 
 def compare_sampling(outputfilename, configfilename, updates=[int(n) for n in np.logspace(3,8,11)]):
-    """Returns the "time"course of the DKL for the sampling results in outputfilename
+    """Return the "time"course of the DKL for the sampling results in outputfilename.
 
     Input:
         outputfilename  string  File that contains the output data in binary states
@@ -136,7 +154,7 @@ def compare_sampling(outputfilename, configfilename, updates=[int(n) for n in np
     Output:
         updates         list    List of updatesteps after which the DKL was calculated
         dkls            list    List of DKLs between the sampled distribution and the theoretical one
-"""
+    """
     w, b = get_weights_biases_from_config(configfilename)
 
     freq_dicts = frequencies_in_file(outputfilename, updates=updates)

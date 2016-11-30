@@ -1,9 +1,10 @@
+### TBD: separation of functionality analysis/misc/collect/single problems
 import collections
 import os
 import yaml
 
 def flatten_dictionary(d, parent_key='', sep='_'):
-    """Returns a flat dictionary with concatenated keys for a nested dictionary d
+    """Return a flat dictionary with concatenated keys for a nested dictionary d.
 
     >>> d = { 'a': {'aa': 1, 'ab': {'aba': 11}}, 'b': 2, 'c': {'cc': 3}}
     >>> flatten_dictionary(d)
@@ -21,6 +22,7 @@ def flatten_dictionary(d, parent_key='', sep='_'):
 
 
 def ensure_folder_exists(folder):
+    """Create folder if not yet existing."""
     try:
         os.makedirs(folder)
     except OSError as e:
@@ -29,12 +31,12 @@ def ensure_folder_exists(folder):
 
 
 def collect_results_caller(args):
-    """Wrapper for multiprocessing pool calls"""
+    """Wrapper for multiprocessing pool calls."""
     collect_results(**args)
 
 
 def collect_results(folders, analysis_function, collected_file):
-    """Calls analysis_function on all folders and dumps results into collected_file"""
+    """Call analysis_function on all folders and dumps results into collected_file."""
     collected = {}
     for f in folders:
         collected.update(analysis_function( f ))
@@ -44,7 +46,7 @@ def collect_results(folders, analysis_function, collected_file):
 
 
 def statestring_from_int(stateint, n_neurons):
-    """Returns the string of {0,1} of length n_neurons corresponding to stateint
+    """Return the string of {0,1} of length n_neurons corresponding to stateint.
 
     Input:
         stateint    int     integer representation of the state
@@ -64,7 +66,7 @@ def statestring_from_int(stateint, n_neurons):
 
 
 def statelist_from_int(stateint, n_neurons):
-    """Returns the binary list of length n_neurons corresponding to stateint
+    """Return the binary list of length n_neurons corresponding to stateint.
 
     Input:
         stateint    int     integer representation of the state

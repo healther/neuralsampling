@@ -1,4 +1,8 @@
+"""Provide C&C capabilities for ../bin/neuralsampler
 
+Basic workflow:
+    ### TODO
+"""
 import yaml
 import os
 import subprocess

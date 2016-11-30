@@ -1,11 +1,11 @@
-
+### TBD: separation of functionality analysis/misc/collect/single problems
 import os
 from collections import deque
 import numpy as np
 
 
 def collect_mean_std_mean(folder, skip_header=2, max_rows=10000, outfile='output'):
-    """Returns the mean and the std of the activities of the simulation in folder
+    """Return the mean and the std of the activities of the simulation in folder.
 
     expects line n to contain the number of active neurons at timestep n
 
@@ -17,7 +17,8 @@ def collect_mean_std_mean(folder, skip_header=2, max_rows=10000, outfile='output
 
     Output:
         dict        dict    key:    splitted folder
-                            value:  dictionary with 'mean' and 'std' keys"""
+                            value:  dictionary with 'mean' and 'std' keys
+    """
     d = np.genfromtxt(os.path.join(folder, outfile), dtype=np.int32,
             skip_header=skip_header, max_rows=max_rows)
     v = {"mean": float(d.mean()), "std": float(d.std())}
@@ -26,7 +27,7 @@ def collect_mean_std_mean(folder, skip_header=2, max_rows=10000, outfile='output
 
 
 def collect_mean_std_state(folder, skip_header=2, max_rows=10000, outfile='output'):
-    """Returns the mean and the std of the activities of the simulation in folder
+    """Return the mean and the std of the activities of the simulation in folder.
 
     expects line n to contain a binary representation of the networkstate at timestep n
 
@@ -38,7 +39,8 @@ def collect_mean_std_state(folder, skip_header=2, max_rows=10000, outfile='outpu
 
     Output:
         dict        dict    key:    splitted folder
-                            value:  dictionary with 'mean' and 'std' keys"""
+                            value:  dictionary with 'mean' and 'std' keys
+    """
     d = np.genfromtxt(os.path.join(folder, outfile), dtype=np.bool,
             delimiter=1, skip_header=skip_header, max_rows=max_rows)
     d = d.sum(axis=-1)
@@ -48,7 +50,7 @@ def collect_mean_std_state(folder, skip_header=2, max_rows=10000, outfile='outpu
 
 
 def collect_mean_std_spikes(folder, tau, skip_header=2, max_rows=10000, outfile='output'):
-    """Returns the mean and the std of the activities of the simulation in folder
+    """Return the mean and the std of the activities of the simulation in folder.
 
     expects line n to contain space separated neuron_ids of the neurons that 
         spiked in timestep n
@@ -62,7 +64,8 @@ def collect_mean_std_spikes(folder, tau, skip_header=2, max_rows=10000, outfile=
 
     Output:
         dict        dict    key:    splitted folder
-                            value:  dictionary with 'mean' and 'std' keys"""
+                            value:  dictionary with 'mean' and 'std' keys
+    """
     d = []
     with open(os.path.join(folder, outfile), 'r') as f:
         for _ in range(skip_header):
