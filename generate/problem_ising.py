@@ -1,3 +1,4 @@
+"""This module implements the Ising model for neural networks."""
 from __future__ import division
 
 
@@ -8,30 +9,39 @@ import sys
 
 
 
-def generate_initialstate(num_sampler, mean_activity=0.5, tauref=100, rseed=42424242):
-    """Returns a random initalstate with length num_sampler with an mean activity of mean_activity
+def generate_initialstate(num_sampler, mean_activity=0.5, tauref=100, 
+    rseed=None, breport=False):
+    """Return a random initalstate with length num_sampler with an mean activity of mean_activity.
 
     Input:
-        num_sampler: int
-        mean_activity: float
-        tauref: int
-        rseed: int
-        dimension: int
+        num_sampler:    int
+        mean_activity:  float   aspired mean activity
+        tauref:         int     refractory time of the neuron
+        rseed:          int
+        breport:        bool    reports achieved mean activity
 
     >>> generate_initialstate(10, 0.5, 100, 42424242)
-    array([127,  73,  33, 198, 174,  12,  10,  83, 146, 183])
+    array([ 12,  80,  19, 128,  11,  56, 159,  38, 164, 168])
     """
-    np.random.seed(rseed)
-    high = tauref/mean_activity
-    return np.random.randint( 0, int(high), num_sampler)
+    if rseed!=None:
+        np.random.seed(rseed)
+    if mean_activity==0.0:
+        low = tauref+1
+        high = tauref+2
+    else:
+        low = 0
+        high = tauref/mean_activity
+
+    out = np.random.uniform( low, high, num_sampler )
+    return out.astype(int)
 
 
 def generate_NN_connection_matrix(linearsize=10, dimension=2, weight=1.):
-    """Returns the normed nearest neighbor connected weight matrix
+    """Return the normed nearest neighbor connected weight matrix.
 
     Input:
-        linearsize: int
-        dimension: int
+        linearsize:     int
+        dimension:      int
 
     >>> generate_NN_connection_matrix(3, 1)
     array([[ 0.,  1.,  1.],
@@ -60,12 +70,12 @@ def generate_NN_connection_matrix(linearsize=10, dimension=2, weight=1.):
 
 
 def generate_bias(weights, factor=1., offset=0.):
-    """Returns the bias vector for a given weight matrix, modified by factor and offset
+    """Return the bias vector for a given weight matrix, modified by factor and offset.
 
     Input:
-        weights: numpy 2d-array
-        factor: float or numpy 1d-array with length len(weights)
-        offset: float or numpy 1d-array with length len(weights)
+        weights:    numpy 2d-array
+        factor:     float or numpy 1d-array with length len(weights)
+        offset:     float or numpy 1d-array with length len(weights)
 
     Output:
         bias = -.5 * factor * weights.sum(axis=-1) + offset
@@ -87,7 +97,7 @@ def generate_bias(weights, factor=1., offset=0.):
 
 
 def generate(dictionary):
-    """Generates the weight, bias and initialstate list (of lists) for dictionary
+    """Generate the weight, bias and initialstate list (of lists) for dictionary.
 
     expects the entries 'connection_function', 'initialstate_function' and
     'bias_function' to refer to functions in this file and their parameter
