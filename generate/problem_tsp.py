@@ -1,4 +1,4 @@
-
+"""This module implements the TSP problem for neural networks."""
 import sys
 import yaml
 import numpy as np
@@ -7,24 +7,49 @@ import itertools
 import analysis
 import misc
 
+
+### input/output functions
 def readtsp(filename):
-    """Returns the distance matrix in filename"""
+    """Return the distance matrix in filename."""
     d = np.loadtxt(filename)
     return d
 
 
+### misc functions
 def double_index_to_single(x, i, n_cities):
-    return x*n_cities+i
+    """Transform double index (city, position) in single index.
+
+    >>> double_index_to_single(0, 0, 5)
+    0
+    >>> double_index_to_single(1, 0, 5)
+    5
+    >>> double_index_to_single(1, 1, 5)
+    6
+    >>> double_index_to_single(6, 1, 4)
+    9
+    >>> double_index_to_single(6, 7, 5)
+    7
+    """
+    return ( (x%n_cities) *n_cities + (i%n_cities) )
 
 
 def single_index_to_double(n, n_cities):
-    return n%n_cities, int(n/n_cities)
+    """Transform single index i to double index (city, position).
+
+    >>> single_index_to_double(7, 5)
+    (1, 2)
+    >>> single_index_to_double(17, 4)
+    (0, 1)
+    """
+    return int(n/n_cities) % n_cities, n%n_cities
 
 
 def row_connections(i,j,x,y):
-    """
+    """Return True if the entry penalizes multiple positions of a city in a route.
 
-    >>> row_connections(0,0,0,0)
+    Expects all coordinates to be 0<= {i,j,x,y} <n_cities
+
+    >>> row_connections(0,0,0,0).
     0
     >>> row_connections(0,0,0,1)
     0
@@ -48,7 +73,7 @@ def dataterm(i,j,x,y, tsp_data):
 
 
 def create_general_tsp(n_cities, A, B, C):
-    """Generates the general restriction matrix for a TSP
+    """Generate the general restriction matrix for a TSP.
 
     Input:
         n_cities    int     number of cities in the TSP
@@ -59,7 +84,17 @@ def create_general_tsp(n_cities, A, B, C):
     Output:
         W           ndarray weight matrix, encoding a general TSP of n_cities
         b           ndarray bias vector, encoding a general TSP of n_cities
-        """
+    >>> create_general_tsp(3, 1, 2, 3)
+    (array([[ 0., -2., -2., -1.,  0.,  0., -1.,  0.,  0.],
+           [-2.,  0., -2.,  0., -1.,  0.,  0., -1.,  0.],
+           [-2., -2.,  0.,  0.,  0., -1.,  0.,  0., -1.],
+           [-1.,  0.,  0.,  0., -2., -2., -1.,  0.,  0.],
+           [ 0., -1.,  0., -2.,  0., -2.,  0., -1.,  0.],
+           [ 0.,  0., -1., -2., -2.,  0.,  0.,  0., -1.],
+           [-1.,  0.,  0., -1.,  0.,  0.,  0., -2., -2.],
+           [ 0., -1.,  0.,  0., -1.,  0., -2.,  0., -2.],
+           [ 0.,  0., -1.,  0.,  0., -1., -2., -2.,  0.]]), array([ 3.,  3.,  3.,  3.,  3.,  3.,  3.,  3.,  3.]))
+    """
     W = np.zeros((n_cities*n_cities, n_cities*n_cities))
     for i,j,x,y in itertools.product(xrange(n_cities), repeat=4):
         wi = double_index_to_single(i,x, n_cities)
@@ -71,6 +106,7 @@ def create_general_tsp(n_cities, A, B, C):
     return W, b
 
 
+## create functions
 def create_tsp(tsp_data, A, B, C, D, fix_starting_point=False):
     n_cities = len(tsp_data)
     W, b = create_general_tsp(n_cities, A, B, C)
@@ -84,12 +120,30 @@ def create_tsp(tsp_data, A, B, C, D, fix_starting_point=False):
     return W, b
 
 
+# analysis functions
 def get_pathlength_for_route(route, tsp_data):
-    return sum([tsp_data[r1,r2] for r1, r2 in zip(route[1:],route[:-1])] + [tsp_data[route[-1], route[0]]])
+    """Return pathlength for a given route in tsp problem tsp_data.
 
+    Input:
+        route       list    indices of the stops, must be a permutation of range(len(route))
+        tsp_data    array   distances between points
+
+    Output:
+        length      float   sum of all distances
+
+    >>> get_pathlength_for_route([0,1,2], [[0., 1., .5], [1., 0., .3], [.5, .3, 0.]])
+    1.8
+    """
+    if isinstance(tsp_data, list):
+        tsp_data = np.array(tsp_data)
+    return sum(
+            [tsp_data[r1,r2] for r1, r2 in zip(route[1:],route[:-1])]
+            + [tsp_data[route[-1], route[0]]]
+            )
 
 
 def get_pathlength_from_state(state, tsp_data):
+    ### TODO: rewrite as testable
     n_cities = len(tsp_data)
     if isinstance(state, int):
         state = misc.statestring_from_int(state, n_cities*n_cities)
@@ -100,17 +154,24 @@ def get_pathlength_from_state(state, tsp_data):
 
 
 def brute_force_minima(tsp_data):
-    """Tests all connection graphs and outputs returns shortest path and shortest pathlength"""
+    """Test all connection graphs and outputs returns shortest path and shortest pathlength.
+
+    Input:
+        tsp_data    array   distance between points
+
+    Output:
+        length      float   length of shortest path
+
+    >>> brute_force_minima([[0., 1., .5], [1., 0., .3], [.5, .3, 0.]])
+    1.8
+    """
+    if isinstance(tsp_data, list):
+        tsp_data = np.array(tsp_data)
     return min(get_pathlength_for_route(p, tsp_data) for p in itertools.permutations(range(len(tsp_data))))
 
 
-def state_from_int(state, n_cities):
-    """Takes """
-    return [int(s) for s in "{0:0{width}b}".format(state, width=n_cities**2)]
-
-
 def column_valid(state, n_cities):
-    """Checks whether state is column_valid
+    """Check whether state is column_valid.
 
     Input:
         state       list    binary representation of the state
@@ -135,11 +196,12 @@ def column_valid(state, n_cities):
         valid *= np.sum(state[i::n_cities])==1
     return bool(valid)
 
+
 def row_valid(state, n_cities):
-    """Checks whether state is row_valid
+    """Check whether state is row_valid.
 
     Input:
-        state       list    binary representation of the state 
+        state       list    binary representation of the state
         n_cities    int     number of cities of the TSP
 
     Output:
@@ -160,11 +222,12 @@ def row_valid(state, n_cities):
         valid *= np.sum(state[i*n_cities:(i+1)*n_cities])==1
     return bool(valid)
 
+
 def number_valid(state, n_cities):
-    """Checks whether state is column_valid
+    """Check whether state is column_valid.
 
     Input:
-        state       list    binary representation of the state 
+        state       list    binary representation of the state
         n_cities    int     number of cities of the TSP
 
     Output:
@@ -188,14 +251,15 @@ def number_valid(state, n_cities):
 
 
 def valid(state, n_cities):
+    """Check validity of state."""
     return (row_valid(state, n_cities),
             column_valid(state, n_cities),
             number_valid(state, n_cities))
 
 
-def check_validity_of_minima(W, b, n_cities, verbose=False):
-    e = analysis.energy_for_network(W, b)
-    minimal_states = np.nonzero(e==min(e))[0]
+def check_validity_of_minima(W, b, verbose=False):
+    n_cities = len(b)
+    minimal_states = analysis.get_minma(W, b)
     valids = []
     column_fail = []
     row_fail = []
@@ -217,7 +281,7 @@ def check_validity_of_minima(W, b, n_cities, verbose=False):
     print(" of those:")
     s = " {} valid\n {} rowfailed\n {} columnfailed\n"
     s += " {} numberfailed"
-    s = s.format(   len(valids), len(row_fail), 
+    s = s.format(   len(valids), len(row_fail),
                     len(column_fail), len(number_fail))
     print(s)
     if verbose:
