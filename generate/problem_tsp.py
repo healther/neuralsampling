@@ -49,7 +49,7 @@ def row_connections(i,j,x,y):
 
     Expects all coordinates to be 0<= {i,j,x,y} <n_cities
 
-    >>> row_connections(0,0,0,0).
+    >>> row_connections(0,0,0,0)
     0
     >>> row_connections(0,0,0,1)
     0
