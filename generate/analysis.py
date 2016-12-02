@@ -5,9 +5,21 @@ import sys
 from copy import deepcopy
 from collections import defaultdict, Counter
 from itertools import islice, product
+import os
 import numpy as np
 import yaml
 
+
+def states(folder):
+    try:
+        freq_dicts = frequencies_in_file(os.path.join(folder, 'output'))
+        outputfilename = os.path.join(folder, 'analysis_output')
+        with open(outputfilename, 'w') as f:
+            yaml.dump(freq_dicts, f)
+        return 0
+    except:
+        raise
+        return 1
 
 def frequencies_in_file(filename, skiprows=3, updates=[1000,10000,100000]):
     r"""Return the histogram of the lines in filename skipping skiprows.
@@ -22,7 +34,7 @@ def frequencies_in_file(filename, skiprows=3, updates=[1000,10000,100000]):
     >>> with open('testfile.tmp', 'w') as f:
     ...     f.write('000\n010\n000\n100')
     >>> frequencies_in_file('testfile.tmp', 0, [1,2,5])
-    [Counter({'000\n': 1}), Counter({'100': 1, '000\n': 1, '010\n': 1})]
+    [{'000': 1}, {'010': 1, '100': 1, '000': 1}]
     """
     output = []
     dupdates = [u1-u2 for u1, u2 in zip(updates[1:], updates[:-1])]
@@ -32,9 +44,9 @@ def frequencies_in_file(filename, skiprows=3, updates=[1000,10000,100000]):
             f.readline()
         for nu in dupdates:
             lines_gen = islice(f, nu)
-            output.append(Counter(lines_gen))
+            output.append(Counter(l.strip() for l in lines_gen))
 
-    return output
+    return [dict(o) for o in output]
 
 
 def get_weights_biases_from_config(configfilename):
@@ -171,7 +183,7 @@ def compare_sampling(outputfilename, configfilename, updates=[int(n) for n in np
     updates = [totn]
 
     for fd in freq_dicts[1:]:
-        frequencies = [f+fd.get(k, 0) 
+        frequencies = [f+fd.get(k, 0)
                             for f,k in zip(frequencies, all_keys)]
         totn = np.sum(frequencies)
         dkl = calculate_dkl(probabilities, frequencies)
@@ -180,7 +192,79 @@ def compare_sampling(outputfilename, configfilename, updates=[int(n) for n in np
 
     return updates, dkls
 
+def collect_mean_std_mean(folder, skip_header=2, max_rows=10000, outfile='output'):
+    """Return the mean and the std of the activities of the simulation in folder.
 
+    expects line n to contain the number of active neurons at timestep n
+
+    Input:
+        folder      string  folder of the simulation
+        skip_header int     number of lines to skip at the beginning of the file
+        max_rows    int     number of lines to consider for the mean and std
+        outfile     string  file in folder that contains the output
+
+    Output:
+        dict        dict    key:    splitted folder
+                            value:  dictionary with 'mean' and 'std' keys
+    """
+    d = np.genfromtxt(os.path.join(folder, outfile), dtype=np.int32,
+            skip_header=skip_header, max_rows=max_rows)
+    v = {"mean": float(d.mean()), "std": float(d.std())}
+
+    return {folder.split(os.sep)[-1].split("_"): v}
+
+
+def collect_mean_std_state(folder, skip_header=2, max_rows=10000, outfile='output'):
+    """Return the mean and the std of the activities of the simulation in folder.
+
+    expects line n to contain a binary representation of the networkstate at timestep n
+
+    Input:
+        folder      string  folder of the simulation
+        skip_header int     number of lines to skip at the beginning of the file
+        max_rows    int     number of lines to consider for the mean and std
+        outfile     string  file in folder that contains the output
+
+    Output:
+        dict        dict    key:    splitted folder
+                            value:  dictionary with 'mean' and 'std' keys
+    """
+    d = np.genfromtxt(os.path.join(folder, outfile), dtype=np.bool,
+            delimiter=1, skip_header=skip_header, max_rows=max_rows)
+    d = d.sum(axis=-1)
+    v = {"mean": float(d.mean()), "std": float(d.std())}
+
+    return {folder.split(os.sep)[-1].split("_"): v}
+
+
+def collect_mean_std_spikes(folder, tau, skip_header=2, max_rows=10000, outfile='output'):
+    """Return the mean and the std of the activities of the simulation in folder.
+
+    expects line n to contain space separated neuron_ids of the neurons that
+        spiked in timestep n
+
+    Input:
+        folder      string  folder of the simulation
+        tau         int     refractory time in timesteps
+        skip_header int     number of lines to skip at the beginning of the file
+        max_rows    int     number of lines to consider for the mean and std
+        outfile     string  file in folder that contains the output
+
+    Output:
+        dict        dict    key:    splitted folder
+                            value:  dictionary with 'mean' and 'std' keys
+    """
+    d = []
+    with open(os.path.join(folder, outfile), 'r') as f:
+        for _ in range(skip_header):
+            f.readline()
+        que = deque([len(l.split()) for l in f[:tau]], tau)
+        for line in f[:10000]:
+            d.append(sum(que))
+            que.append(len(line.split()))
+    v = {"mean": float(d.mean()), "std": float(d.std())}
+
+    return {folder.split(os.sep)[-1].split("_"): v}
 
 
 if __name__ == '__main__':

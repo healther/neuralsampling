@@ -120,6 +120,17 @@ def create_tsp(tsp_data, A, B, C, D, fix_starting_point=False):
     return W, b
 
 
+def create(tsp, A, B, C, D, fix_starting_point):
+    if isinstance(tsp, str):
+        tsp_data = np.loadtxt(tsp_datafile)
+    else:
+        tsp_data = np.array(tsp)
+    W, b = create_tsp(tsp_data, A, B, C, D, fix_starting_point)
+    initialstate = np.zeros(len(b)).astype(int)
+
+    return W.tolist(), b.tolist(), initialstate.tolist()
+
+
 # analysis functions
 def get_pathlength_for_route(route, tsp_data):
     """Return pathlength for a given route in tsp problem tsp_data.
