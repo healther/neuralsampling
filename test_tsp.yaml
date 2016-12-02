@@ -5,13 +5,25 @@ experiment_config:
   collect_results: True
   plot: False
 sim_parameters:
-  target_system: Local
+  target_system: BwUni
   system_parameters:
-    n_cpus: 1
+    n_sims_per_job: 16
+    nodes: 1
+    processors_per_node: 1
+    walltime: '00:10:00'
+    max_queue_size: 40
+    generate_folder: 'tmp'
+    wait_time: 15.
 ana_parameters:
-  target_system: Local
+  target_system: BwUni
   system_parameters:
-    n_cpus: 1
+    n_sims_per_job: 16
+    nodes: 1
+    processors_per_node: 2
+    walltime: '00:10:00'
+    max_queue_size: 40
+    generate_folder: 'tmp'
+    wait_time: 30.
 col_parameters:
   target_system: Local
   system_parameters:
@@ -22,7 +34,7 @@ Config:
   Tmax: 1.
   Tmin: 1.
   neuron_type: erf_rect
-  nupdates: 1000000
+  nupdates: 100
   random_seed: 42424242
   random_skip: 1000000
   tauref: tau

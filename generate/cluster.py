@@ -4,6 +4,14 @@ import abc
 import multiprocessing as mp
 import subprocess
 import functools
+import os
+import uuid
+import yaml
+import sys
+import time
+
+import misc
+import control
 
 class SlurmError(Exception):
     pass
@@ -113,20 +121,23 @@ python generate/cluster.py bwuni {job_file}.yaml {transform_function_name}"""
 
 class BwUni(ClusterBase):
     def __init__(self, n_sims_per_job, nodes, processors_per_node, walltime,
-            max_queue_size, generate_folder):
+            max_queue_size, generate_folder, wait_time=120.):
         self.n_sims_per_job = n_sims_per_job
         self.nodes = nodes
         self.processors_per_node = processors_per_node
         self.walltime = walltime
         self.max_queue_size = max_queue_size
         self.generate_folder = generate_folder
+        self.wait_time = wait_time
+
+        misc.ensure_folder_exists(self.generate_folder)
 
         self.queued_jobs = {}
         self.failed_jobs = {}
 
-    def run_jobs(self, folders, function):
+    def run_jobs(self, folders, function_name, parameters={}):
         self.arguments = folders
-        self.jobfiles = self._generate_jobfiles(folders, function)
+        self.jobfiles = self._generate_jobfiles(folders, function_name)
         self.queue_jobs(self.jobfiles)
 
     def queue_jobs(self, jobfiles):
@@ -135,34 +146,37 @@ class BwUni(ClusterBase):
                 jobid = subprocess.check_output(['msub', jobfile]).strip()
                 self.queued_jobs.update({jobid: jobfile})
             else:
-                time.sleep(60.)
+                time.sleep(self.wait_time)
 
 
     def _find_queue_size(self, retries=10):
         try:
             showq_output = subprocess.check_output(['showq']).split()
             for _ in range(retries):
-                if showq_output[-3:-1]==['Total', 'jobs']:
+                if showq_output[-3]=='Total':   # check if last line is according to expecations
                     return int(showq_output[-1])
+                showq_output = subprocess.check_output(['showq']).split()
             else:
-                raise SlurmError("No valid 'showq' output found.")
+                raise SlurmError("No valid 'showq' output found. Found instead: {}".format(showq_output))
         except:
+            raise
             ### raise original error too?
             raise SlurmError("'showq' command failed.")
 
     def _generate_jobfiles(self, folders, transform_function_name):
         n_job_files = int(len(folders)/self.n_sims_per_job)+1
-        uid = uuid.uuid()
+        # TODO: Enable more useful jobfilenames
+        uid = uuid.uuid1()
         job_files = []
         for i in range(n_job_files):
-            job_filename = os.path.join(generate_folder, 'job_{}_{:05d}'.format(uid, i))
+            job_filename = os.path.join(self.generate_folder, 'job_{}_{:05d}'.format(uid, i))
             job_folderlist = folders[i*self.n_sims_per_job:(i+1)*self.n_sims_per_job]
             with open(job_filename+'.yaml', 'w') as f:
                 yaml.dump(job_folderlist, f)
             moab_content = bwjobfile_content.format(nodes=self.nodes,
                                 processors_per_node=self.processors_per_node,
-                                walltime=walltime,
-                                jobfile=job_filename,
+                                walltime=self.walltime,
+                                job_file=job_filename,
                                 transform_function_name=transform_function_name)
             with open(job_filename+'.moab', 'w') as f:
                 f.write(moab_content)
@@ -170,33 +184,82 @@ class BwUni(ClusterBase):
 
         return job_files
 
+    def wait_for_finish(self):
+        t0 = time.time()
+        for jobid, _ in self.queued_jobs.iteritems():
+            state = self._get_jobstate(jobid)
+            while state in ['Idle', 'Running']:
+                print("Waiting since {:07.1f} seconds for job {} to finish".format(time.time()-t0, jobid))
+                time.sleep(self.wait_time)
+                state = self._get_jobstate(jobid)
+
+    def _get_jobstate(self, jobid, attempt=0):
+        try:
+            r = subprocess.check_output(['checkjob', jobid])
+            state = r.split("State:")[1].split()[0]
+            return state
+        except:
+            if attempt<10:
+                return self._get_jobstate(jobid, attempt=attempt+1)
+            else:
+                print(state)
+                raise
+
     def ensure_success(self, retries=2):
         failed_jobs = self._find_failed_jobs()
         for _ in range(retries):
-            if failed_jobids != []:
+            if len(failed_jobs)!=0:
                 self.failed_jobs.update(failed_jobs)
                 self.queue_jobs(failed_jobs.itervalues())
                 failed_jobs = self._find_failed_jobs()
             else:
-                return True
+                bsuccess = True
+                break
         else:
-            return False
+            bsuccess = False
+
+        print("All jobs completed, cleaning not-failed jobfiles")
+        self._clean_jobfiles()
+        if len(self.failed_jobs)!=0:
+            print("The following jobs failed to report success:")
+            print(self.failed_jobs)
+        return bsuccess
+
+    def _clean_jobfiles(self):
+        for jobid, jobfile in self.queued_jobs.iteritems():
+            if not self.failed_jobs.has_key(jobid):
+                try:
+                    os.remove('job_uc1_{}.out'.format(jobid))
+                except OSError as e:
+                    if e.errno==2:
+                        print("job_uc1_{}.out was already missing.".format(jobid))
+                    else:
+                        raise
+                os.remove(jobfile)
+                os.remove(jobfile.replace('.moab', '.yaml'))
 
     def _find_failed_jobs(self):
+        ### TODO: encapsulate checkjob better
         failed_jobs = {}
         for jobid, jobfile in self.queued_jobs.iteritems():
             try:
-                r = subprocess.check_output(['checkjob', jobid])
-                return_code = r[r.find('Completion Code:'):].split()[2]
-                if return_code is not '0':
+                state = self._get_jobstate(jobid)
+                if state=="Completed":
+                    r = subprocess.check_output(['checkjob', jobid])
+                    completion_code = r[r.find('Completion Code:'):].split()[2]
+                    if completion_code is not '0':
+                        failed_jobs.update({jobid: jobfile})
+                elif state=="Removed":
                     failed_jobs.update({jobid: jobfile})
             except:
+                raise
                 raise SlurmError("'checkjob' failed for jobid {}".format(jobid))
         return failed_jobs
 
 
+
 def run_job_bwuni(folderfile, transform_function_name):
-    sim_fct = functools.partial(control.simulate, transform_function_name=transform_function_name)
+    sim_fct = control.get_function_from_name(transform_function_name)
     folders = yaml.load(open(folderfile, 'r'))
     nproc = int(os.getenv('SLURM_NPROCS', '1'))
     pool = mp.Pool(nproc)
@@ -212,6 +275,7 @@ if "__main__"==__name__:
     if len(sys.argv)==1:
         import doctest
         print(doctest.testmod())
+
     elif len(sys.argv)==4:
         if sys.argv[1]=='bwuni':
             print(run_job_bwuni(folderfile=sys.argv[2],
