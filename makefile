@@ -14,10 +14,13 @@ all: bin/neuralsampler tests/test_neuron tests/test_network
 test: tests/test_neuron tests/test_network
 	tests/test_neuron
 	tests/test_network
-	python generate/config.py
-	python generate/misc.py
 	python generate/analysis.py
+	python generate/cluster.py
 	python generate/collect.py
+	python generate/config.py
+	python generate/control.py
+	python generate/misc.py
+	python generate/plot.py
 	python generate/problem_ising.py
 	python generate/problem_tsp.py
 
