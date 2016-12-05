@@ -72,7 +72,8 @@ def run_experiment(dictionary):
         sim_processor.run_jobs(folders, **dictionary['simulate'])
         if dictionary["wait"]:
             sim_processor.wait_for_finish()
-            sim_processor.ensure_success()
+            if not sim_processor.ensure_success():
+                print("Not all jobs succeeded.")
 
     if run_analysis:
         print("analysis")
@@ -80,7 +81,8 @@ def run_experiment(dictionary):
         ana_processor.run_jobs(folders, **dictionary['analysis'])
         if dictionary["wait"]:
             ana_processor.wait_for_finish()
-            ana_processor.ensure_success()
+            if not ana_processor.ensure_success():
+                print("Not all jobs succeeded.")
 
     if collect_results:
         print("collect")
@@ -135,6 +137,17 @@ def get_function_from_name(function_name):
     return func
 
 
+def dump_runfile(folder):
+    simyaml = yaml.load(open(os.path.join(folder, 'sim.yaml'), 'r'))
+    create_sim_function = get_function_from_name(simyaml['network']['name'])
+    W, b, i = create_sim_function(**simyaml['network']['parameters'])
+    simyaml['weight'] = W
+    simyaml['bias'] = b
+    simyaml['initialstate'] = i
+    simyaml['outfile'] = os.path.join(folder, 'output')
+    yaml.dump(simyaml, open(os.path.join(folder, 'run.yaml'), 'w'))
+
+
 def simulate(folder):
     """Execute simulation in folder.
 
@@ -144,14 +157,7 @@ def simulate(folder):
 
     Returns the return value of bin/neuralsampler.
     """
-    simyaml = yaml.load(open(os.path.join(folder, 'sim.yaml'), 'r'))
-    create_sim_function = get_function_from_name(simyaml['network']['name'])
-    W, b, i = create_sim_function(**simyaml['network']['parameters'])
-    simyaml['weight'] = W
-    simyaml['bias'] = b
-    simyaml['initialstate'] = i
-    simyaml['outfile'] = os.path.join(folder, 'output')
-    yaml.dump(simyaml, open(os.path.join(folder, 'run.yaml'), 'w'))
+    dump_runfile(folder)
     DEVNULL = open(os.devnull, 'wb')
     ret_value = subprocess.call(['bin/neuralsampler',
                                 os.path.join(folder, 'run.yaml')],
