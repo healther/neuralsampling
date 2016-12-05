@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import yaml
 import numpy as np
 import os
+import sys
 
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -16,7 +17,7 @@ def colormap(collected_file_name, xlabel, ylabel, zlabel, restrictions, plotname
         xlabel                  string  key that should be plotted on the xlabel
         ylabel                  string  key that should be plotted on the ylabel
         zlabel                  string  key that should select the color of the patch
-        restrictions            dict    dictionary of {argument: iterable} with 
+        restrictions            dict    dictionary of {argument: iterable} with
                                             iterable containing all applicable values for argument
         plotname                string  filename of the output pdf file
         plotfolder              string  folder in which to put the output
@@ -33,7 +34,7 @@ def colormap(collected_file_name, xlabel, ylabel, zlabel, restrictions, plotname
 
     for k,v in d.iteritems():
         _, _, randomtype, tau, w, updaterandomseed, initialactivity, initialrandomseed = k.split('_')
-        kdict = {'randomtype': randomtype, 'tau': int(tau), 'weight': float(w), 
+        kdict = {'randomtype': randomtype, 'tau': int(tau), 'weight': float(w),
                     'updaterandomseed': int(updaterandomseed),
                     'initialactivity': float(initialactivity), 'initialrandomseed': int(initialrandomseed)}
         try:
@@ -83,3 +84,8 @@ def colormap(collected_file_name, xlabel, ylabel, zlabel, restrictions, plotname
         plt.savefig(pdf, format='pdf')
 
     return fig, ax
+
+if __name__ == '__main__':
+    if len(sys.argv)==1:
+        import doctest
+        print(doctest.testmod())

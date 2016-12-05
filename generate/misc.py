@@ -1,4 +1,8 @@
-### TBD: separation of functionality analysis/misc/collect/single problems
+"""This module provides misceallous but unspecific functionality.
+
+All public functions should be sideeffect free.
+"""
+### TODO: Move sideeffect functions to different files
 import collections
 import os
 import yaml
@@ -30,19 +34,67 @@ def ensure_folder_exists(folder):
             raise
 
 
-def collect_results_caller(args):
-    """Wrapper for multiprocessing pool calls."""
-    collect_results(**args)
+### State format transformations
+def get_statelist(state, n_neurons):
+    """Return list of {0,1}^n_neurons according to state.
+
+    >>> get_statelist(2, 3)
+    [0, 1, 0]
+    >>> get_statelist('010', 3)
+    [0, 1, 0]
+    >>> get_statelist([0, 1, 0], 3)
+    [0, 1, 0]
+    >>> get_statelist(8, 3)
+    Traceback (most recent call last):
+    ...
+    ValueError: State 8 out of bounds 7
+    >>> get_statelist('01', 3)
+    Traceback (most recent call last):
+    ...
+    ValueError: Wrong string length 2 requires 3
+    >>> get_statelist([0, 1], 3)
+    Traceback (most recent call last):
+    ...
+    ValueError: Wrong list length 2 requires 3
+    """
+    if isinstance(state, int):
+        return statelist_from_int(state, n_neurons)
+    elif isinstance(state, str):
+        return statelist_from_string(state, n_neurons)
+    elif isinstance(state, list):
+        if len(state)==n_neurons:
+            return state
+        else:
+            raise ValueError("Wrong list length {} requires {}".format(len(state), n_neurons))
 
 
-def collect_results(folders, analysis_function, collected_file):
-    """Call analysis_function on all folders and dumps results into collected_file."""
-    collected = {}
-    for f in folders:
-        collected.update(analysis_function( f ))
+def get_statestring(state, n_neurons):
+    """Return string of {0,1}^n_neurons according to state.
 
-    with open(collected_file, 'w') as f:
-        yaml.dump(collected, f)
+    >>> get_statestring([0, 1, 0], 3)
+    '010'
+    >>> get_statestring(2, 3)
+    '010'
+    >>> get_statestring('010', 3)
+    '010'
+    """
+    statelist = get_statelist(state, n_neurons)
+    return ''.join(str(i) for i in statelist)
+
+
+def statelist_from_string(state, n_neurons):
+    """Return list of {0,1}^n_neurons according to state.
+
+    >>> statelist_from_string('010', 3)
+    [0, 1, 0]
+    >>> statelist_from_string('01', 3)
+    Traceback (most recent call last):
+    ...
+    ValueError: Wrong string length 2 requires 3
+    """
+    if len(state)!=n_neurons:
+        raise ValueError("Wrong string length {} requires {}".format(len(state), n_neurons))
+    return [int(s) for s in state]
 
 
 def statestring_from_int(stateint, n_neurons):
@@ -61,7 +113,13 @@ def statestring_from_int(stateint, n_neurons):
     '11111'
     >>> statestring_from_int(27, 5)
     '11011'
+    >>> statestring_from_int(8, 3)
+    Traceback (most recent call last):
+    ...
+    ValueError: State 8 out of bounds 7
     """
+    if stateint >= 2**n_neurons:
+        raise ValueError("State {} out of bounds {}".format(stateint, 2**n_neurons-1))
     return "{0:0{width}b}".format(stateint, width=n_neurons)
 
 
@@ -81,7 +139,13 @@ def statelist_from_int(stateint, n_neurons):
     [1, 1, 1, 1, 1]
     >>> statelist_from_int(27, 5)
     [1, 1, 0, 1, 1]
+    >>> statelist_from_int(8, 3)
+    Traceback (most recent call last):
+    ...
+    ValueError: State 8 out of bounds 7
     """
+    if stateint >= 2**n_neurons:
+        raise ValueError("State {} out of bounds {}".format(stateint, 2**n_neurons-1))
     return [int(s) for s in "{0:0{width}b}".format(stateint, width=n_neurons)]
 
 if __name__ == "__main__":

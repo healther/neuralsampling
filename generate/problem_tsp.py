@@ -64,10 +64,26 @@ def row_connections(i,j,x,y):
 
 
 def column_connections(i,j,x,y):
+    """Return True if the entry penalizes multiple cities at a single position in a route.
+
+    Expects all coordinates to be 0<= {i,j,x,y} <n_cities
+
+    >>> column_connections(0,0,0,0)
+    0
+    >>> column_connections(0,1,0,0)
+    0
+    >>> column_connections(0,1,0,1)
+    0
+    >>> column_connections(0,0,0,1)
+    1
+    >>> column_connections(0,0,2,1)
+    1
+    """
     return (i==j)*(1-(x==y))
 
 
 def dataterm(i,j,x,y, tsp_data):
+    """Return the appropriate dataterm, if entry penalizes distance."""
     n_cities=len(tsp_data)
     return tsp_data[x,y] * ((j==(i+1)%n_cities)+(j==(i-1)%n_cities))
 
@@ -107,7 +123,19 @@ def create_general_tsp(n_cities, A, B, C):
 
 
 ## create functions
-def create_tsp(tsp_data, A, B, C, D, fix_starting_point=False):
+def _create_tsp(tsp_data, A, B, C, D, fix_starting_point=False):
+    """Create concrete TSP realisation.
+
+    Input:
+        tsp_data    ndarray     distance matrix, needs to be a numpy array
+        A           float       row penalty
+        B           float       column penalty
+        C           float       number penalty
+        D           float       data peanalty
+        fix_starting_point  bool    flag wether to prefer the (0,0)
+                                    neuron for route uniquness
+                                    ### TODO: fix
+    """
     n_cities = len(tsp_data)
     W, b = create_general_tsp(n_cities, A, B, C)
     for i,j,x,y in itertools.product(xrange(n_cities), repeat=4):
@@ -121,11 +149,20 @@ def create_tsp(tsp_data, A, B, C, D, fix_starting_point=False):
 
 
 def create(tsp, A, B, C, D, fix_starting_point):
+    """Create concrete TSP.
+
+    Input:
+        tsp         string      filename of np.savetxt tsp data
+                    list        distance matrix
+                    ndarray     distance matrix
+        A, B, C, D  float       relative peanalties, cf _create_tsp
+        fix_starting_point  bool    make route more unique (upto direction)
+    """
     if isinstance(tsp, str):
         tsp_data = np.loadtxt(tsp_datafile)
     else:
         tsp_data = np.array(tsp)
-    W, b = create_tsp(tsp_data, A, B, C, D, fix_starting_point)
+    W, b = _create_tsp(tsp_data, A, B, C, D, fix_starting_point)
     initialstate = np.zeros(len(b)).astype(int)
 
     return W.tolist(), b.tolist(), initialstate.tolist()
@@ -154,8 +191,19 @@ def get_pathlength_for_route(route, tsp_data):
 
 
 def get_pathlength_from_state(state, tsp_data):
-    ### TODO: rewrite as testable
+    """Return pathlength for a route given by state.
+
+    Input:
+        state       int     final state of the solution
+        tsp_data    array   distance between points
+
+    Output:
+        route       list    empty if not a valid state
+        distance    float   sum of all distances, inf if not valid
+    """
     n_cities = len(tsp_data)
+    if valid(state, n_cities)!=(True, True, True):
+        return [], inf
     if isinstance(state, int):
         state = misc.statestring_from_int(state, n_cities*n_cities)
     bstate = np.array([int(s) for s in state]).reshape((n_cities, n_cities)).tolist()
@@ -217,6 +265,9 @@ def row_valid(state, n_cities):
 
     Output:
         valid       bool    True if state obeys the TSP row restrictions
+
+    ### TODO: Rewrite test for all input types and valid checks,
+    ###         introduce a make_statelist function
     >>> row_valid([0,0,0,1, 0,1,0,0, 1,0,0,0, 0,0,1,0], 4)
     True
     >>> row_valid([0,0,1,0, 0,1,0,0, 1,0,0,0, 0,0,1,0], 4)
@@ -270,7 +321,7 @@ def valid(state, n_cities):
 
 def check_validity_of_minima(W, b, verbose=False):
     n_cities = len(b)
-    minimal_states = analysis.get_minma(W, b)
+    minimal_states = analysis.get_minmal_energy_states(W, b)
     valids = []
     column_fail = []
     row_fail = []

@@ -1,4 +1,15 @@
-"""This module implements the different cluster platforms as classes"""
+"""This module implements the different cluster platforms as classes.
+
+Currently implemented are:
+    - Local         for running the experiment locally
+    - BwUni         for submitting jobs to the BWUniCluster
+
+Implementations of additinal platforms have to at least override all
+methods of ClusterBase. Consult the ClusterBase class for the intended
+usage.
+Further functionality should be implemented as private functions in
+order to keep the experiment execution cluster agnostic.
+"""
 
 import abc
 import multiprocessing as mp
@@ -14,29 +25,58 @@ import misc
 import control
 
 class SlurmError(Exception):
+    """Indicate an error with the slurm functions."""
+
     pass
 
 
 class ClusterBase():
-    """Implement the interface for cluster classes"""
+    """Implement the interface for cluster classes."""
+
     def __init__(self):
+        """Initialise cluster instance.
+
+        If applicable take environment configurations as parameters.
+        """
         pass
 
-    def run_jobs(self, folders, function):
-        """Use to execute function on all folders."""
+    def run_jobs(self, folders, function_name, parameters={}):
+        """Run function on all folders.
+
+        Input:
+            folders         list    list of folders of simulations to run
+            function_name   string  module.function needs to be available for
+                                    an import and take a single folder as the
+                                    first argument, all further (optional)
+                                    arguments can be provided in parameters
+            parameters      dict    optional arguments for function
+        """
         pass
 
     def wait_for_finish(self):
-        """Wait for asynchrone jobs to finish."""
+        """Wait for jobs to finish.
+
+        Only important for distributed systems.
+        """
         pass
 
     def ensure_success(self, retries):
-        """Check for success of the jobs."""
+        """Check for success of the jobs.
+
+        Input:
+            retries     int     number of attempts to reissue simulations
+
+        Should provide an automatic restart of failed simulations.
+        But must report which simulations have failed. Use discression
+        to handle a reasonable amount of failures on the fly and reduce
+        user intervention to a minimum.
+        """
         pass
 
 
 class Local(ClusterBase):
     """Process on local machine."""
+
     def __init__(self, n_cpus=1):
         """Process on local machine on n_cpus cores.
 
@@ -46,13 +86,7 @@ class Local(ClusterBase):
         self.use_n_cpus = n_cpus
 
     def run_jobs(self, folders, function_name, parameters={}):
-        """Run function on all folders.
-
-        Input:
-            folders         list    list of folders of simulations to run
-            function_name   string  module.function needs to take as argument a folder
-            parameters      dict    parameters for function expect folder
-        """
+        """Override ClusterBase check there for information."""
         self.function_name = function_name
         self.parameters = parameters
         module_name, fct_name = function_name.split('.')
@@ -72,19 +106,11 @@ class Local(ClusterBase):
             pool.join()
 
     def wait_for_finish(self):
-        """Does nothing."""
+        """Override ClusterBase check there for information."""
         pass
 
     def ensure_success(self, retries=2):
-        """Check return values and retries if non-zero.
-
-        Input:
-            transform_function_name     string  module.transform_function
-            retries                     int     maximal number of retries
-
-        Output:
-            success     bool
-        """
+        """Override ClusterBase check there for information."""
         failed_folders = [folder for folder, ret_value
                             in zip(self.folders, self.ret_values)
                             if not ret_value==0]
@@ -116,12 +142,26 @@ module load python-2.7.12-gcc-6.2.0-csrr54f
 module load py-pyyaml-3.11-gcc-6.2.0-2kgymdu
 
 echo {job_file}
-python generate/cluster.py bwuni {job_file}.yaml {transform_function_name}"""
+python generate/cluster.py bwuni {job_file}.yaml {function_name}"""
 
 
 class BwUni(ClusterBase):
+    """Process on BWUniCluster."""
+
     def __init__(self, n_sims_per_job, nodes, processors_per_node, walltime,
-            max_queue_size, generate_folder, wait_time=120.):
+            max_queue_size, generate_folder, wait_time=120., basejobname=None):
+        """Process on BWUniCluster using multiple processors and nodes.
+
+        Input:
+            n_sims_per_job          int     number of simulations per job file
+            nodes                   int     number of nodes to use per job
+            processors_per_node     int     number of processors per node
+            walltime                string  time string of the time limit of a single job
+            max_queue_size          int     max number of jobs to be queue at one time
+            generate_folder         string  folder in which to put the jobfiles
+            wait_time               float   number of seconds to wait before attempting the next try
+            basejobname             string  basename of the generated jobfiles
+        """
         self.n_sims_per_job = n_sims_per_job
         self.nodes = nodes
         self.processors_per_node = processors_per_node
@@ -129,6 +169,7 @@ class BwUni(ClusterBase):
         self.max_queue_size = max_queue_size
         self.generate_folder = generate_folder
         self.wait_time = wait_time
+        self.basejobname = basejobname
 
         misc.ensure_folder_exists(self.generate_folder)
 
@@ -136,55 +177,13 @@ class BwUni(ClusterBase):
         self.failed_jobs = {}
 
     def run_jobs(self, folders, function_name, parameters={}):
+        """Override ClusterBase check there for information."""
         self.arguments = folders
         self.jobfiles = self._generate_jobfiles(folders, function_name)
-        self.queue_jobs(self.jobfiles)
-
-    def queue_jobs(self, jobfiles):
-        for jobfile in jobfiles:
-            if self._find_queue_size() < self.max_queue_size:
-                jobid = subprocess.check_output(['msub', jobfile]).strip()
-                self.queued_jobs.update({jobid: jobfile})
-            else:
-                time.sleep(self.wait_time)
-
-
-    def _find_queue_size(self, retries=10):
-        try:
-            showq_output = subprocess.check_output(['showq']).split()
-            for _ in range(retries):
-                if showq_output[-3]=='Total':   # check if last line is according to expecations
-                    return int(showq_output[-1])
-                showq_output = subprocess.check_output(['showq']).split()
-            else:
-                raise SlurmError("No valid 'showq' output found. Found instead: {}".format(showq_output))
-        except:
-            raise
-            ### raise original error too?
-            raise SlurmError("'showq' command failed.")
-
-    def _generate_jobfiles(self, folders, transform_function_name):
-        n_job_files = int(len(folders)/self.n_sims_per_job)+1
-        # TODO: Enable more useful jobfilenames
-        uid = uuid.uuid1()
-        job_files = []
-        for i in range(n_job_files):
-            job_filename = os.path.join(self.generate_folder, 'job_{}_{:05d}'.format(uid, i))
-            job_folderlist = folders[i*self.n_sims_per_job:(i+1)*self.n_sims_per_job]
-            with open(job_filename+'.yaml', 'w') as f:
-                yaml.dump(job_folderlist, f)
-            moab_content = bwjobfile_content.format(nodes=self.nodes,
-                                processors_per_node=self.processors_per_node,
-                                walltime=self.walltime,
-                                job_file=job_filename,
-                                transform_function_name=transform_function_name)
-            with open(job_filename+'.moab', 'w') as f:
-                f.write(moab_content)
-            job_files.append(job_filename+'.moab')
-
-        return job_files
+        self._queue_jobs(self.jobfiles)
 
     def wait_for_finish(self):
+        """Override ClusterBase check there for information."""
         t0 = time.time()
         for jobid, _ in self.queued_jobs.iteritems():
             state = self._get_jobstate(jobid)
@@ -193,24 +192,13 @@ class BwUni(ClusterBase):
                 time.sleep(self.wait_time)
                 state = self._get_jobstate(jobid)
 
-    def _get_jobstate(self, jobid, attempt=0):
-        try:
-            r = subprocess.check_output(['checkjob', jobid])
-            state = r.split("State:")[1].split()[0]
-            return state
-        except:
-            if attempt<10:
-                return self._get_jobstate(jobid, attempt=attempt+1)
-            else:
-                print(state)
-                raise
-
     def ensure_success(self, retries=2):
+        """Override ClusterBase check there for information."""
         failed_jobs = self._find_failed_jobs()
         for _ in range(retries):
             if len(failed_jobs)!=0:
                 self.failed_jobs.update(failed_jobs)
-                self.queue_jobs(failed_jobs.itervalues())
+                self._queue_jobs(failed_jobs.itervalues())
                 failed_jobs = self._find_failed_jobs()
             else:
                 bsuccess = True
@@ -225,7 +213,67 @@ class BwUni(ClusterBase):
             print(self.failed_jobs)
         return bsuccess
 
+    def _queue_jobs(self, jobfiles):
+        """Add jobs to queue, obeying self.max_queue_size."""
+        for jobfile in jobfiles:
+            if self._find_queue_size() < self.max_queue_size:
+                jobid = subprocess.check_output(['msub', jobfile]).strip()
+                self.queued_jobs.update({jobid: jobfile})
+            else:
+                time.sleep(self.wait_time)
+
+    def _find_queue_size(self, retries=10):
+        """Return current number of queued (running or idle) jobs."""
+        try:
+            showq_output = subprocess.check_output(['showq']).split()
+            for _ in range(retries):
+                if showq_output[-3]=='Total':   # check if last line is according to expecations
+                    return int(showq_output[-1])
+                showq_output = subprocess.check_output(['showq']).split()
+            else:
+                raise SlurmError("No valid 'showq' output found. Found instead: {}".format(showq_output))
+        except:
+            raise
+            ### TODO: raise original error too?
+            raise SlurmError("'showq' command failed.")
+
+    def _generate_jobfiles(self, folders, function_name):
+        """Return list of jobfilenames."""
+        n_job_files = int(len(folders)/self.n_sims_per_job)+1
+        if self.basejobname==None:
+            self.basejobname = uuid.uuid1()
+        job_files = []
+        for i in range(n_job_files):
+            job_filename = os.path.join(self.generate_folder,
+                                'job_{}_{:05d}'.format(self.basejobname, i))
+            job_folderlist = folders[i*self.n_sims_per_job:(i+1)*self.n_sims_per_job]
+            with open(job_filename+'.yaml', 'w') as f:
+                yaml.dump(job_folderlist, f)
+            moab_content = bwjobfile_content.format(nodes=self.nodes,
+                                processors_per_node=self.processors_per_node,
+                                walltime=self.walltime,
+                                job_file=job_filename,
+                                function_name=function_name)
+            with open(job_filename+'.moab', 'w') as f:
+                f.write(moab_content)
+            job_files.append(job_filename+'.moab')
+
+        return job_files
+
+    def _get_jobstate(self, jobid, attempt=0):
+        """Return the state of jobid {Running, Idle, Removed, Completed}."""
+        try:
+            r = subprocess.check_output(['checkjob', jobid])
+            state = r.split("State:")[1].split()[0]
+            return state
+        except:
+            if attempt<10:
+                return self._get_jobstate(jobid, attempt=attempt+1)
+            else:
+                raise
+
     def _clean_jobfiles(self):
+        """Remove all jobfiles, that did not fail."""
         for jobid, jobfile in self.queued_jobs.iteritems():
             if not self.failed_jobs.has_key(jobid):
                 try:
@@ -239,6 +287,7 @@ class BwUni(ClusterBase):
                 os.remove(jobfile.replace('.moab', '.yaml'))
 
     def _find_failed_jobs(self):
+        """Probe all queued_jobs's status."""
         ### TODO: encapsulate checkjob better
         failed_jobs = {}
         for jobid, jobfile in self.queued_jobs.iteritems():
@@ -257,9 +306,9 @@ class BwUni(ClusterBase):
         return failed_jobs
 
 
-
-def run_job_bwuni(folderfile, transform_function_name):
-    sim_fct = control.get_function_from_name(transform_function_name)
+def run_job_bwuni(folderfile, function_name):
+    """Wrapper for job_file execution of function_name on folders."""
+    sim_fct = control.get_function_from_name(function_name)
     folders = yaml.load(open(folderfile, 'r'))
     nproc = int(os.getenv('SLURM_NPROCS', '1'))
     pool = mp.Pool(nproc)

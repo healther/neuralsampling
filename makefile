@@ -22,6 +22,7 @@ test: tests/test_neuron tests/test_network
 	python generate/misc.py
 	python generate/plot.py
 	python generate/problem_ising.py
+	python generate/problem_sampling.py
 	python generate/problem_tsp.py
 
 clean:

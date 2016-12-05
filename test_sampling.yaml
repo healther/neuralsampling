@@ -1,0 +1,55 @@
+experiment_config:
+  write_configs: True
+  execute_sims: True
+  run_analysis: True
+  collect_results: True
+  plot: False
+sim_parameters:
+  target_system: Local
+  system_parameters:
+    n_cpus: 1
+ana_parameters:
+  target_system: Local
+  system_parameters:
+    n_cpus: 1
+col_parameters:
+  target_system: Local
+  system_parameters:
+    n_cpus: 1
+sim_folder_template:
+  simulation/sampling/{Config_tausyn:05d}
+Config:
+  Tmax: 1.
+  Tmin: 1.
+  neuron_type: log_rect
+  nupdates: 10000
+  random_seed: 42424242
+  random_skip: 1000000
+  tauref: tau
+  tausyn: tau
+  output_scheme: BinaryState
+  network_update_scheme: InOrder
+  remove_config_file: False
+network:
+  name: problem_sampling.create_beta_distribution
+  parameters:
+    n: 5
+    factor: 1.
+    alpha: 0.5
+    beta: 0.5
+    rseed: 42424242
+    ic_low: 0
+    ic_high: 200
+    ic_rseed: 42424243
+simulate:
+  function_name: control.simulate
+analysis:
+  function_name: analysis.state_distribution
+collect:
+  function_name: collect.singlefile
+  parameters:
+    targetfolder: collected
+replacements:
+  tau: [100]
+experiment_name: Test001
+wait: True

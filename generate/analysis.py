@@ -1,4 +1,16 @@
-### TBD: separation of functionality analysis/misc/collect/single problems
+"""This module provides analysis functionality for neuralsampler output.
+
+Public functions expect a folder as the only argument, expect an "output"
+file with the output of the binary (see output format for further information)
+and produce an "analysis_output" file containing the analysed results,
+typically a dictionary or a list of dictionaries.
+Should return 0 if and only if no exception had to be caught. It is
+up to the function to decide whether that means attempting to perform
+the complete anlaysis or fail after the first exception.
+
+Private functions typically work on the "output" file itself or are
+helper functions to those. Use with care and discression.
+"""
 from __future__ import division, print_function
 
 import sys
@@ -10,9 +22,19 @@ import numpy as np
 import yaml
 
 
-def states(folder):
+def state_distribution(folder, skiprows=3, updates=[1000,10000,100000,1000000]):
+    """Write the state frequency distribution in analysis_output.
+
+    Input:
+        folder      string      folder on which to operate
+        skiprows    int         number of rows at the beginning of the file to skip
+        updates     list        list of ints of update numbers after which an outdict should be produced
+    Output:
+        success     int         1 if an exception occured 0 otherwise
+    """
     try:
-        freq_dicts = frequencies_in_file(os.path.join(folder, 'output'))
+        freq_dicts = _frequencies_in_file(os.path.join(folder, 'output'),
+                            skiprows=skiprows, updates=updates)
         outputfilename = os.path.join(folder, 'analysis_output')
         with open(outputfilename, 'w') as f:
             yaml.dump(freq_dicts, f)
@@ -21,7 +43,8 @@ def states(folder):
         raise
         return 1
 
-def frequencies_in_file(filename, skiprows=3, updates=[1000,10000,100000]):
+
+def _frequencies_in_file(filename, skiprows=3, updates=[1000,10000,100000]):
     r"""Return the histogram of the lines in filename skipping skiprows.
 
     Input:
@@ -29,15 +52,15 @@ def frequencies_in_file(filename, skiprows=3, updates=[1000,10000,100000]):
         skiprows    int     number of rows at the begining of the file to skip
         updates     list    list of ints of update numbers after which an outdict should be produced
     Output:
-        outdicts    list    list of a Counter of the line frequencies between the i-1-th and i-th entry in updates
+        outdicts    dict    TODO: correct #dictionary of a Counter of the line frequencies between the i-1-th and i-th entry in updates
 
     >>> with open('testfile.tmp', 'w') as f:
     ...     f.write('000\n010\n000\n100')
-    >>> frequencies_in_file('testfile.tmp', 0, [1,2,5])
-    [{'000': 1}, {'010': 1, '100': 1, '000': 1}]
+    >>> _frequencies_in_file('testfile.tmp', 0, [1,3,5])
+    {1: {'000': 1}, 3: {'010': 1, '000': 1}, 4: {'100': 1}}
     """
     output = []
-    dupdates = [u1-u2 for u1, u2 in zip(updates[1:], updates[:-1])]
+    dupdates = [updates[0]] + [u1-u2 for u1, u2 in zip(updates[1:], updates[:-1])]
 
     with open(filename, 'r') as f:
         for _ in xrange(skiprows):
@@ -46,32 +69,109 @@ def frequencies_in_file(filename, skiprows=3, updates=[1000,10000,100000]):
             lines_gen = islice(f, nu)
             output.append(Counter(l.strip() for l in lines_gen))
 
-    return [dict(o) for o in output]
+    used_line_number = sum(sum(o.values()) for o in output)
+    for i, o in enumerate(output):
+        if len(o)==0:
+            updates[i] = used_line_number
+            output[i] = output[i-1]
+    out = {n: dict(o) for n, o in zip(updates, output)}
+    return out
 
 
-def get_weights_biases_from_config(configfilename):
-    """Return the weight and bias entries of the config file in configfilename."""
-    d = yaml.load(open(configfilename, 'r'))
+def timeaverage_activity(folder, outputtype='mean', skip_header=3, max_rows=1000000, outfile='output', tau=100):
+    """Return the mean and the std of the activities of the simulation in folder.
 
-    return np.array(d['weight']), np.array(d['bias'])
-
-
-def get_state_from_string(statestring):
-    """Take binary line of output and returns a list of ints.
+    expects line n to contain the number of active neurons at timestep n
 
     Input:
-        statestring     string
+        folder      string  folder of the simulation
+        outputtype  string  expected format of 'output' file ['mean', 'binary', 'spikes']
+        skip_header int     number of lines to skip at the beginning of the file
+        max_rows    int     number of lines to consider for the mean and std
+        outfile     string  file in folder that contains the output
+        tau         int     time of neuron to be 1, only used in 'spikes' mode
+
     Output:
-        outlist         list
-
-    >>> get_state_from_string('1110')
-    [1, 1, 1, 0]
-    >>> get_state_from_string('1010 ')
-    [1, 0, 1, 0]
+        dict        dict    key:    splitted folder
+                            value:  dictionary with 'mean' and 'std' keys
     """
-    return [int(s) for s in statestring.strip()]
+    if outputtype=='mean':
+        d = np.genfromtxt(os.path.join(folder, outfile), dtype=np.int32,
+            skip_header=skip_header, max_rows=max_rows)
+    elif outputtype=='binary':
+        d = np.genfromtxt(os.path.join(folder, outfile), dtype=np.bool,
+            delimiter=1, skip_header=skip_header, max_rows=max_rows)
+        d = d.sum(axis=-1)
+    elif outputtype=='spikes':
+        d = []
+        with open(os.path.join(folder, outfile), 'r') as f:
+            for _ in range(skip_header):
+                f.readline()
+            que = deque([len(l.split()) for l in f[:tau]], tau)
+            for line in f[:10000]:
+                d.append(sum(que))
+                que.append(len(line.split()))
+    else:
+        raise ValueError("outputtype must be one of 'mean', 'binary', 'spikes'!")
+    v = {"mean": float(d.mean()), "std": float(d.std())}
+
+    return {folder.split(os.sep)[-1].split("_"): v}
 
 
+def collect_mean_std_state(folder, skip_header=2, max_rows=10000, outfile='output'):
+    """Return the mean and the std of the activities of the simulation in folder.
+
+    expects line n to contain a binary representation of the networkstate at timestep n
+
+    Input:
+        folder      string  folder of the simulation
+        skip_header int     number of lines to skip at the beginning of the file
+        max_rows    int     number of lines to consider for the mean and std
+        outfile     string  file in folder that contains the output
+
+    Output:
+        dict        dict    key:    splitted folder
+                            value:  dictionary with 'mean' and 'std' keys
+    """
+    d = np.genfromtxt(os.path.join(folder, outfile), dtype=np.bool,
+            delimiter=1, skip_header=skip_header, max_rows=max_rows)
+    d = d.sum(axis=-1)
+    v = {"mean": float(d.mean()), "std": float(d.std())}
+
+    return {folder.split(os.sep)[-1].split("_"): v}
+
+
+def collect_mean_std_spikes(folder, tau, skip_header=2, max_rows=10000, outfile='output'):
+    """Return the mean and the std of the activities of the simulation in folder.
+
+    expects line n to contain space separated neuron_ids of the neurons that
+        spiked in timestep n
+
+    Input:
+        folder      string  folder of the simulation
+        tau         int     refractory time in timesteps
+        skip_header int     number of lines to skip at the beginning of the file
+        max_rows    int     number of lines to consider for the mean and std
+        outfile     string  file in folder that contains the output
+
+    Output:
+        dict        dict    key:    splitted folder
+                            value:  dictionary with 'mean' and 'std' keys
+    """
+    d = []
+    with open(os.path.join(folder, outfile), 'r') as f:
+        for _ in range(skip_header):
+            f.readline()
+        que = deque([len(l.split()) for l in f[:tau]], tau)
+        for line in f[:10000]:
+            d.append(sum(que))
+            que.append(len(line.split()))
+    v = {"mean": float(d.mean()), "std": float(d.std())}
+
+    return {folder.split(os.sep)[-1].split("_"): v}
+
+
+### distribution comparisons
 def calculate_dkl(ptheo, fsampl, norm_theo=False):
     """Calculate the relative entropy when encoding fsampl with the optimal encoding of ptheo.
 
@@ -115,7 +215,7 @@ def energy_for_network(w,b, states=None):
     return [ -.5*np.dot(z, np.dot(w, z))-np.dot(b,z) for z in states]
 
 
-def get_minma(W, b):
+def get_minimal_energy_states(W, b):
     """Return a list of minmal energy states for BM (W, b).
 
     Input:
@@ -125,7 +225,7 @@ def get_minma(W, b):
     Output:
         minimal_states  list    list of the minimal energy states as ints
 
-    >>> get_minma([[0., 1.], [1., 0.]], [-.5, .5])
+    >>> get_minimal_energy_states([[0., 1.], [1., 0.]], [-.5, .5])
     array([3])
     """
     e = energy_for_network(W, b)
@@ -192,79 +292,6 @@ def compare_sampling(outputfilename, configfilename, updates=[int(n) for n in np
 
     return updates, dkls
 
-def collect_mean_std_mean(folder, skip_header=2, max_rows=10000, outfile='output'):
-    """Return the mean and the std of the activities of the simulation in folder.
-
-    expects line n to contain the number of active neurons at timestep n
-
-    Input:
-        folder      string  folder of the simulation
-        skip_header int     number of lines to skip at the beginning of the file
-        max_rows    int     number of lines to consider for the mean and std
-        outfile     string  file in folder that contains the output
-
-    Output:
-        dict        dict    key:    splitted folder
-                            value:  dictionary with 'mean' and 'std' keys
-    """
-    d = np.genfromtxt(os.path.join(folder, outfile), dtype=np.int32,
-            skip_header=skip_header, max_rows=max_rows)
-    v = {"mean": float(d.mean()), "std": float(d.std())}
-
-    return {folder.split(os.sep)[-1].split("_"): v}
-
-
-def collect_mean_std_state(folder, skip_header=2, max_rows=10000, outfile='output'):
-    """Return the mean and the std of the activities of the simulation in folder.
-
-    expects line n to contain a binary representation of the networkstate at timestep n
-
-    Input:
-        folder      string  folder of the simulation
-        skip_header int     number of lines to skip at the beginning of the file
-        max_rows    int     number of lines to consider for the mean and std
-        outfile     string  file in folder that contains the output
-
-    Output:
-        dict        dict    key:    splitted folder
-                            value:  dictionary with 'mean' and 'std' keys
-    """
-    d = np.genfromtxt(os.path.join(folder, outfile), dtype=np.bool,
-            delimiter=1, skip_header=skip_header, max_rows=max_rows)
-    d = d.sum(axis=-1)
-    v = {"mean": float(d.mean()), "std": float(d.std())}
-
-    return {folder.split(os.sep)[-1].split("_"): v}
-
-
-def collect_mean_std_spikes(folder, tau, skip_header=2, max_rows=10000, outfile='output'):
-    """Return the mean and the std of the activities of the simulation in folder.
-
-    expects line n to contain space separated neuron_ids of the neurons that
-        spiked in timestep n
-
-    Input:
-        folder      string  folder of the simulation
-        tau         int     refractory time in timesteps
-        skip_header int     number of lines to skip at the beginning of the file
-        max_rows    int     number of lines to consider for the mean and std
-        outfile     string  file in folder that contains the output
-
-    Output:
-        dict        dict    key:    splitted folder
-                            value:  dictionary with 'mean' and 'std' keys
-    """
-    d = []
-    with open(os.path.join(folder, outfile), 'r') as f:
-        for _ in range(skip_header):
-            f.readline()
-        que = deque([len(l.split()) for l in f[:tau]], tau)
-        for line in f[:10000]:
-            d.append(sum(que))
-            que.append(len(line.split()))
-    v = {"mean": float(d.mean()), "std": float(d.std())}
-
-    return {folder.split(os.sep)[-1].split("_"): v}
 
 
 if __name__ == '__main__':
