@@ -72,8 +72,9 @@ def _frequencies_in_file(filename, skiprows=3, updates=[1000,10000,100000]):
     used_line_number = sum(sum(o.values()) for o in output)
     for i, o in enumerate(output):
         if len(o)==0:
-            updates[i] = used_line_number
+            updates[i-1] = used_line_number
             output[i] = output[i-1]
+    updates[-1] = used_line_number
     out = {n: dict(o) for n, o in zip(updates, output)}
     return out
 
