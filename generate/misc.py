@@ -3,9 +3,13 @@
 All public functions should be sideeffect free.
 """
 ### TODO: Move sideeffect functions to different files
+from __future__ import division, print_function
+
 import collections
 import os
 import yaml
+import itertools as it
+import numpy as np
 
 def flatten_dictionary(d, parent_key='', sep='_'):
     """Return a flat dictionary with concatenated keys for a nested dictionary d.
@@ -61,7 +65,7 @@ def get_statelist(state, n_neurons):
         return statelist_from_int(state, n_neurons)
     elif isinstance(state, str):
         return statelist_from_string(state, n_neurons)
-    elif isinstance(state, list):
+    elif isinstance(state, list) or isinstance(state, tuple):
         if len(state)==n_neurons:
             return state
         else:
@@ -147,6 +151,90 @@ def statelist_from_int(stateint, n_neurons):
     if stateint >= 2**n_neurons:
         raise ValueError("State {} out of bounds {}".format(stateint, 2**n_neurons-1))
     return [int(s) for s in "{0:0{width}b}".format(stateint, width=n_neurons)]
+
+### distribution comparisons
+def calculate_dkl(ptheo, fsampl, norm_theo=False):
+    """Calculate the relative entropy when encoding fsampl with the optimal encoding of ptheo.
+
+    Input:
+        ptheo       list    theoretical probabilities for all states
+        fsample     list    frequencies for all sampled states
+        norm_theo   bool    if True ptheo /= sum(ptheo), default False
+    Output:
+        dkl     float   Kullback Leibler divergence
+
+    >>> calculate_dkl([0.5,0.25,0.25], [2,1,1])
+    0.0
+    >>> calculate_dkl([0.5,0.25,0.25], [5,2,3])
+    0.010067756775344432
+    """
+    if norm_theo:
+        ptheo /= sum(ptheo)
+    totn = np.sum(fsampl)
+    return np.sum(f/totn * np.log(f/totn/p) for p,f in zip(ptheo, fsampl) if f!=0)
+
+
+def energies_for_network(w,b, states=None):
+    """Calculate the energy of the states, based on weights w and biases b.
+
+    Input:
+        w       ndarray     weights of the network
+        b       ndarray     biases of the network
+        states  list        list of states for which to calculate the energy, default None
+
+    Output:
+        energies    list    energy for each state in states, if states is None the energies
+                            for all 2**n states
+
+    >>> energies_for_network(np.array([[0.,1.],[1.,0.]]), np.array([-.5, .5]))
+    [-0.0, -0.5, 0.5, -1.0]
+    >>> energies_for_network(np.array([[0.,1.],[1.,0.]]), np.array([-.5, .5]), [[0,0],[1,1]])
+    [-0.0, -1.0]
+    """
+    if states==None:
+        states = [z for z in it.product([0,1], repeat=len(w))]
+    return [ -.5*np.dot(z, np.dot(w, z))-np.dot(b,z) for z in states]
+
+
+def get_minimal_energy_states(W, b):
+    """Return a list of minmal energy states for BM (W, b).
+
+    Input:
+        W   array   weight matrix
+        b   array   bias vector
+
+    Output:
+        minimal_states  list    list of the minimal energy states as ints
+
+    >>> get_minimal_energy_states([[0., 1.], [1., 0.]], [-.5, .5])
+    array([3])
+    """
+    e = energies_for_network(W, b)
+    return np.nonzero(e==min(e))[0]
+
+
+def probabilities_from_energies(energies):
+    """Calculate the Boltzmann probabilities for the set of energies.
+
+    Input:
+        energies        list    list of energy of the single states
+
+    Output:
+        probabilities   list    list of the corresponding probabilities
+
+    >>> probabilities_from_energies([0.,0.])
+    [0.5, 0.5]
+    >>> probabilities_from_energies([1.,1.])
+    [0.5, 0.5]
+    >>> probabilities_from_energies([0.,1.])
+    [0.7310585786300049, 0.2689414213699951]
+    >>> probabilities_from_energies([-1.,0.])
+    [0.7310585786300049, 0.2689414213699951]
+    """
+    Z = np.sum(np.exp(-e) for e in energies)
+    probabilities = [np.exp(-e)/Z for e in energies]
+    return probabilities
+
 
 if __name__ == "__main__":
     import doctest

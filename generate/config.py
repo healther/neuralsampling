@@ -29,7 +29,7 @@ def find_key_from_identifier(dict_to_expand, identifier):
 
 def update_dict(dic, value, key, *keys):
     """Set dic[k0][k1]...[kn] = value for keys=[k0, k1, ..., kn].
-    
+
     >>> d = { 1: 'blub', 2: {3: 'blub', 4: 'hello'}}
     >>> keys = find_key_from_identifier(d, 'blub')
     >>> update_dict(d, 'ch', *keys[0])
@@ -73,7 +73,9 @@ def expanddict(dict_to_expand, expansions):
     return expanded_dicts
 
 
-
+def get_weights_biases_from_configfile(filename):
+    d = yaml.load(open(filename, 'r'))
+    return d['weight'], d['bias']
 
 
 

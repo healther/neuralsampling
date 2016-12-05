@@ -2,7 +2,6 @@
 import sys
 import yaml
 import numpy as np
-import itertools
 
 import misc
 
@@ -21,10 +20,10 @@ def create_beta_distribution(n, factor, alpha, beta, rseed, ic_low, ic_high, ic_
         ic_random   int     random seed for the initial conditions
     """
     np.random.seed(rseed)
-    weights = factor * np.random.beta(alpha, beta, size=(n, n))
+    weights = factor * (.5-np.random.beta(alpha, beta, size=(n, n)))
     weights = np.triu(weights, 1)
     weights += weights.T
-    biases = factor * np.random.beta(alpha, beta, size=n)
+    biases = factor * (.5-np.random.beta(alpha, beta, size=n))
     np.random.seed(ic_rseed)
     initial_conditions = np.random.uniform(ic_low, ic_high, len(biases)).astype(int)
 
