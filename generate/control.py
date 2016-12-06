@@ -11,6 +11,7 @@ import subprocess
 import sys
 import multiprocessing as mp
 import datetime
+import time
 import numpy as np
 
 import config
@@ -37,11 +38,14 @@ def run_experiment(dictionary):
         analysis: ## TODO: specify API for problem analysis
         collect:  ## TODO: specify API for collect functionality
         replacements: {key: [values, ...], ...}
-
+            # TODO: Implement a value = factor * othervalue feature!!!
+            # TODO: Remove _ from parameter names or change connector in dict-flattening!!!
 
     """
     ### TODO: Improve documentation
     ### separate configuration entries
+    print("{}: Starting experiment".format(datetime.datetime.now()))
+
     replacements = dictionary.pop('replacements', {})
     sim_folder_template = dictionary.get('sim_folder_template')
 
@@ -60,14 +64,17 @@ def run_experiment(dictionary):
     ex_dicts = config.expanddict(dictionary, replacements)
 
     ### do actual work
+    t0 = time.time()
     if write_configs:
         folders = _get_folders(ex_dicts, sim_folder_template)
         _write_configs(ex_dicts, folders)
     else:
         folders = _get_folders(ex_dicts, sim_folder_template)
+    elapsed_time = time.time() - t0
+    print("{}: Generated {} simulations in {} seconds.".format(datetime.datetime.now(), len(folders), elapsed_time))
 
     if execute:
-        print("execute")
+        print("{}: execute".format(datetime.datetime.now()))
         sim_processor = _generate_processor(**sim_parameters)
         sim_processor.run_jobs(folders, **dictionary['simulate'])
         if dictionary["wait"]:
@@ -76,7 +83,7 @@ def run_experiment(dictionary):
                 print("Not all jobs succeeded.")
 
     if run_analysis:
-        print("analysis")
+        print("{}: analysis".format(datetime.datetime.now()))
         ana_processor = _generate_processor(**ana_parameters)
         ana_processor.run_jobs(folders, **dictionary['analysis'])
         if dictionary["wait"]:
@@ -85,7 +92,7 @@ def run_experiment(dictionary):
                 print("Not all jobs succeeded.")
 
     if collect_results:
-        print("collect")
+        print("{}: collect".format(datetime.datetime.now()))
         if not dictionary['collect'].has_key('parameters'):
             dictionary['collect']['parameters'] = {'targetfolder': '.',
                             'targetfile': dictionary['experiment_name']}
