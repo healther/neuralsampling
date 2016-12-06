@@ -38,13 +38,21 @@ def singlefile(folders, targetfolder, targetfile):
     misc.ensure_folder_exists(targetfolder)
     outfile = os.path.join(targetfolder, targetfile)
     output = {}
+    template = None
     for folder in folders:
         key = tuple(folder.replace(os.sep, '_').split('_'))
-        with open(os.path.join(folder, 'analysis_output'), 'r') as f:
-            value = f.read()
-        output[key] = value
+        try:
+            value = yaml.load(open(os.path.join(folder, 'analysis_output'), 'r'))
+            output[key] = value
+            if template==None:
+                template = _get_template(folder)
+        except IOError as e:
+            if e.errno==2:
+                ## File not existing -> marking data as missing
+                output[key] = None
+            else:
+                raise
 
-    template = _get_template(folder)
     with open(os.path.join(targetfolder, targetfile), 'w') as f:
         yaml.dump({'template': template, 'data': output}, f)
 
