@@ -180,7 +180,8 @@ if __name__=="__main__":
         d = yaml.load(open(sys.argv[1], 'r'))
         run_experiment(dictionary=d)
     elif len(sys.argv)==3:
-        simulate(folder=sys.argv[1], transform_function_name=sys.argv[2])
+        if sys.argv[1]=='run':
+            simulate(folder=sys.argv[2])
     else:
         print("Don't know what to do.")
 
