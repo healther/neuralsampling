@@ -3,8 +3,6 @@ import sys
 import yaml
 import numpy as np
 
-import misc
-
 
 def create_beta_distribution(n, factor, alpha, beta, rseed, ic_low, ic_high, ic_rseed):
     """Create a BM with beta distributed parameters.
@@ -18,6 +16,9 @@ def create_beta_distribution(n, factor, alpha, beta, rseed, ic_low, ic_high, ic_
         ic_low      float   lower end of the initial condition distribution
         ic_high     float   upper bound of the initial condition distribution
         ic_random   int     random seed for the initial conditions
+
+    >>> create_beta_distribution(3, 1., .5, .5, 12, 0, 10, 13)
+    ([[0.0, 0.30425651289269606, 0.49974839820651534], [0.30425651289269606, 0.0, 0.32013983380426525], [0.49974839820651534, 0.32013983380426525, 0.0]], [-0.4992597294794353, -0.07487731161190547, 0.32439364137800153], [7, 2, 8])
     """
     np.random.seed(rseed)
     weights = factor * (.5-np.random.beta(alpha, beta, size=(n, n)))
@@ -41,7 +42,10 @@ def create(weights, biases, initial_conditions):
         initial_conditions  string      filename of initial_conditions ndarray
                             ndarray     initial_conditions vector
                             [float, float, int]    uniform initialisation above {low, ..., high}
-        """
+
+    >>> create([[0., 1.], [1., 0.]], [.5, -.5], [0, 5])
+    ([[0.0, 1.0], [1.0, 0.0]], [0.5, -0.5], [0, 5])
+    """
     if isinstance(weights, str):
         weights = np.loadtxt(weights)
     else:
