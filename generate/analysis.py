@@ -16,7 +16,7 @@ from __future__ import division, print_function
 
 import sys
 from copy import deepcopy
-from collections import defaultdict, Counter
+import collections
 import itertools as it
 import os
 import numpy as np
@@ -74,7 +74,7 @@ def frequencies_in_file(filename, skiprows=3, updates=[1000,10000,100000]):
             f.readline()
         for nu in dupdates:
             lines_gen = it.islice(f, nu)
-            output.append(Counter(l.strip() for l in lines_gen))
+            output.append(collections.Counter(l.strip() for l in lines_gen))
 
     used_line_number = sum(sum(o.values()) for o in output)
     for i, o in enumerate(output):
@@ -101,7 +101,7 @@ def write_timeaverage(folder, outputtype='mean', skip_header=3, max_rows=1000000
 
 
 def timeaverage_activity(filename, outputtype='mean', skip_header=3, max_rows=1000000, tau=100):
-    """Return the mean and the std of the activities of the simulation in folder.
+    r"""Return the mean and the std of the activities of the simulation in folder.
 
     expects line n to contain the number of active neurons at timestep n
 
@@ -116,6 +116,19 @@ def timeaverage_activity(filename, outputtype='mean', skip_header=3, max_rows=10
     Output:
         dict        dict    key:    splitted folder
                             value:  dictionary with 'mean' and 'std' keys
+
+    >>> with open('testfile.tmp', 'w') as f:
+    ...     f.write('5\n8\n13\n9\n7')
+    >>> timeaverage_activity('testfile.tmp', 'mean', 0, 5, None)
+    {('',): {'std': 2.6532998322843198, 'mean': 8.4}}
+    >>> with open('testfile.tmp', 'w') as f:
+    ...     f.write('0010\n0111\n1111\n0000\n1100')
+    >>> timeaverage_activity('testfile.tmp', 'binary', 0, 5, None)
+    {('',): {'std': 1.4142135623730951, 'mean': 2.0}}
+    >>> with open('testfile.tmp', 'w') as f:
+    ...     f.write('1 4\n5 9 2 3\n13 15 21 4\n7 31 8 2\n14 12 11 5')
+    >>> timeaverage_activity('testfile.tmp', 'spikes', 0, 5, 2)
+    {('',): {'std': 2.449489742783178, 'mean': 5.0}}
     """
     if outputtype=='mean':
         d = np.genfromtxt(filename, dtype=np.int32,
@@ -129,10 +142,15 @@ def timeaverage_activity(filename, outputtype='mean', skip_header=3, max_rows=10
         with open(filename, 'r') as f:
             for _ in range(skip_header):
                 f.readline()
-            que = deque([len(l.split()) for l in f[:tau]], tau)
-            for line in f[:10000]:
+            que = collections.deque([], tau)
+            for _ in range(tau):
+                que.append(len([f.readline().split()]))
+            for i, line in enumerate(f):
                 d.append(sum(que))
                 que.append(len(line.split()))
+                if i>max_rows:
+                    break
+        d = np.array(d)
     else:
         raise ValueError("outputtype must be one of 'mean', 'binary', 'spikes'!")
     v = {"mean": float(d.mean()), "std": float(d.std())}
@@ -160,7 +178,7 @@ def dkl_development(filename, skiprows=3, updates=[int(n) for n in np.logspace(3
     frequencies = []
     nupdates = []
     for k in sorted(freq_dicts.keys()):
-        frequencies.append(Counter(freq_dicts[k]))
+        frequencies.append(collections.Counter(freq_dicts[k]))
         nupdates.append(k)
     for i in range(len(frequencies)-1):
         frequencies[i+1] += frequencies[i]
