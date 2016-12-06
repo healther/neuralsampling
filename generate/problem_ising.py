@@ -7,56 +7,22 @@ import yaml
 import sys
 
 
+def _biases_from_weights(weights, biasfactor=1., biasoffset=0.):
+    return -biasfactor*np.sum(weights, axis=-1)/2. + biasoffset
 
 
-def generate_initialstate(num_sampler, mean_activity=0.5, tauref=100, 
-    rseed=None, breport=False):
-    """Return a random initalstate with length num_sampler with an mean activity of mean_activity.
-
-    Input:
-        num_sampler:    int
-        mean_activity:  float   aspired mean activity
-        tauref:         int     refractory time of the neuron
-        rseed:          int
-        breport:        bool    reports achieved mean activity
-
-    >>> generate_initialstate(10, 0.5, 100, 42424242)
-    array([ 12,  80,  19, 128,  11,  56, 159,  38, 164, 168])
-    """
-    if rseed!=None:
-        np.random.seed(rseed)
-    if mean_activity==0.0:
-        low = tauref+1
-        high = tauref+2
-    else:
-        low = 0
-        high = tauref/mean_activity
-
-    out = np.random.uniform( low, high, num_sampler )
-    return out.astype(int)
-
-
-def generate_NN_connection_matrix(linearsize=10, dimension=2, weight=1.):
-    """Return the normed nearest neighbor connected weight matrix.
+def create_NN(linearsize=10, dimension=2, weight=1., ic_mean=0.5, tau=100, ic_rseed=42424242):
+    """Return the nearest neighbor connected weight matrix.
 
     Input:
         linearsize:     int
         dimension:      int
+        weight:         float
 
-    >>> generate_NN_connection_matrix(3, 1)
-    array([[ 0.,  1.,  1.],
-           [ 1.,  0.,  1.],
-           [ 1.,  1.,  0.]])
-    >>> generate_NN_connection_matrix(3, 2)
-    array([[ 0.,  1.,  1.,  1.,  0.,  0.,  1.,  0.,  0.],
-           [ 1.,  0.,  1.,  0.,  1.,  0.,  0.,  1.,  0.],
-           [ 1.,  1.,  0.,  0.,  0.,  1.,  0.,  0.,  1.],
-           [ 1.,  0.,  0.,  0.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  1.,  0.,  1.,  0.,  1.,  0.,  1.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  0.,  0.,  0.,  1.],
-           [ 1.,  0.,  0.,  1.,  0.,  0.,  0.,  1.,  1.],
-           [ 0.,  1.,  0.,  0.,  1.,  0.,  1.,  0.,  1.],
-           [ 0.,  0.,  1.,  0.,  0.,  1.,  1.,  1.,  0.]])
+    >>> create_NN(3, 1, 1.)
+    ([[0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]], [-1.0, -1.0, -1.0], [12, 80, 19])
+    >>> create_NN(3, 2, 1.)
+    ([[0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0], [1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0], [1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0], [0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0], [0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0], [0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0], [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0]], [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0], [12, 80, 19, 128, 11, 56, 159, 38, 164])
     """
     weights = np.zeros((linearsize**dimension, linearsize**dimension))
     for nid in range(linearsize**dimension):
@@ -66,54 +32,33 @@ def generate_NN_connection_matrix(linearsize=10, dimension=2, weight=1.):
                     for o in [linearsize**d, -linearsize**d]
                     ]
         weights[nid, connlist] = weight
-    return weights
+    biases = _biases_from_weights(weights)
+    np.random.seed(ic_rseed)
+    ic_low = 0
+    if ic_mean!=0.:
+        ic_high = tau/ic_mean
+    else:
+        ic_high = tau
+    initial_conditions = np.random.uniform(ic_low, ic_high, len(biases)).astype(int)
+    return weights.tolist(), biases.tolist(), initial_conditions.tolist()
 
 
-def generate_bias(weights, factor=1., offset=0.):
-    """Return the bias vector for a given weight matrix, modified by factor and offset.
-
-    Input:
-        weights:    numpy 2d-array
-        factor:     float or numpy 1d-array with length len(weights)
-        offset:     float or numpy 1d-array with length len(weights)
-
-    Output:
-        bias = -.5 * factor * weights.sum(axis=-1) + offset
-
-    >>> w = np.array([[0., 1., 1.], [1., 0., 1.], [0., 1., 1.]])
-    >>> generate_bias(w)
-    array([-1., -1., -1.])
-    >>> generate_bias(w, 2.)
-    array([-2., -2., -2.])
-    >>> generate_bias(w, 1., .5)
-    array([-0.5, -0.5, -0.5])
-    >>> generate_bias(w, np.array([1.,2.,.5]), np.array([.5,.0,-.5]))
-    array([-0.5, -2. , -1. ])
-    """
-    biases = -.5 * weights.sum(axis=-1)
-    biases *= factor
-    biases += offset
-    return biases
+def create_NN_noisy(linearsize=10, dimension=2, weight=1., ic_mean=0.5, tau=100, ic_rseed=42424242,
+        bias_noise=.1, weight_noise=.1, noise_rseed=42424242):
+    W, b, i = create_NN(linearsize, dimension, weight, ic_mean, tau, ic_rseed)
+    np.random.seed(noise_rseed)
+    W = np.array(W)
+    W *= np.random.normal(loc=1., scale=weight_noise, size=W.shape)
+    b = np.array(b)
+    b *= np.random.normal(loc=1., scale=bias_noise, size=b.shape)
+    return W.tolist(), b.tolist(), i
 
 
-def generate(dictionary):
-    """Generate the weight, bias and initialstate list (of lists) for dictionary.
-
-    expects the entries 'connection_function', 'initialstate_function' and
-    'bias_function' to refer to functions in this file and their parameter
-    dictionaries in the 'connection', 'bias', 'initialstate' entries of
-    dictionary.
-    """
-    connection_function = globals()[dictionary["connection_function"]]
-    initialstate_function = globals()[dictionary["initialstate_function"]]
-    bias_function = globals()[dictionary["bias_function"]]
-
-    weight = connection_function(**dictionary["connection"])
-    bias = bias_function(weights=weight, **dictionary["bias"])
-    initialstate = initialstate_function(num_sampler=len(weight),
-            **dictionary["initialstate"])
-
-    return weight.tolist(), bias.tolist(), initialstate.tolist()
+def create_NN_biasfactor(linearsize=10, dimension=2, weight=1., ic_mean=0.5, tau=100, ic_rseed=42424242,
+        bias_factor=1.):
+    W, b, i = create_NN(linearsize, dimension, weight, ic_mean, tau, ic_rseed)
+    b = np.array(b)*bias_factor
+    return W, b.tolist(), i
 
 
 if __name__=="__main__":
