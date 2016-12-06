@@ -10,7 +10,7 @@ usage.
 Further functionality should be implemented as private functions in
 order to keep the experiment execution cluster agnostic.
 """
-
+from __future__ import division, print_function
 import abc
 import multiprocessing as mp
 import subprocess
@@ -20,6 +20,7 @@ import uuid
 import yaml
 import sys
 import time
+import datetime
 
 import misc
 import control
@@ -180,7 +181,10 @@ class BwUni(ClusterBase):
         """Override ClusterBase check there for information."""
         self.arguments = folders
         self.jobfiles = self._generate_jobfiles(folders, function_name)
+        print(self.jobfiles)
+        time.sleep(15.)
         self._queue_jobs(self.jobfiles)
+        print(self.queued_jobs)
 
     def wait_for_finish(self):
         """Override ClusterBase check there for information."""
@@ -199,6 +203,7 @@ class BwUni(ClusterBase):
             if len(failed_jobs)!=0:
                 self.failed_jobs.update(failed_jobs)
                 self._queue_jobs(failed_jobs.itervalues())
+                self.wait_for_finish()
                 failed_jobs = self._find_failed_jobs()
             else:
                 bsuccess = True
@@ -240,6 +245,7 @@ class BwUni(ClusterBase):
     def _generate_jobfiles(self, folders, function_name):
         """Return list of jobfilenames."""
         n_job_files = int(len(folders)/self.n_sims_per_job)+1
+        print("{}: Generating {} jobfiles for {} simulations.".format(datetime.datetime.now(), n_job_files, len(folders)))
         if self.basejobname==None:
             self.basejobname = uuid.uuid1()
         job_files = []
@@ -328,4 +334,4 @@ if "__main__"==__name__:
     elif len(sys.argv)==4:
         if sys.argv[1]=='bwuni':
             print(run_job_bwuni(folderfile=sys.argv[2],
-                        transform_function_name=sys.argv[3]))
+                        function_name=sys.argv[3]))
