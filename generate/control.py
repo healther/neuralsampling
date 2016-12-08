@@ -155,7 +155,7 @@ def dump_runfile(folder):
     yaml.dump(simyaml, open(os.path.join(folder, 'run.yaml'), 'w'))
 
 
-def simulate(folder):
+def simulate(folder, check_output=False):
     """Execute simulation in folder.
 
     Expands folder/sim.yaml into folder/run.yaml by calling the
@@ -163,7 +163,12 @@ def simulate(folder):
     Which needs to return the network configuration (W,b,i)
 
     Returns the return value of bin/neuralsampler.
+
+    TODO: make check_output available through BwUni cluster
     """
+    if check_output:
+        if os.path.exists(os.path.join(folder, 'output')):
+            return 0
     dump_runfile(folder)
     DEVNULL = open(os.devnull, 'wb')
     ret_value = subprocess.call(['bin/neuralsampler',

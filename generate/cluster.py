@@ -143,7 +143,7 @@ module load python-2.7.12-gcc-6.2.0-csrr54f
 module load py-pyyaml-3.11-gcc-6.2.0-2kgymdu
 
 echo {job_file}
-python generate/cluster.py bwuni {job_file}.yaml {function_name}"""
+python generate/cluster.py bwuni {job_file}.yaml {function_name} {parameterfilename}"""
 
 
 class BwUni(ClusterBase):
@@ -180,8 +180,7 @@ class BwUni(ClusterBase):
     def run_jobs(self, folders, function_name, parameters={}):
         """Override ClusterBase check there for information."""
         self.arguments = folders
-        self.jobfiles = self._generate_jobfiles(folders, function_name)
-        print(self.jobfiles)
+        self.jobfiles = self._generate_jobfiles(folders, function_name, parameters)
         time.sleep(15.)
         self._queue_jobs(self.jobfiles)
         print(self.queued_jobs)
@@ -242,12 +241,16 @@ class BwUni(ClusterBase):
             ### TODO: raise original error too?
             raise SlurmError("'showq' command failed.")
 
-    def _generate_jobfiles(self, folders, function_name):
+    def _generate_jobfiles(self, folders, function_name, parameters={}):
         """Return list of jobfilenames."""
-        n_job_files = int(len(folders)/self.n_sims_per_job)+1
-        print("{}: Generating {} jobfiles for {} simulations.".format(datetime.datetime.now(), n_job_files, len(folders)))
         if self.basejobname==None:
             self.basejobname = uuid.uuid1()
+        parameterfilename = os.path.join(self.generate_folder, 'parameters_'+self.basejobname)
+        with open(parameterfilename, 'w') as f:
+            yaml.dump(parameters, f)
+
+        n_job_files = int(len(folders)/self.n_sims_per_job)+1
+        print("{}: Generating {} jobfiles for {} simulations.".format(datetime.datetime.now(), n_job_files, len(folders)))
         job_files = []
         for i in range(n_job_files):
             job_filename = os.path.join(self.generate_folder,
@@ -259,7 +262,8 @@ class BwUni(ClusterBase):
                                 processors_per_node=self.processors_per_node,
                                 walltime=self.walltime,
                                 job_file=job_filename,
-                                function_name=function_name)
+                                function_name=function_name,
+                                parameterfilename=parameterfilename)
             with open(job_filename+'.moab', 'w') as f:
                 f.write(moab_content)
             job_files.append(job_filename+'.moab')
@@ -312,9 +316,13 @@ class BwUni(ClusterBase):
         return failed_jobs
 
 
-def run_job_bwuni(folderfile, function_name):
+def run_job_bwuni(folderfile, function_name, argument_file=None):
     """Wrapper for job_file execution of function_name on folders."""
-    sim_fct = control.get_function_from_name(function_name)
+    if argument_file != None:
+        parameters = yaml.load(open(argument_file, 'r'))
+
+    base_fct = control.get_function_from_name(function_name)
+    sim_fct = functools.partial(base_fct, **parameters)
     folders = yaml.load(open(folderfile, 'r'))
     nproc = int(os.getenv('SLURM_NPROCS', '1'))
     pool = mp.Pool(nproc)
@@ -335,3 +343,8 @@ if "__main__"==__name__:
         if sys.argv[1]=='bwuni':
             print(run_job_bwuni(folderfile=sys.argv[2],
                         function_name=sys.argv[3]))
+    elif len(sys.argv)==4:
+        if sys.argv[1]=='bwuni':
+            print(run_job_bwuni(folderfile=sys.argv[2],
+                        function_name=sys.argv[3],
+                        argument_file=sys.argv[4]))
