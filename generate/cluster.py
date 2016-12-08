@@ -206,6 +206,7 @@ class BwUni(ClusterBase):
                 self._queue_jobs(failed_jobs.itervalues())
                 self.wait_for_finish()
                 failed_jobs = self._find_failed_jobs()
+                print(failed_jobs)
             else:
                 bsuccess = True
                 break
@@ -349,7 +350,7 @@ if "__main__"==__name__:
         if sys.argv[1]=='bwuni':
             print(run_job_bwuni(folderfile=sys.argv[2],
                         function_name=sys.argv[3]))
-    elif len(sys.argv)==4:
+    elif len(sys.argv)==5:
         if sys.argv[1]=='bwuni':
             print(run_job_bwuni(folderfile=sys.argv[2],
                         function_name=sys.argv[3],

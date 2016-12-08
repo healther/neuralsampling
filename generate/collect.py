@@ -54,7 +54,7 @@ def singlefile(folders, targetfolder, targetfile):
             else:
                 raise
         if i%1000==0:
-            print("{} Collected: {5.1f}%".format(datetime.datetime.now(), i*100./len(folders)))
+            print("{} Collected: {:5.1f}%".format(datetime.datetime.now(), i*100./len(folders)))
 
     with open(os.path.join(targetfolder, targetfile), 'w') as f:
         yaml.dump({'template': template, 'data': output}, f)
