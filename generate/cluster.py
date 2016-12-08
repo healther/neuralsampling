@@ -150,7 +150,8 @@ class BwUni(ClusterBase):
     """Process on BWUniCluster."""
 
     def __init__(self, n_sims_per_job, nodes, processors_per_node, walltime,
-            max_queue_size, generate_folder, wait_time=120., basejobname=None):
+            max_queue_size, generate_folder, wait_time=120., basejobname=None,
+            cleanjobfiles=False,):
         """Process on BWUniCluster using multiple processors and nodes.
 
         Input:
@@ -171,6 +172,7 @@ class BwUni(ClusterBase):
         self.generate_folder = generate_folder
         self.wait_time = wait_time
         self.basejobname = basejobname
+        self.cleanjobfiles = cleanjobfiles
 
         misc.ensure_folder_exists(self.generate_folder)
 
@@ -210,11 +212,13 @@ class BwUni(ClusterBase):
         else:
             bsuccess = False
 
-        print("All jobs completed, cleaning not-failed jobfiles")
-        self._clean_jobfiles()
-        if len(self.failed_jobs)!=0:
-            print("The following jobs failed to report success:")
-            print(self.failed_jobs)
+        print("All jobs completed")
+        if self.cleanjobfiles:
+            print("Cleaning not-failed jobfiles")
+            self._clean_jobfiles()
+            if len(self.failed_jobs)!=0:
+                print("The following jobs failed to report success:")
+                print(self.failed_jobs)
         return bsuccess
 
     def _queue_jobs(self, jobfiles):
@@ -318,6 +322,7 @@ class BwUni(ClusterBase):
 
 def run_job_bwuni(folderfile, function_name, argument_file=None):
     """Wrapper for job_file execution of function_name on folders."""
+    print("{} Started to apply {} on {}".format(datetime.datetime.now(), function_name, folderfile))
     if argument_file != None:
         parameters = yaml.load(open(argument_file, 'r'))
 
@@ -329,6 +334,7 @@ def run_job_bwuni(folderfile, function_name, argument_file=None):
     ret_values = pool.map(sim_fct, folders)
     pool.close()
     pool.join()
+    print("{} Finished to apply {} on {}".format(datetime.datetime.now(), function_name, folderfile))
 
     return [folder for folder, ret_value in zip(folders, ret_values)
                         if ret_value is not 0]
