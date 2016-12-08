@@ -9,6 +9,7 @@ TODO: Multicore support
 
 import os
 from collections import deque
+import datetime
 import yaml
 import numpy as np
 
@@ -39,11 +40,11 @@ def singlefile(folders, targetfolder, targetfile):
     outfile = os.path.join(targetfolder, targetfile)
     output = {}
     template = None
-    for folder in folders:
+    for i,folder in enumerate(folders):
         key = tuple(folder.replace(os.sep, '_').split('_'))
         try:
             value = yaml.load(open(os.path.join(folder, 'analysis_output'), 'r'))
-            output[key] = value
+            output.update(value)
             if template==None:
                 template = _get_template(folder)
         except IOError as e:
@@ -52,6 +53,8 @@ def singlefile(folders, targetfolder, targetfile):
                 output[key] = None
             else:
                 raise
+        if i%1000==0:
+            print("{} Collected: {5.1f}%".format(datetime.datetime.now(), i*100./len(folders)))
 
     with open(os.path.join(targetfolder, targetfile), 'w') as f:
         yaml.dump({'template': template, 'data': output}, f)
