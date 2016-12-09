@@ -153,8 +153,8 @@ def timeaverage_activity(filename, outputtype='mean', skip_header=3, max_rows=10
         d = np.array(d)
     else:
         raise ValueError("outputtype must be one of 'mean', 'binary', 'spikes'!")
-    v = {"mean": float(d.mean()), "std": float(d.std())}
-    return {tuple(os.path.dirname(filename).split(os.sep)[-1].split("_")): v}
+    out = {"mean": float(d.mean()), "std": float(d.std())}
+    return out
 
 
 def write_dkl_development(folder, skiprows=3, updates=[int(n) for n in np.logspace(3,8,11)]):
@@ -202,7 +202,7 @@ def dkl_development(filename, skiprows=3, updates=[int(n) for n in np.logspace(3
     ptheo = misc.probabilities_from_energies(misc.energies_for_network(W, b))
 
     dkls = [float(misc.calculate_dkl(ptheo, fsamp)) for fsamp in frequencies]
-    return nupdates, dkls
+    return {'nupdates': nupdates, 'dkls': dkls}
 
 
 def _compare_sampling(outputfilename, configfilename, updates=[int(n) for n in np.logspace(3,8,11)]):

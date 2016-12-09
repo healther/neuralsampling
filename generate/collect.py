@@ -44,7 +44,7 @@ def singlefile(folders, targetfolder, targetfile):
         key = tuple(folder.replace(os.sep, '_').split('_'))
         try:
             value = yaml.load(open(os.path.join(folder, 'analysis_output'), 'r'))
-            output.update(value)
+            output[key] = value
             if template==None:
                 template = _get_template(folder)
         except IOError as e:
