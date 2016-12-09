@@ -342,7 +342,7 @@ def run_job_bwuni(folderfile, function_name, argument_file=None):
     #for f in folders:
     #    print(sim_fct(f))
     print("{} Finished to apply {} on {}".format(datetime.datetime.now(), function_name, folderfile))
-
+    print(ret_values)
     return [folder for folder, ret_value in zip(folders, ret_values)
                         if ret_value is not 0]
 

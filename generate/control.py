@@ -176,15 +176,19 @@ def simulate(folder, check_output=False):
 
     TODO: make check_output available through BwUni cluster
     """
-    if check_output:
-        if os.path.exists(os.path.join(folder, 'output')):
-            return 0
-    dump_runfile(folder)
-    DEVNULL = open(os.devnull, 'wb')
-    ret_value = subprocess.call(['bin/neuralsampler',
-                                os.path.join(folder, 'run.yaml')],
-                                stdout=DEVNULL)
-    return ret_value
+    try:
+        if check_output:
+            if os.path.exists(os.path.join(folder, 'output')):
+                return 0
+        dump_runfile(folder)
+        DEVNULL = open(os.devnull, 'wb')
+        ret_value = subprocess.call(['bin/neuralsampler',
+                                    os.path.join(folder, 'run.yaml')],
+                                    stdout=DEVNULL)
+        return ret_value
+    except Exception as e:
+        print("{} found exception {}".format(datetime.datetime.now(), e))
+        return 1
 
 
 if __name__=="__main__":
@@ -199,6 +203,6 @@ if __name__=="__main__":
             simulate(folder=sys.argv[2])
     else:
         print("Don't know what to do.")
-
+    print(sys.argv)
 
 
