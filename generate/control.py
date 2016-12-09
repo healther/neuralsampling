@@ -74,6 +74,7 @@ def run_experiment(dictionary):
     print("{}: Generated {} simulations in {} seconds.".format(datetime.datetime.now(), len(folders), elapsed_time))
 
     if execute:
+        _create_binary_if_not_exists()
         print("{}: execute".format(datetime.datetime.now()))
         sim_processor = _generate_processor(**sim_parameters)
         sim_processor.run_jobs(folders, **dictionary['simulate'])
@@ -107,6 +108,15 @@ def run_experiment(dictionary):
 
         function = getattr(__import__(module_name), function_name)
         function(folders, **parameters)
+
+
+def _create_binary_if_not_exists():
+    if not os.path.exists('bin/neuralsampler'):
+        print("{} Missing executable, makeing it".format(datetime.datetime.now()))
+        subprocess.call(['make', 'bin'])
+        print("{} Finished make".format(datetime.datetime.now()))
+    else:
+        print("{} Binaray found, continue running".format(datetime.datetime.now()))
 
 
 def _generate_processor(target_system='Local', system_parameters={}):

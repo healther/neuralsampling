@@ -204,6 +204,7 @@ class BwUni(ClusterBase):
             if len(failed_jobs)!=0:
                 self.failed_jobs.update(failed_jobs)
                 self._queue_jobs(failed_jobs.itervalues())
+                time.sleep(self.wait_time)
                 self.wait_for_finish()
                 failed_jobs = self._find_failed_jobs()
                 print(failed_jobs)
@@ -249,7 +250,7 @@ class BwUni(ClusterBase):
     def _generate_jobfiles(self, folders, function_name, parameters={}):
         """Return list of jobfilenames."""
         if self.basejobname==None:
-            self.basejobname = uuid.uuid1()
+            self.basejobname = str(uuid.uuid1())
         parameterfilename = os.path.join(self.generate_folder, 'parameters_'+self.basejobname)
         with open(parameterfilename, 'w') as f:
             yaml.dump(parameters, f)
@@ -283,6 +284,7 @@ class BwUni(ClusterBase):
             return state
         except:
             if attempt<10:
+                time.sleep(self.wait_time)
                 return self._get_jobstate(jobid, attempt=attempt+1)
             else:
                 raise
@@ -326,6 +328,8 @@ def run_job_bwuni(folderfile, function_name, argument_file=None):
     print("{} Started to apply {} on {}".format(datetime.datetime.now(), function_name, folderfile))
     if argument_file != None:
         parameters = yaml.load(open(argument_file, 'r'))
+    else:
+        parameters = {}
 
     base_fct = control.get_function_from_name(function_name)
     sim_fct = functools.partial(base_fct, **parameters)
@@ -335,6 +339,8 @@ def run_job_bwuni(folderfile, function_name, argument_file=None):
     ret_values = pool.map(sim_fct, folders)
     pool.close()
     pool.join()
+    #for f in folders:
+    #    print(sim_fct(f))
     print("{} Finished to apply {} on {}".format(datetime.datetime.now(), function_name, folderfile))
 
     return [folder for folder, ret_value in zip(folders, ret_values)
