@@ -8,7 +8,60 @@ import sys
 from matplotlib.backends.backend_pdf import PdfPages
 
 
-def colormap(collected_file_name, xlabel, ylabel, zlabel, restrictions, plotname='pp.pdf', plotfolder='plots'):
+def isinlist(id_list, list_of_list):
+    for i, li in zip(id_list, list_of_lists):
+        if i not in li:
+            return False
+    return True
+
+
+def reduce_data(collected_file_name, restrictions, order):
+    d = yaml.load(open(collected_file_name, 'r'))
+
+    reduced_data = []
+    for k, v in d.iteritems():
+        if isinlist(k, restrictions):
+            # reduced_dict[k] = v
+            dataline = []
+            for o in order:
+                if o[0]=='key':
+                    dataline.append(k[o[1]])
+                elif o[0]=='value':
+                    dataline.append(v[o[1]])
+            reduced_data.append(dataline)
+
+    return reduced_data
+
+
+def scatter_plot(collected_file_name,
+        restrictions, order, bundleind, bundels,
+        xlabel, ylabel, xid, yid,
+        plotname, plotfolder):
+
+    reduced_data = reduce_data(collected_file_name)
+    xdata = len(bundels)*[]
+    ydata = len(bundels)*[]
+
+    for rd in reduced_dict.iteritems():
+        xdata[bundels.index(rd[bundelind])].append(rd[xid])
+        ydata[bundels.index(rd[bundelind])].append(rd[yid])
+
+    with PdfPages(os.path.join(plotfolder, plotname)) as pdf:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        for b in bundels:
+            ax.scatter(xdata, ydata, label=str(b))
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        ax.set_title(title)
+        plt.savefig(pdf, format='pdf')
+
+
+
+def colormap(collected_file_name,
+        restrictions, order,
+        xlabel, ylabel, zlabel, xid, yid, zid,
+        plotname='pp.pdf', plotfolder='plots'):
     """Plots a 2d colormap
 
     Input:
@@ -24,63 +77,47 @@ def colormap(collected_file_name, xlabel, ylabel, zlabel, restrictions, plotname
     Output:
         fig, ax
     """
-    d = yaml.load(open(collected_file_name, 'r'))
 
-    print(len(d))
+    reduced_data = reduce_data(collected_file_name, restrictions, order)
+
 
     xvalues = []
     yvalues = []
     zvalues = []
 
-    for k,v in d.iteritems():
-        _, _, randomtype, tau, w, updaterandomseed, initialactivity, initialrandomseed = k.split('_')
-        kdict = {'randomtype': randomtype, 'tau': int(tau), 'weight': float(w),
-                    'updaterandomseed': int(updaterandomseed),
-                    'initialactivity': float(initialactivity), 'initialrandomseed': int(initialrandomseed)}
-        try:
-            if np.prod([kdict[kk] in vv for kk,vv in restrictions.iteritems()]):
-                xvalues.append(kdict[xlabel])
-                yvalues.append(kdict[ylabel])
-                zvalues.append(v['mean'])
-        except TypeError as e:
-            print("Restrictions must be a dictionary of {argument: iterable} with iterable containing all valid values for the argument.")
-            raise
+    for rd in reduced_data:
+        xvalues.append(rd[xid])
+        yvalues.append(rd[yid])
+        zvalues.append(rd[zid])
 
-    unique_x = list(set(xvalues))
-    unique_y = list(set(yvalues))
-    if len(unique_x)*len(unique_y)!=len(zvalues):
-        xys = []
-        zs = []
+    unique_x = sorted(list(set(xvalues)))
+    unique_y = sorted(list(set(yvalues)))
+    n_slices = len(unique_x)*len(unique_y)
 
-        for x, y, z in zip(xvalues, yvalues, zvalues):
-            if (x,y) in xys:
-                ind = xys.index((x,y))
-                zs[ind].append(z)
-            else:
-                xys.append((x,y))
-                zs.append([z])
+    if n_slices < len(zvalues):
+        zvals = n_slices*[0.]
+        zfreqs = n_slices*[0]
 
-        xvalues = [x for x, y in xys]
-        yvalues = [y for x, y in xys]
-        zvalues = [np.mean(z) for z in zs]
-        print(len(zs[0]))
+        for x, y, z in zip(xvalues, yvalues):
+            ind = len(unique_x)*unique_y.index(y) + unique_x.index(x)
+            zvals[int] += z
+            zfreqs[int] += 1
 
-        zresults = np.zeros((len(unique_x), len(unique_y)))
-        for x, y, z in zip(xvalues, yvalues, zvalues):
-            zresults[unique_x.index(x), unique_y.index(y)] = z
+        for i in range(len(zvals)):
+            zvals[i] = zvals[i]/zfreqs[i]
+
+    zresults = np.zeros((len(unique_x), len(unique_y)))
+    for x, y, z in zip(xvalues, yvalues, zvals):
+        zresults[unique_x.index(x), unique_y.index(y)] = z
 
 
     with PdfPages(os.path.join(plotfolder, plotname)) as pdf:
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.set_xscale('log')
-        # cax = ax.scatter(xvalues, yvalues, c=zvalues, s=100, marker='s')
-        # cbar = fig.colorbar(cax)
-        cax = ax.pcolorfast([0]+unique_x, [0]+unique_z, zresults)
-        cbar = fig.colorbar(cax)
-        #X, Y = np.meshgrid(unique_x, unique_y)
-        #Z = [ [ zvalues[xys.index((xx,yy))] for xx, yy in zip(x,y)  ] for x,y in zip(X,Y) ]
-        #ax.contour( X, Y, Z)
+        cax = ax.pcolor(zresults)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        cbar = fig.colorbar(cax, label=zlabel)
         plt.savefig(pdf, format='pdf')
 
     return fig, ax
