@@ -1,8 +1,12 @@
 """This module implements the TSP problem for neural networks."""
+from __future__ import division, print_function
 import sys
 import yaml
 import numpy as np
 import itertools
+
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 import analysis
 import misc
@@ -136,6 +140,7 @@ def _create_tsp(tsp_data, A, B, C, D, fix_starting_point=False):
                                     neuron for route uniquness
                                     ### TODO: fix
     """
+    tsp_data = tsp_data/np.linalg.norm(tsp_data)
     n_cities = len(tsp_data)
     W, b = create_general_tsp(n_cities, A, B, C)
     for i,j,x,y in itertools.product(xrange(n_cities), repeat=4):
@@ -159,7 +164,7 @@ def create(tsp, A, B, C, D, fix_starting_point):
         fix_starting_point  bool    make route more unique (upto direction)
     """
     if isinstance(tsp, str):
-        tsp_data = np.loadtxt(tsp_datafile)
+        tsp_data = np.loadtxt(tsp)
     else:
         tsp_data = np.array(tsp)
     W, b = _create_tsp(tsp_data, A, B, C, D, fix_starting_point)
@@ -212,6 +217,24 @@ def get_pathlength_from_state(state, tsp_data):
     return route, d
 
 
+def factorial(n):
+    if n<0:
+        raise Exception
+    elif n==1 or n==0:
+        return 1
+    else:
+        return n*factorial(n-1)
+
+
+def get_all_routes(tsp_data, max_number=10000):
+    if isinstance(tsp_data, list):
+        tsp_data = np.array(tsp_data)
+    if factorial(len(tsp_data))<max_number:
+        return [get_pathlength_for_route(p, tsp_data) for p in itertools.permutations(range(len(tsp_data)))]
+    else:
+        routes = [np.random.permutation(range(len(tsp_data))) for _ in range(max_number)]
+        return [get_pathlength_for_route(p, tsp_data) for p in routes]
+
 def brute_force_minima(tsp_data):
     """Test all connection graphs and outputs returns shortest path and shortest pathlength.
 
@@ -226,7 +249,7 @@ def brute_force_minima(tsp_data):
     """
     if isinstance(tsp_data, list):
         tsp_data = np.array(tsp_data)
-    return min(get_pathlength_for_route(p, tsp_data) for p in itertools.permutations(range(len(tsp_data))))
+    return min(get_all_routes(tsp_data))
 
 
 def column_valid(state, n_cities):
@@ -248,8 +271,7 @@ def column_valid(state, n_cities):
     >>> column_valid([0,0,1,1, 0,1,0,0, 1,0,0,0, 0,0,1,0], 4)
     False
     """
-    if isinstance(state, int):
-        state = misc.statelist_from_int(state, n_cities*n_cities)
+    state = misc.get_statelist(state, n_cities*n_cities)
     valid = True
     for i in range(n_cities):
         valid *= np.sum(state[i::n_cities])==1
@@ -277,8 +299,7 @@ def row_valid(state, n_cities):
     >>> row_valid([0,0,1,1, 0,1,0,0, 1,0,0,0, 0,0,1,0], 4)
     False
     """
-    if isinstance(state, int):
-        state = misc.statelist_from_int(state, n_cities*n_cities)
+    state = misc.get_statelist(state, n_cities*n_cities)
     valid = True
     for i in range(n_cities):
         valid *= np.sum(state[i*n_cities:(i+1)*n_cities])==1
@@ -307,8 +328,7 @@ def number_valid(state, n_cities):
     >>> number_valid(22, 4)
     False
     """
-    if isinstance(state, int):
-        state = misc.statelist_from_int(state, n_cities*n_cities)
+    state = misc.get_statelist(state, n_cities*n_cities)
     return np.sum(state)==n_cities
 
 
@@ -353,6 +373,27 @@ def check_validity_of_minima(W, b, verbose=False):
 
     return minimal_states, valids, row_fail, column_fail, number_fail
 
+
+def plot(plotname, state_freq_dict, tsp_data, nbins=30, min_frequency=40):
+    n_cities = len(tsp_data)
+    states = [k for k,v in state_freq_dict.iteritems() if v>min_frequency]
+    frequencies = [v for k,v in state_freq_dict.iteritems() if v>min_frequency]
+
+    valid_states = [s for s in states if all(valid(s, n_cities))]
+    valid_frequencies = [v for s,v in zip(states, frequencies)
+                                if all(valid(s, n_cities))]
+    dists = [get_pathlength_from_state(s, tsp_data)[1] for s in states]
+    print(len(valid_states)/len(states))
+
+    rls = get_all_routes(tsp_data)
+
+    with PdfPages(plotname) as pdf:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        n, bins, patches = ax.hist(rls, bins=nbins, normed=True, label='all')
+        ax.hist(dists, bins, alpha=.5, normed=True, label='sampled')
+        ax.legend()
+        plt.savefig(pdf, format='pdf')
 
 if __name__ == '__main__':
     if len(sys.argv)==1:
