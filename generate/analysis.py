@@ -160,10 +160,10 @@ def timeaverage_activity(filename, outputtype='mean', skip_header=3, max_rows=10
 def write_dkl_development(folder, skiprows=3, updates=[int(n) for n in np.logspace(3,8,11)]):
     try:
         outfilename = os.path.join(folder, 'output')
-        nupdates, dkls = dkl_development(outfilename, skiprows, updates)
+        dkl_dict = dkl_development(outfilename, skiprows, updates)
 
         with open(os.path.join(folder, 'analysis_output'), 'w') as f:
-            yaml.dump({'nupdates': nupdates, 'dkls': dkls}, f)
+            yaml.dump(dkl_dict, f)
         return 0
     except:
         if DEBUG:
