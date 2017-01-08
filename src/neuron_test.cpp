@@ -7,12 +7,13 @@
 SCENARIO("Neuron constructor") {
 
     GIVEN("Rectangular neuron - active") {
-        Neuron n(100, 100, 99, Log, Rect);
+        Neuron n(100, 100, 1, 99, Log, Rect);
 
         REQUIRE( n.get_internalstate()==99 );
         REQUIRE( n.get_state()== 1);
         REQUIRE( n.get_interaction() == 1. );
         REQUIRE( n.activation(0.) == 0.5 );
+        REQUIRE( n.activation(0.- std::log(100)) == Approx(0.0099009900990098976).epsilon(0.000001) );
         REQUIRE( n.activation(1.) == Approx(0.7310585786).epsilon(0.000001));
         REQUIRE( n.activation(-1.) == Approx(0.2689414214).epsilon(0.000001));
 
@@ -35,7 +36,7 @@ SCENARIO("Neuron constructor") {
     }
 
     GIVEN("Exponential neuron - active") {
-        Neuron n(100, 100, 99, Log, Exp);
+        Neuron n(100, 100, 1, 99, Log, Exp);
 
         REQUIRE( n.get_internalstate()==99 );
         REQUIRE( n.get_state()== 1);
@@ -44,7 +45,7 @@ SCENARIO("Neuron constructor") {
         REQUIRE( n.activation(0.) == 0.5 );
         REQUIRE( n.activation(1.) == Approx(0.7310585786).epsilon(0.000001));
         REQUIRE( n.activation(-1.) == Approx(0.2689414214).epsilon(0.000001));
-        
+
         WHEN("State is updated - impossible to spike") {
             n.update_state(-50.);
             REQUIRE( n.get_internalstate() == 100 );
@@ -67,7 +68,7 @@ SCENARIO("Neuron constructor") {
     }
 
     GIVEN("Tail neuron - active") {
-        Neuron n(100, 100, 99, Log, Tail);
+        Neuron n(100, 100, 1, 99, Log, Tail);
 
         REQUIRE( n.get_internalstate()==99 );
         REQUIRE( n.get_state()== 1);
@@ -76,7 +77,7 @@ SCENARIO("Neuron constructor") {
         REQUIRE( n.activation(0.) == 0.5 );
         REQUIRE( n.activation(1.) == Approx(0.7310585786).epsilon(0.000001));
         REQUIRE( n.activation(-1.) == Approx(0.2689414214).epsilon(0.000001));
-        
+
         WHEN("State is updated - impossible to spike") {
             n.update_state(-50.);
             REQUIRE( n.get_internalstate() == 100 );
@@ -99,7 +100,7 @@ SCENARIO("Neuron constructor") {
     }
 
     GIVEN("Cuto neuron - active") {
-        Neuron n(100, 100, 99, Log, Cuto);
+        Neuron n(100, 100, 1, 99, Log, Cuto);
 
         REQUIRE( n.get_internalstate()==99 );
         REQUIRE( n.get_state()== 1);
@@ -108,7 +109,7 @@ SCENARIO("Neuron constructor") {
         REQUIRE( n.activation(0.) == 0.5 );
         REQUIRE( n.activation(1.) == Approx(0.7310585786).epsilon(0.000001));
         REQUIRE( n.activation(-1.) == Approx(0.2689414214).epsilon(0.000001));
-        
+
         WHEN("State is updated - impossible to spike") {
             n.update_state(-50.);
             REQUIRE( n.get_internalstate() == 100 );
@@ -131,7 +132,7 @@ SCENARIO("Neuron constructor") {
     }
 
         GIVEN("Rectangular erf neuron - active") {
-        Neuron n(100, 100, 99, Erf, Rect);
+        Neuron n(100, 100, 1, 99, Erf, Rect);
 
         REQUIRE( n.get_internalstate()==99 );
         REQUIRE( n.get_state()== 1);
@@ -159,7 +160,7 @@ SCENARIO("Neuron constructor") {
     }
 
     GIVEN("Exponential erf neuron - active") {
-        Neuron n(100, 100, 99, Erf, Exp);
+        Neuron n(100, 100, 1, 99, Erf, Exp);
 
         REQUIRE( n.get_internalstate()==99 );
         REQUIRE( n.get_state()== 1);
@@ -168,7 +169,7 @@ SCENARIO("Neuron constructor") {
         REQUIRE( n.activation(0.) == 0.5 );
         REQUIRE( n.activation(1.) == Approx(0.7219864828).epsilon(0.000001));
         REQUIRE( n.activation(-1.) == Approx(0.2780135172).epsilon(0.000001));
-        
+
         WHEN("State is updated - impossible to spike") {
             n.update_state(-50.);
             REQUIRE( n.get_internalstate() == 100 );
@@ -191,7 +192,7 @@ SCENARIO("Neuron constructor") {
     }
 
     GIVEN("Tail erf neuron - active") {
-        Neuron n(100, 100, 99, Erf, Tail);
+        Neuron n(100, 100, 1, 99, Erf, Tail);
 
         REQUIRE( n.get_internalstate()==99 );
         REQUIRE( n.get_state()== 1);
@@ -200,7 +201,7 @@ SCENARIO("Neuron constructor") {
         REQUIRE( n.activation(0.) == 0.5 );
         REQUIRE( n.activation(1.) == Approx(0.7219864828).epsilon(0.000001));
         REQUIRE( n.activation(-1.) == Approx(0.2780135172).epsilon(0.000001));
-        
+
         WHEN("State is updated - impossible to spike") {
             n.update_state(-50.);
             REQUIRE( n.get_internalstate() == 100 );
@@ -223,7 +224,7 @@ SCENARIO("Neuron constructor") {
     }
 
     GIVEN("Cuto erf neuron - active") {
-        Neuron n(100, 100, 99, Erf, Cuto);
+        Neuron n(100, 100, 1, 99, Erf, Cuto);
 
         REQUIRE( n.get_internalstate()==99 );
         REQUIRE( n.get_state()== 1);

@@ -61,6 +61,7 @@ int main(int argc, char const *argv[])
     unsigned int nupdates = configNode["nupdates"].as<int>();
     int tauref = configNode["tauref"].as<int>();
     int tausyn = configNode["tausyn"].as<int>();
+    int delay = configNode["delay"].as<int>();
     double Tmin = configNode["Tmin"].as<double>();
     double Tmax = configNode["Tmax"].as<double>();
     double T = (Tmax-Tmin)/nupdates + Tmin;
@@ -72,6 +73,8 @@ int main(int argc, char const *argv[])
     // create corresponding network
     TInteraction neuron_interaction_type;
     TActivation neuron_activation_type;
+    /// TODO: Replace neuron_type with interaction_type and
+    ///         activation_type and include stepfunction
     if (neuron_type=="log_rect") {
         neuron_interaction_type = Rect;
         neuron_activation_type = Log;
@@ -138,10 +141,10 @@ int main(int argc, char const *argv[])
         << network_output_scheme_type << network_update_scheme_type
         << neuron_interaction_type << neuron_activation_type << std::endl;
 
-    Network net(bias, weights, initialstate, tauref, tausyn,
+    Network net(bias, weights, initialstate, tauref, tausyn, delay,
         network_output_scheme_type,
-        network_update_scheme_type, 
-        neuron_activation_type, 
+        network_update_scheme_type,
+        neuron_activation_type,
         neuron_interaction_type);
 
     // and output initial configuration
@@ -165,7 +168,7 @@ int main(int argc, char const *argv[])
     if (b_remove_config_file){
         std::remove(argv[1]);
     }
-    
+
     return 0;
 }
 

@@ -2,11 +2,12 @@
 #define NEURON_H
 
 #include <random>
+#include "fixed_queue.h"
 
 extern std::mt19937_64 mt_random;
 extern std::uniform_real_distribution<double> random_double;
 
-enum TActivation { Log, Erf };
+enum TActivation { Log, Erf, Step };
 enum TInteraction { Rect, Exp, Tail, Cuto };
 
 
@@ -19,11 +20,12 @@ private:
 protected:
     const int tauref;
     const int tausyn;
+    const int delay;
     int state;
-    double interaction;
+    FixedQueue interactions;
 
 public:
-    Neuron(const int _tauref, const int _tausyn, const int _state, 
+    Neuron(const int _tauref, const int _tausyn, const int _delay, const int _state,
         const TActivation _activation_type, const TInteraction _interaction_type);
     ~Neuron() {};
 

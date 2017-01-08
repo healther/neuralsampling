@@ -13,12 +13,13 @@ SCENARIO("Network constructor") {
         std::vector<int> initialstate {0, 4, 8};
         int tauref = 5;
         int tausyn = 5;
+        int delay = 1;
         TActivation act = Log;
         TInteraction inter = Rect;
         TUpdateScheme updscheme = InOrder;
         TOutputScheme outscheme = MeanActivityOutput;
 
-        Network n(biases, weights, initialstate, tauref, tausyn, outscheme, updscheme, act, inter);
+        Network n(biases, weights, initialstate, tauref, tausyn, delay, outscheme, updscheme, act, inter);
         REQUIRE( n.states[0] == 1 );
         REQUIRE( n.states[1] == 1 );
         REQUIRE( n.states[2] == 0 );

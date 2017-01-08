@@ -7,15 +7,20 @@
 
 
 
-Neuron::Neuron(const int _tauref, const int _tausyn, const int _state,
+Neuron::Neuron(const int _tauref, const int _tausyn, const int _delay, const int _state,
     const TActivation _activation_type, const TInteraction _interaction_type):
     tauref(_tauref),
     tausyn(_tausyn),
+    delay(_delay),
     activation_type(_activation_type),
-    interaction_type(_interaction_type)
+    interaction_type(_interaction_type),
+    interactions(_delay, 0.)
 {
     state = _state;
-    update_interaction();
+    for (int i = 0; i < delay; ++i)
+    {
+        update_interaction();
+    }
 }
 
 
@@ -41,9 +46,9 @@ void Neuron::update_state(const double pot)
 void Neuron::update_interaction()
 {
     double relstate = (double)state/(double)tauref;
-    interaction = (relstate < 1.);
+    double interaction = (relstate < 1.);
     if (interaction_type==Exp) {
-        interaction = (double)tauref/(double)tausyn * std::exp(-relstate)/(1.-std::exp(-(double)tauref/(double)tausyn));        
+        interaction = (double)tauref/(double)tausyn * std::exp(-relstate)/(1.-std::exp(-(double)tauref/(double)tausyn));
     } else if (interaction_type==Rect) {
         interaction = (state < tauref);
     } else if (interaction_type==Cuto) {
@@ -61,14 +66,19 @@ void Neuron::update_interaction()
             interaction = 1.;
         }
     }
+    interactions.add_entry(interaction);
 }
 
 
 
 bool Neuron::spike(const double pot)
 {
-    double r = random_double(mt_random);
-    return activation(pot - std::log(tauref)) > r;
+    if (Step==activation_type) {
+        return pot>0.;
+    } else {
+        double r = random_double(mt_random);
+        return activation(pot - std::log(tauref)) > r;
+    }
 }
 
 bool Neuron::has_spiked()
@@ -92,7 +102,7 @@ int Neuron::get_state()
 
 double Neuron::get_interaction()
 {
-    return interaction;
+    return interactions.return_entry();
 }
 
 double Neuron::activation(const double pot)

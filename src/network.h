@@ -26,22 +26,23 @@ private:
     std::vector<Neuron> neurons;
     int tauref;
     int tausyn;
+    int delay;
     bool boptimized;
 
     void generate_connected_neuron_ids();
 
 
 public:
-    Network(std::vector<double> &_biases, 
-            std::vector<std::vector<double> > &_weights, 
+    Network(std::vector<double> &_biases,
+            std::vector<std::vector<double> > &_weights,
             std::vector<int> &_initialstate,
-            int _tauref, int _tausyn,
+            int _tauref, int _tausyn, int delay,
             TOutputScheme _output_scheme,
             TUpdateScheme _update_scheme,
             TActivation _neuron_activation_type,
             TInteraction _neuron_interaction_type);
     ~Network() {};
-    
+
     std::vector<int> states;
 
     // std::vector<bool> get_state();

@@ -10,10 +10,10 @@
 
 
 
-Network::Network(std::vector<double> &_biases, 
+Network::Network(std::vector<double> &_biases,
             std::vector<std::vector<double> > &_weights,
             std::vector<int> &_initialstate,
-            int _tauref, int _tausyn,
+            int _tauref, int _tausyn, int _delay,
             TOutputScheme _output_scheme,
             TUpdateScheme _update_scheme,
             TActivation _neuron_activation_type,
@@ -28,12 +28,13 @@ Network::Network(std::vector<double> &_biases,
     weights = _weights;
     tauref = _tauref;
     tausyn = _tausyn;
+    delay = _delay;
     neurons.reserve(biases.size());
     states.resize(biases.size());
     for (unsigned int i = 0; i < biases.size(); ++i)
     {
         neurons.push_back(
-            Neuron(tauref, tausyn, _initialstate[i], 
+            Neuron(tauref, tausyn, delay, _initialstate[i],
             neuron_activation_type, neuron_interaction_type)
         );
         states[i] = neurons[i].get_state();
