@@ -132,15 +132,7 @@ bwjobfile_content = """#!/bin/bash
 #MSUB -l nodes={nodes}:ppn={processors_per_node}
 #MSUB -l walltime={walltime}
 
-module load yaml-cpp-0.5.3-gcc-6.2.0-2klkoil
-module load bzip2-1.0.6-gcc-6.2.0-hzvvkma
-module load ncurses-6.0-gcc-6.2.0-q7ibucr
-module load zlib-1.2.8-gcc-6.2.0-sw5a7dc
-module load openssl-1.0.2j-gcc-6.2.0-iuqx65o
-module load readline-6.3-gcc-6.2.0-o2e7g36
-module load sqlite-3.8.5-gcc-6.2.0-kd7qe6o
-module load python-2.7.12-gcc-6.2.0-csrr54f
-module load py-pyyaml-3.11-gcc-6.2.0-2kgymdu
+source load_env.sh
 
 echo {job_file}
 python generate/cluster.py bwuni {job_file}.yaml {function_name} {parameterfilename}"""

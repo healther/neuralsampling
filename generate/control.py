@@ -200,7 +200,7 @@ if __name__=="__main__":
         run_experiment(dictionary=d)
     elif len(sys.argv)==3:
         if sys.argv[1]=='run':
-            simulate(folder=sys.argv[2])
+            simulate(folder=sys.argv[2], check_output=False)
     else:
         print("Don't know what to do.")
     print(sys.argv)
