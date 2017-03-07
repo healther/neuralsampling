@@ -4,205 +4,140 @@ Basic workflow:
     ### TODO
 """
 
-### TODO: cleanup imported modules
 import yaml
 import os
 import subprocess
 import sys
-import multiprocessing as mp
 import datetime
 import time
-import numpy as np
 
-import config
-import misc
-import analysis
-import plot
-import cluster
-
-
-def run_experiment(dictionary):
-    """Run the experiment specified in dictionary.
-
-    Dictionary keys:
-        exp_conf:   Configuration for this function,
-           {'write_configs'  : True,
-            'execute_sims'   : True,
-            'run_analysis'   : True,
-            'collect_results': True,}
-        sim_folder_template: string
-        network: ## TODO: specify API for problem description
-           {'problemname' : string, # needs to be available as problem_problemname.py
-            'parameters' : dict}
-        execution:## TODO: specify API for execution environment
-        analysis: ## TODO: specify API for problem analysis
-        collect:  ## TODO: specify API for collect functionality
-        replacements: {key: [values, ...], ...}
-            # TODO: Implement a value = factor * othervalue feature!!!
-            # TODO: Remove _ from parameter names or change connector in dict-flattening!!!
-
-    """
-    ### TODO: Improve documentation
-    ### separate configuration entries
-    print("{}: Starting experiment".format(datetime.datetime.now()))
-
-    replacements = dictionary.pop('replacements', {})
-    sim_folder_template = dictionary.get('sim_folder_template')
-
-    experiment_config = dictionary.pop('experiment_config')
-    write_configs = experiment_config.get('write_configs', False)
-    execute = experiment_config.get('execute_sims', False)
-    run_analysis = experiment_config.get('run_analysis', False)
-    collect_results = experiment_config.get('collect_results', False)
-    plot = experiment_config.get('plot', False)
-
-    sim_parameters = dictionary.pop('sim_parameters', {"target_system": "Local"})
-    ana_parameters = dictionary.pop('ana_parameters', {"target_system": "Local"})
-    col_parameters = dictionary.pop('col_parameters', {"target_system": "Local"})
-
-    ### expand dictionaries
-    ex_dicts = config.expanddict(dictionary, replacements)
-
-    ### do actual work
-    t0 = time.time()
-    if write_configs:
-        folders = _get_folders(ex_dicts, sim_folder_template)
-        _write_configs(ex_dicts, folders)
-    else:
-        folders = _get_folders(ex_dicts, sim_folder_template)
-    elapsed_time = time.time() - t0
-    print("{}: Generated {} simulations in {} seconds.".format(datetime.datetime.now(), len(folders), elapsed_time))
-
-    if execute:
-        _create_binary_if_not_exists()
-        print("{}: execute".format(datetime.datetime.now()))
-        sim_processor = _generate_processor(**sim_parameters)
-        sim_processor.run_jobs(folders, **dictionary['simulate'])
-        if dictionary["wait"]:
-            sim_processor.wait_for_finish()
-            if not sim_processor.ensure_success():
-                print("Not all jobs succeeded.")
-
-    if run_analysis:
-        print("{}: analysis".format(datetime.datetime.now()))
-        ana_processor = _generate_processor(**ana_parameters)
-        ana_processor.run_jobs(folders, **dictionary['analysis'])
-        if dictionary["wait"]:
-            ana_processor.wait_for_finish()
-            if not ana_processor.ensure_success():
-                print("Not all jobs succeeded.")
-
-    if collect_results:
-        print("{}: collect".format(datetime.datetime.now()))
-        if not dictionary['collect'].has_key('parameters'):
-            dictionary['collect']['parameters'] = {'targetfolder': '.',
-                            'targetfile': dictionary['experiment_name']}
-
-        module_name, function_name = dictionary['collect']['function_name'].split('.')
-        parameters = dictionary['collect']['parameters']
-
-        if not parameters.has_key('targetfolder'):
-            parameters['targetfolder'] = '.'
-        if not parameters.has_key('targetfile'):
-            parameters['targetfile'] = dictionary['experiment_name']
-
-        function = getattr(__import__(module_name), function_name)
-        function(folders, **parameters)
-
-
-def _create_binary_if_not_exists():
-    if not os.path.exists('bin/neuralsampler'):
-        print("{} Missing executable, makeing it".format(datetime.datetime.now()))
-        subprocess.call(['make', 'bin'])
-        print("{} Finished make".format(datetime.datetime.now()))
-    else:
-        print("{} Binaray found, continue running".format(datetime.datetime.now()))
-
-
-def _generate_processor(target_system='Local', system_parameters={}):
-    if target_system=='Local':
-        processor = cluster.Local(**system_parameters)
-    elif target_system=='BwUni':
-        processor = cluster.BwUni(**system_parameters)
-    else:
-        raise NotImplementedError("Please implement the cluster you want to use.")
-    return processor
-
-
-def _write_configs(ex_dicts, folders):
-    """Helper function writing the sim.yaml config files."""
-    for ed, folder in zip(ex_dicts, folders):
-        misc.ensure_folder_exists(folder)
-        ed['path'] = folder
-        ed['type'] = 'Simulation'
-        with open(os.path.join(folder, 'sim.yaml'), 'w') as f:
-            yaml.dump(ed, f)
+import utils
 
 
 def _get_folders(ex_dicts, sim_folder_template):
     """Helper function providing the simulation folder from the template."""
     folders = [sim_folder_template.format(**d)
-                    for d in map(misc.flatten_dictionary, ex_dicts)]
+                    for d in map(utils.flatten_dictionary, ex_dicts)]
     return folders
 
 
-def get_function_from_name(function_name):
-    """Return the callable function_name=module.function ."""
-    # TODO: Move to misc
-    m = __import__(function_name.split('.')[0])
-    func = getattr(m, function_name.split('.')[1])
-    return func
+def _write_configs(ex_dicts, folders):
+    """Helper function writing the sim.yaml config files."""
+    for ed, folder in zip(ex_dicts, folders):
+        utils.ensure_exists(folder)
+        ed['path'] = folder
+        with open(os.path.join(folder, 'sim.yaml'), 'w') as f:
+            yaml.dump(ed, f)
 
 
-def dump_runfile(folder):
-    simyaml = yaml.load(open(os.path.join(folder, 'sim.yaml'), 'r'))
-    create_sim_function = get_function_from_name(simyaml['network']['name'])
-    W, b, i = create_sim_function(**simyaml['network']['parameters'])
-    simyaml['weight'] = W
-    simyaml['bias'] = b
-    simyaml['initialstate'] = i
-    simyaml['outfile'] = os.path.join(folder, 'output')
-    yaml.dump(simyaml, open(os.path.join(folder, 'run.yaml'), 'w'))
+def _generate_job(folder, envfile, binary_location, files_to_remove, eta):
+    stub = """
+cd {folder}
+source {envscript}
+{cwd}/control.py expand {folder}
+{binaryLocation} {folder}/run.yaml
+{cwd}/control.py analysis {folder}
 
-
-def simulate(folder, check_output=False):
-    """Execute simulation in folder.
-
-    Expands folder/sim.yaml into folder/run.yaml by calling the
-    sim.yaml[network][name] function with sim.yaml[network][parameters]
-    Which needs to return the network configuration (W,b,i)
-
-    Returns the return value of bin/neuralsampler.
-
-    TODO: make check_output available through BwUni cluster
+rm {files_to_remove}
     """
-    try:
-        if check_output:
-            if os.path.exists(os.path.join(folder, 'output')):
-                return 0
-        dump_runfile(folder)
-        DEVNULL = open(os.devnull, 'wb')
-        ret_value = subprocess.call(['bin/neuralsampler',
-                                    os.path.join(folder, 'run.yaml')],
-                                    stdout=DEVNULL)
-        return ret_value
-    except Exception as e:
-        print("{} found exception {}".format(datetime.datetime.now(), e))
-        return 1
+    content = stub.format(envscript=envfile, cwd=os.path.realpath(__file__),
+                binaryLocation=binary_location, folder=folder,
+                files_to_remove=files_to_remove)
+    with open(folder + os.sep + 'job', 'w') as f:
+        f.write(content)
 
 
-if __name__=="__main__":
-    if len(sys.argv)==1:
+def _submit_job(folder):
+    eta = utils.eta(folder + os.sep + 'sim.yaml')
+    subprocess.call(['jobcontrol', 'a', folder + os.sep + 'job', folder, eta])
+
+
+def _sanity_check(config):
+    if not os.path.exists(config.get['binary_location']):
+        raise OSError(
+            "Executable {} not found".format(config.get['binary_location']))
+    if not os.path.exists(config.get['envfile']):
+        raise OSError(
+            "Environment file {} not found".format(config.get['envfile']))
+
+
+def run_experiment(experimentfile):
+    print("{}: Starting experiment".format(datetime.datetime.now()))
+    dictionary = yaml.load(open(experimentfile, 'r'))
+
+    replacements = dictionary.pop('replacements', {})
+    basedir = dictionary.get('name', 'simulations')
+    sim_folder_template = utils.generate_folder_template(replacements,
+                                                            dictionary,
+                                                            base=basedir)
+
+    experiment_config = dictionary.pop('experiment_config')
+    write_configs = experiment_config.get('write_configs', False)
+    generate_jobs = experiment_config.get('generate_jobs', False)
+    submit_jobs = experiment_config.get('submit_jobs', False)
+    envfile = experiment_config.get('envfile', '')
+    binary_location = experiment_config.get('binary_location', '')
+    files_to_remove = experiment_config.get('filesToRemove', '')
+
+    _sanity_check(experiment_config)
+
+    # expand dictionaries
+    ex_dicts = utils.expanddict(dictionary, replacements)
+
+    # generate skeletons
+    t0 = time.time()
+    folders = _get_folders(ex_dicts, sim_folder_template)
+    if write_configs:
+        _write_configs(ex_dicts, folders)
+    elapsed_time = time.time() - t0
+    print("{}: Generated {} simulations in {} "
+        "seconds.".format(datetime.datetime.now(), len(folders), elapsed_time))
+
+    if generate_jobs:
+        for folder in folders:
+            _generate_job(folder, envfile, binary_location, files_to_remove)
+
+    if submit_jobs:
+        for folder in folders:
+            _submit_job(folder)
+
+
+def expand(folder):
+    simdict = yaml.load(open(os.path.join(folder, 'sim.yaml'), 'r'))
+    rundict = {}
+    rundict['Config'] = simdict['Config']
+
+    create_function = utils.get_function_from_name(
+                                        simdict['problem']['problemFunction'])
+    W, b, i = create_function(**simdict['problem']['parameters'])
+    rundict['weight']       = W
+    rundict['bias']         = b
+    rundict['initialstate'] = i
+    # extend for other input, e.g. external currents, temperature etc.
+    # once implemented in neuralsampler
+    rundict['outfile'] = os.path.join(folder, 'output')
+
+    yaml.dump(rundict, open(os.path.join(folder, 'run.yaml'), 'w'))
+
+
+def analysis(folder):
+    simdict = yaml.load(open(os.path.join(folder, 'sim.yaml'), 'r'))
+    analysis_function = utils.get_function_from_name(
+                                    simdict['analysis']['analysisFunction'])
+    analysis_function(**simdict['analysis']['parameters'])
+
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
         import doctest
         print(doctest.testmod())
-    elif len(sys.argv)==2:
-        d = yaml.load(open(sys.argv[1], 'r'))
-        run_experiment(dictionary=d)
-    elif len(sys.argv)==3:
-        if sys.argv[1]=='run':
-            simulate(folder=sys.argv[2], check_output=False)
+    elif len(sys.argv) == 2:
+        run_experiment(experimentfile=sys.argv[1])
+    elif len(sys.argv) == 3:
+        if sys.argv[1] == 'expand':
+            expand(folder=sys.argv[2])
+        if sys.argv[1] == 'analysis':
+            analysis(folder=sys.argv[2])
     else:
         print("Don't know what to do.")
     print(sys.argv)
-
-
