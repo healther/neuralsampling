@@ -1,67 +1,86 @@
 """This module implements the Ising model for neural networks."""
 from __future__ import division
 
+import os
+import yaml
 
 import numpy as np
-import yaml
-import sys
+
+
+TIMECONSTANT = 20E-8
+# helper functions
 
 
 def _biases_from_weights(weights, biasfactor=1., biasoffset=0.):
-    return -biasfactor*np.sum(weights, axis=-1)/2. + biasoffset
+    return -biasfactor * np.sum(weights, axis=-1) / 2. + biasoffset
 
 
-def create_NN(linearsize=10, dimension=2, weight=1., ic_mean=0.5, tau=100, ic_rseed=42424242):
-    """Return the nearest neighbor connected weight matrix.
-
-    Input:
-        linearsize:     int
-        dimension:      int
-        weight:         float
-
-    >>> create_NN(3, 1, 1.)
-    ([[0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]], [-1.0, -1.0, -1.0], [12, 80, 19])
-    >>> create_NN(3, 2, 1.)
-    ([[0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0], [1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0], [1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0], [0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0], [0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0], [0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0], [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0]], [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0], [12, 80, 19, 128, 11, 56, 159, 38, 164])
-    """
+def _create_nn_unit_weights_biases(linearsize=10, dimension=2):
     weights = np.zeros((linearsize**dimension, linearsize**dimension))
     for nid in range(linearsize**dimension):
-        connlist = [(nid+o) % (linearsize**(d+1)) +
-                    int(nid/linearsize**(d+1))*linearsize**(d+1)
+        connlist = [(nid + o) % (linearsize**(d + 1)) +
+                    int(nid / linearsize**(d + 1)) * linearsize**(d + 1)
                     for d in range(dimension)
                     for o in [linearsize**d, -linearsize**d]
                     ]
-        weights[nid, connlist] = weight
+        weights[nid, connlist] = 1.
     biases = _biases_from_weights(weights)
-    np.random.seed(ic_rseed)
-    ic_low = 0
-    if ic_mean!=0.:
-        ic_high = tau/ic_mean
-    else:
-        ic_high = tau
-    initial_conditions = np.random.uniform(ic_low, ic_high, len(biases)).astype(int)
-    return weights.tolist(), biases.tolist(), initial_conditions.tolist()
+
+    return weights, biases
 
 
-def create_NN_noisy(linearsize=10, dimension=2, weight=1., ic_mean=0.5, tau=100, ic_rseed=42424242,
-        bias_noise=.1, weight_noise=.1, noise_rseed=42424242):
-    W, b, i = create_NN(linearsize, dimension, weight, ic_mean, tau, ic_rseed)
-    np.random.seed(noise_rseed)
-    W = np.array(W)
-    W *= np.random.normal(loc=1., scale=weight_noise, size=W.shape)
-    b = np.array(b)
-    b *= np.random.normal(loc=1., scale=bias_noise, size=b.shape)
-    return W.tolist(), b.tolist(), i
+# public facing functions
 
 
-def create_NN_biasfactor(linearsize=10, dimension=2, weight=1., ic_mean=0.5, tau=100, ic_rseed=42424242,
-        bias_factor=1.):
-    W, b, i = create_NN(linearsize, dimension, weight, ic_mean, tau, ic_rseed)
-    b = np.array(b)*bias_factor
-    return W, b.tolist(), i
+def create(linearsize, dimension, connection_paramters,
+            bias_parameters, initail_state_parameters):
+    pass
 
 
-if __name__=="__main__":
+def analysis(analysis_parameters):
+    pass
+
+
+def eta(config):
+    linearsize = config['network']['parameters']['linearsize']
+    dimension = config['network']['parameters']['dimension']
+    nupdates = config['Config']['nupdates']
+
+    return str(linearsize**dimension * nupdates * TIMECONSTANT)
+
+
+def create_nn_singleinitial(linearsize, dimension, weight, meanactivity,
+            zerostatetau, onestatetau, rseed,
+            weightnoise=0., biasnoise=0., biasfactor=1., biasoffset=0.):
+    np.random.seed(rseed)
+
+    W, b = _create_nn_unit_weights_biases(linearsize=linearsize,
+                                            dimension=dimension)
+    states = np.random.random(size=linearsize**dimension) < meanactivity
+    states = states.astype(int)
+    states[states == 1] = onestatetau
+    states[states == 0] = zerostatetau
+
+    if weightnoise != 0.:
+        W *= np.random.normal(loc=1., scale=biasnoise, size=W.shape)
+    if biasnoise != 0.:
+        b *= np.random.normal(loc=1., scale=biasnoise, size=b.shape)
+    b *= biasfactor
+    b += biasoffset
+
+    return W.tolist(), b.tolist(), states.tolist()
+
+
+def analysis_mean(outfile):
+    with open(outfile, 'r') as f:
+        activities = [int(line) for line in f]
+    mean, std = float(np.mean(activities)), float(np.std(activities))
+    nsamples = len(activities)
+
+    with open(os.path.join(os.path.realpath(outfile)[0], 'output'), 'w') as f:
+        f.write(yaml.dump({'nsamples': nsamples, 'mean': mean, 'std': std}))
+
+
+if __name__ == "__main__":
     import doctest
     print(doctest.testmod())
-

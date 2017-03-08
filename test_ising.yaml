@@ -1,77 +1,41 @@
-experiment_config:
-  write_configs: True
-  execute_sims: True
-  run_analysis: True
-  collect_results: True
-  plot: False
-sim_parameters:
-  target_system: BwUni
-  system_parameters:
-    n_sims_per_job: 480
-    nodes: 1
-    processors_per_node: 8
-    walltime: '06:00:00'
-    max_queue_size: 40
-    generate_folder: 'tmp'
-    wait_time: 120.
-    basejobname: sim_ising
-ana_parameters:
-  target_system: BwUni
-  system_parameters:
-    n_sims_per_job: 480
-    nodes: 1
-    processors_per_node: 8
-    walltime: '12:00:00'
-    max_queue_size: 40
-    generate_folder: 'tmp'
-    wait_time: 180.
-    basejobname: ana_ising
-col_parameters:
-  target_system: Local
-  system_parameters:
-    n_cpus: 1
-sim_folder_template:
-  simulation/ising/{Config_neuron_type}_{Config_network_update_scheme}_{Config_tauref}_{network_parameters_weight}_{network_parameters_ic_mean}_{network_parameters_ic_rseed}_{Config_random_seed}
+experimentConfig:
+  writeConfigs: True
+  generateJobs: True
+  submitJobs: True
+  executeJobs: True
+  binaryLocation: /scratch/wv385/Documents/git/neuralsampling/bin/neuralsampler
+  envfile: /scratch/wv385/Documents/git/neuralsampling/load_env.sh
+  filesToRemove:
+    - run.yaml
 Config:
   Tmax: 1.
   Tmin: 1.
-  neuron_type: neuron_type
+  neuronType: log
+  synapseType: synapseType
   nupdates: 1000000
-  random_seed: rseed_update
-  random_skip: 1000000
-  tauref: tau
-  tausyn: tau
-  output_scheme: MeanActivity
-  network_update_scheme: update_scheme
-  remove_config_file: True
+  randomSeed: 42434343
+  randomSkip: 1000000
+  tauref: 100
+  tausyn: 100
+  outputScheme: MeanActivity
+  networkUpdateScheme: InOrder
+  removeConfigFile: False
 network:
-  name: problem_ising.create_NN
+  etaFunction: ising.eta
+  problemName: ising.create_nn_singleinitial
   parameters:
     linearsize: 40
     dimension: 2
-    weight: w
-    ic_mean: i_activity
-    tau: tau
-    ic_rseed: ic_seed
-simulate:
-  function_name: control.simulate
-analysis:
-  function_name: analysis.write_timeaverage
-  parameters:
-    outputtype: mean
-    skip_header: 3
-    max_rows: 1000000
-collect:
-  function_name: collect.singlefile
-  parameters:
-    targetfolder: collected
+    weight: 1.5
+    meanactivity: .5
+    zerostatetau: 101
+    onestatetau: 20
+    rseed: 42424242
+    weightnoise: 0.
+    biasnoise: 0.
+    biasfactor: 1.
+    biasoffset: 0.
+experimentName: TestSampling001
+
 replacements:
-  neuron_type: [log_rect, log_exp, log_tail, log_cuto]
-  rseed_update: [12121212, 12121213, 12121214, 12121215, 12121216]
-  tau: [1, 3, 10, 30, 100, 300, 1000]
-  update_scheme: [InOrder, BatchRandom, Random]
-  w: [0.1, 0.8, 1.4, 1., 1.6, 1.7, 1.75, 1.8, 1.9, 2.5]
-  i_activity: [0.1, .4, .45, .5, .55, .6, .9]
-  ic_seed: [32323232, 32323233, 32323234, 32323235, 32323236, 32323237, 32323238]
-experiment_name: TestSampling001
-wait: True
+  synapseType: [rect, exp, tail, cuto]
