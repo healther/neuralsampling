@@ -43,15 +43,16 @@ def _generate_job(folder, envfile, binary_location, files_to_remove):
     stub = """
 cd {folder}
 source {envscript}
-{cwd}/control.py expand {folder}
+python {cwd}/control.py expand {folder}
 {binaryLocation} {folder}/run.yaml
-{cwd}/control.py analysis {folder}
+python {cwd}/control.py analysis {folder}
 
 rm {files_to_remove}
     """
-    content = stub.format(envscript=envfile, cwd=os.path.realpath(__file__),
+    content = stub.format(envscript=envfile,
+                cwd=os.path.split(os.path.realpath(__file__))[0],
                 binaryLocation=binary_location, folder=os.path.abspath(folder),
-                files_to_remove=files_to_remove)
+                files_to_remove=" ".join(files_to_remove))
     with open(folder + os.sep + 'job', 'w') as f:
         f.write(content)
 
@@ -72,12 +73,12 @@ def _execute_jobs():
 
 
 def _sanity_check(config):
-    if not os.path.exists(config.get('binary_location')):
-        raise OSError(
-            "Executable {} not found".format(config.get('binary_location')))
-    if not os.path.exists(config.get('envfile')):
-        raise OSError(
-            "Environment file {} not found".format(config.get('envfile')))
+    binaryLocation = config.get('binaryLocation', 'somenonexistingfile')
+    envfileLocation = config.get('envfileLocation', 'somenonexistingfile')
+    if not os.path.exists(binaryLocation):
+        raise OSError("Executable {} not found".format(binaryLocation))
+    if not os.path.exists(envfileLocation):
+        raise OSError("Environment file {} not found".format(envfileLocation))
 
 
 def run_experiment(experimentfile):
@@ -92,7 +93,7 @@ def run_experiment(experimentfile):
     generate_jobs = experiment_config.get('generateJobs', False)
     submit_jobs = experiment_config.get('submitJobs', False)
     execute_jobs = experiment_config.get('executeJobs', False)
-    envfile = experiment_config.get('envfile', '')
+    envfile = experiment_config.get('envfileLocation', '')
     binary_location = experiment_config.get('binaryLocation', '')
     files_to_remove = experiment_config.get('filesToRemove', '')
 
@@ -131,8 +132,8 @@ def expand(folder):
     rundict['Config'] = simdict['Config']
 
     create_function = utils.get_function_from_name(
-                                        simdict['problem']['problemFunction'])
-    W, b, i = create_function(**simdict['problem']['parameters'])
+                                        simdict['network']['problemName'])
+    W, b, i = create_function(**simdict['network']['parameters'])
     rundict['weight']       = W
     rundict['bias']         = b
     rundict['initialstate'] = i

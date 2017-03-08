@@ -1,10 +1,10 @@
 experimentConfig:
   writeConfigs: True
   generateJobs: True
-  submitJobs: True
-  executeJobs: True
-  binaryLocation: /scratch/wv385/Documents/git/neuralsampling/bin/neuralsampler
-  envfile: /scratch/wv385/Documents/git/neuralsampling/load_env.sh
+  submitJobs: False
+  executeJobs: False
+  binaryLocation: /home/hd/hd_hd/hd_wv385/git/neuralsampling/bin/neuralsampler
+  envfileLocation: /home/hd/hd_hd/hd_wv385/git/neuralsampling/load_env.sh
   filesToRemove:
     - run.yaml
 Config:
@@ -17,6 +17,7 @@ Config:
   randomSkip: 1000000
   tauref: 100
   tausyn: 100
+  delay: 1
   outputScheme: MeanActivity
   networkUpdateScheme: InOrder
   removeConfigFile: False
@@ -35,6 +36,10 @@ network:
     biasnoise: 0.
     biasfactor: 1.
     biasoffset: 0.
+analysis:
+  analysisFunction: ising.analysis
+  parameters:
+    blub: nothinguseful
 experimentName: TestSampling001
 
 replacements:

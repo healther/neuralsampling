@@ -75,20 +75,20 @@ int main(int argc, char const *argv[])
     TInteraction neuron_interaction_type;
     TActivation neuron_activation_type;
     /// TODO: include stepfunction
-    if (neuronType=="log") {
+    if (neuron_type=="log") {
         neuron_activation_type = Log;
-    } else if (neuronType=="erf") {
+    } else if (neuron_type=="erf") {
         neuron_activation_type = Erf;
     } else {
         return -1;
     }
-    if (synapseType=="rect") {
+    if (synapse_type=="rect") {
         neuron_interaction_type = Rect;
-    } else if (synapseType=="exp") {
+    } else if (synapse_type=="exp") {
         neuron_interaction_type = Exp;
-    } else if (synapseType=="cuto") {
+    } else if (synapse_type=="cuto") {
         neuron_interaction_type = Cuto;
-    } else if (synapseType=="tail") {
+    } else if (synapse_type=="tail") {
         neuron_interaction_type = Tail;
     } else  {
         return -1;

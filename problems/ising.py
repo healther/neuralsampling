@@ -37,7 +37,7 @@ def create(linearsize, dimension, connection_paramters,
     pass
 
 
-def analysis(analysis_parameters):
+def analysis(**analysis_parameters):
     pass
 
 

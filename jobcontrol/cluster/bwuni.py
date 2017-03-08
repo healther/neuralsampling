@@ -39,7 +39,8 @@ def submit_job(config, tasklistfile):
     eta = config['maxhours']
     jobcontrolfolder = utils.get_parentdirectory(__file__)
 
-    content = stub.format(ncpus=ncpus, eta=eta, tasklistfile=tasklistfile,
+    content = stub.format(ncpus=ncpus, eta=eta,
+                            tasklistfile=tasklistfile,
                             jobcontrolfolder=jobcontrolfolder)
     with open(jobcontrol.jobtasklists + '.moab', 'w') as f:
         f.write(content)
