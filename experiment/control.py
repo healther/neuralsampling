@@ -6,12 +6,21 @@ Basic workflow:
 
 import yaml
 import os
+import inspect
 import subprocess
 import sys
 import datetime
 import time
 
 import utils
+
+currentdir = os.path.dirname(os.path.abspath(
+                                inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+os.environ['JOBCONTROLEXE'] = os.path.join(
+                        parentdir,
+                        "jobcontrol",
+                        "jobcontrol.py")
 
 
 def _get_folders(ex_dicts, sim_folder_template):
@@ -24,13 +33,13 @@ def _get_folders(ex_dicts, sim_folder_template):
 def _write_configs(ex_dicts, folders):
     """Helper function writing the sim.yaml config files."""
     for ed, folder in zip(ex_dicts, folders):
-        utils.ensure_exists(folder)
+        utils.ensure_exist(folder)
         ed['path'] = folder
         with open(os.path.join(folder, 'sim.yaml'), 'w') as f:
             yaml.dump(ed, f)
 
 
-def _generate_job(folder, envfile, binary_location, files_to_remove, eta):
+def _generate_job(folder, envfile, binary_location, files_to_remove):
     stub = """
 cd {folder}
 source {envscript}
@@ -41,24 +50,34 @@ source {envscript}
 rm {files_to_remove}
     """
     content = stub.format(envscript=envfile, cwd=os.path.realpath(__file__),
-                binaryLocation=binary_location, folder=folder,
+                binaryLocation=binary_location, folder=os.path.abspath(folder),
                 files_to_remove=files_to_remove)
     with open(folder + os.sep + 'job', 'w') as f:
         f.write(content)
 
 
 def _submit_job(folder):
-    eta = utils.eta(folder + os.sep + 'sim.yaml')
-    subprocess.call(['jobcontrol', 'a', folder + os.sep + 'job', folder, eta])
+    sim_config = yaml.load(open(os.path.join(folder, 'sim.yaml'), 'r'))
+    eta_function = utils.get_function_from_name(
+                            sim_config['network']['etaFunction'])
+    eta = eta_function(sim_config)
+    subprocess.call(
+        [os.environ['JOBCONTROLEXE'],
+            'a', os.path.join(folder, 'job'), folder, eta])
+
+
+def _execute_jobs():
+    subprocess.call(
+        [os.environ['JOBCONTROLEXE'], 'e'])
 
 
 def _sanity_check(config):
-    if not os.path.exists(config.get['binary_location']):
+    if not os.path.exists(config.get('binary_location')):
         raise OSError(
-            "Executable {} not found".format(config.get['binary_location']))
-    if not os.path.exists(config.get['envfile']):
+            "Executable {} not found".format(config.get('binary_location')))
+    if not os.path.exists(config.get('envfile')):
         raise OSError(
-            "Environment file {} not found".format(config.get['envfile']))
+            "Environment file {} not found".format(config.get('envfile')))
 
 
 def run_experiment(experimentfile):
@@ -66,18 +85,19 @@ def run_experiment(experimentfile):
     dictionary = yaml.load(open(experimentfile, 'r'))
 
     replacements = dictionary.pop('replacements', {})
-    basedir = dictionary.get('name', 'simulations')
-    sim_folder_template = utils.generate_folder_template(replacements,
-                                                            dictionary,
-                                                            base=basedir)
+    experimentname = dictionary.get('experimentName', '')
 
-    experiment_config = dictionary.pop('experiment_config')
-    write_configs = experiment_config.get('write_configs', False)
-    generate_jobs = experiment_config.get('generate_jobs', False)
-    submit_jobs = experiment_config.get('submit_jobs', False)
+    experiment_config = dictionary.pop('experimentConfig')
+    write_configs = experiment_config.get('writeConfigs', False)
+    generate_jobs = experiment_config.get('generateJobs', False)
+    submit_jobs = experiment_config.get('submitJobs', False)
+    execute_jobs = experiment_config.get('executeJobs', False)
     envfile = experiment_config.get('envfile', '')
-    binary_location = experiment_config.get('binary_location', '')
+    binary_location = experiment_config.get('binaryLocation', '')
     files_to_remove = experiment_config.get('filesToRemove', '')
+
+    sim_folder_template = utils.generate_folder_template(
+                    replacements, dictionary, 'simulations', experimentname)
 
     _sanity_check(experiment_config)
 
@@ -100,6 +120,9 @@ def run_experiment(experimentfile):
     if submit_jobs:
         for folder in folders:
             _submit_job(folder)
+
+    if execute_jobs:
+        _execute_jobs()
 
 
 def expand(folder):

@@ -1,6 +1,7 @@
 import os
 import copy
 import collections
+import imp
 
 
 def find_key_from_identifier(dict_to_expand, identifier):
@@ -94,15 +95,18 @@ def flatten_dictionary(d, parent_key='', sep='_'):
 
 
 def generate_folder_template(replacement_dictionary, expanding_dictonary,
-                                base='simulations'):
+            base='simulations', experimentname=''):
     entries = []
-    for replacement_key in replacement_dictionary.keys():
+    for replacement_id in replacement_dictionary.keys():
         keys = find_key_from_identifier(
-                    flatten_dictionary(expanding_dictonary), replacement_key)
-        entry = '{' + keys[0] + '}'
+                    flatten_dictionary(expanding_dictonary), replacement_id)
+        # keys is a list of lists, i.e. keys[0] contains the list of nested
+        # keys at which we find the replacement_id, due to the flattening,
+        # this key has only length 1.
+        entry = '{' + keys[0][0] + '}'
         entries.append(entry)
 
-    return base + os.sep + "_".join(entries)
+    return os.path.join(base, experimentname, "_".join(entries))
 
 
 def ensure_exist(folder):
@@ -113,10 +117,14 @@ def ensure_exist(folder):
             raise
 
 
-def get_function_from_name(function_name):
-    """Return the callable function_name=module.function ."""
-    m = __import__(function_name.split('.')[0])
-    func = getattr(m, function_name.split('.')[1])
+def get_function_from_name(function_identifier):
+    """Return the callable function_identifier=problem.function ."""
+    problemname, functionname = function_identifier.split('.')
+    directory = os.path.split(os.path.realpath(__file__))[0]
+    parentdirectory = os.path.join(directory, os.pardir)
+    module = imp.load_source('problem',
+                os.path.join(parentdirectory, 'problems', problemname + '.py'))
+    func = getattr(module, functionname)
     return func
 
 
