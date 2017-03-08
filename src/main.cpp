@@ -17,17 +17,17 @@ int main(int argc, char const *argv[])
     YAML::Node configNode = baseNode["Config"];
     YAML::Node biasNode = baseNode["bias"];
     if (!biasNode) {
-        YAML::Node biasFileNode = baseNode["bias_file"];
+        YAML::Node biasFileNode = baseNode["biasFile"];
         biasNode = YAML::LoadFile(biasFileNode.as<std::string>());
     }
     YAML::Node weightNode = baseNode["weight"];
     if (!weightNode) {
-        YAML::Node weightFileNode = baseNode["weight_file"];
+        YAML::Node weightFileNode = baseNode["weightFile"];
         weightNode = YAML::LoadFile(weightFileNode.as<std::string>());
     }
     YAML::Node initialStateNode = baseNode["initialstate"];
     if (!initialStateNode) {
-        YAML::Node initialStateFileNode = baseNode["initialstate_file"];
+        YAML::Node initialStateFileNode = baseNode["initialstateFile"];
         initialStateNode = YAML::LoadFile(initialStateFileNode.as<std::string>());
     }
 
@@ -56,8 +56,8 @@ int main(int argc, char const *argv[])
         initialstate.push_back(it->as<int>());
     }
 
-    int random_seed = configNode["random_seed"].as<int>();
-    int random_skip = configNode["random_skip"].as<int>();
+    int random_seed = configNode["randomSeed"].as<int>();
+    int random_skip = configNode["randomSkip"].as<int>();
     unsigned int nupdates = configNode["nupdates"].as<int>();
     int tauref = configNode["tauref"].as<int>();
     int tausyn = configNode["tausyn"].as<int>();
@@ -65,41 +65,32 @@ int main(int argc, char const *argv[])
     double Tmin = configNode["Tmin"].as<double>();
     double Tmax = configNode["Tmax"].as<double>();
     double T = (Tmax-Tmin)/nupdates + Tmin;
-    std::string neuron_type = configNode["neuron_type"].as<std::string>();
-    std::string network_update_scheme = configNode["network_update_scheme"].as<std::string>();
-    std::string output_scheme = configNode["output_scheme"].as<std::string>();
-    bool b_remove_config_file = configNode["remove_config_file"].as<bool>();
+    std::string neuron_type = configNode["neuronType"].as<std::string>();
+    std::string synapse_type = configNode["synapseType"].as<std::string>();
+    std::string network_update_scheme = configNode["networkUpdateScheme"].as<std::string>();
+    std::string output_scheme = configNode["outputScheme"].as<std::string>();
+    // bool b_remove_config_file = configNode["removeConfigFile"].as<bool>();
 
     // create corresponding network
     TInteraction neuron_interaction_type;
     TActivation neuron_activation_type;
-    /// TODO: Replace neuron_type with interaction_type and
-    ///         activation_type and include stepfunction
-    if (neuron_type=="log_rect") {
-        neuron_interaction_type = Rect;
+    /// TODO: include stepfunction
+    if (neuronType=="log") {
         neuron_activation_type = Log;
-    } else if (neuron_type=="log_exp") {
-        neuron_interaction_type = Exp;
-        neuron_activation_type = Log;
-    } else if (neuron_type=="log_cuto") {
-        neuron_interaction_type = Cuto;
-        neuron_activation_type = Log;
-    } else if (neuron_type=="log_tail") {
-        neuron_interaction_type = Tail;
-        neuron_activation_type = Log;
-    } else if (neuron_type=="erf_rect") {
-        neuron_interaction_type = Rect;
-        neuron_activation_type = Erf;
-    } else if (neuron_type=="erf_exp") {
-        neuron_interaction_type = Exp;
-        neuron_activation_type = Erf;
-    } else if (neuron_type=="erf_cuto") {
-        neuron_interaction_type = Cuto;
-        neuron_activation_type = Erf;
-    } else if (neuron_type=="erf_tail") {
-        neuron_interaction_type = Tail;
+    } else if (neuronType=="erf") {
         neuron_activation_type = Erf;
     } else {
+        return -1;
+    }
+    if (synapseType=="rect") {
+        neuron_interaction_type = Rect;
+    } else if (synapseType=="exp") {
+        neuron_interaction_type = Exp;
+    } else if (synapseType=="cuto") {
+        neuron_interaction_type = Cuto;
+    } else if (synapseType=="tail") {
+        neuron_interaction_type = Tail;
+    } else  {
         return -1;
     }
 
@@ -136,7 +127,7 @@ int main(int argc, char const *argv[])
         buf = std::cout.rdbuf();
     }
     std::ostream output(buf);
-    output << "Remove config file at the end: " << b_remove_config_file << std::endl;
+    // output << "Remove config file at the end: " << b_remove_config_file << std::endl;
     output << "Outputformat Updatescheme Activationtype Interactiontype: "
         << network_output_scheme_type << network_update_scheme_type
         << neuron_interaction_type << neuron_activation_type << std::endl;
@@ -165,9 +156,9 @@ int main(int argc, char const *argv[])
     }
     of.close();
 
-    if (b_remove_config_file){
-        std::remove(argv[1]);
-    }
+    // if (b_remove_config_file){
+    //     std::remove(argv[1]);
+    // }
 
     return 0;
 }
