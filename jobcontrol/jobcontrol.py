@@ -127,10 +127,10 @@ def action_execute(args):
                                 'execute_jobfile.py'), taskfilename])
     elif config['slurmmode'] == 'bwuni':
         for taskfilename in taskfilenames:
-            cluster.bwuni.submit_job(config, taskfilename)
+            cluster.bwuni.submit_task(config, taskfilename)
     elif config['slurmmode'] == 'heidelberg':
         for taskfilename in taskfilenames:
-            cluster.heidelberg.submit_job(config, taskfilename)
+            cluster.heidelberg.submit_task(config, taskfilename)
 
 
 def action_add(args):

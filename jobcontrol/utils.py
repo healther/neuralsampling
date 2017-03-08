@@ -37,3 +37,9 @@ def update_dict(dic, value, key, *keys):
 def touch(fname, times=None):
     with open(fname, 'a'):
         os.utime(fname, times)
+
+
+def get_parentdirectory(filepath):
+    directory = os.path.split(os.path.realpath(filepath))[0]
+    parentdirectory = os.path.join(directory, os.pardir)
+    return os.path.abspath(parentdirectory)
