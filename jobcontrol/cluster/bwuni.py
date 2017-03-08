@@ -2,8 +2,16 @@
 import time
 import subprocess
 
-from .. import jobcontrol
-from .. import utils
+import os
+import sys
+import inspect
+# crazy hack to be able to import modules from the parent...
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+import jobcontrol
+import utils
 
 stub = """#!/bin/bash
 

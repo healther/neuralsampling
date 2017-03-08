@@ -124,7 +124,7 @@ def action_execute(args):
             # print(taskfilename)
             subprocess.call([os.path.join(
                                 os.path.split(os.path.realpath(__file__))[0],
-                                'execute_jobfile.py'), taskfilename])
+                                'execute_taskfile.py'), taskfilename])
     elif config['slurmmode'] == 'bwuni':
         for taskfilename in taskfilenames:
             cluster.bwuni.submit_task(config, taskfilename)
