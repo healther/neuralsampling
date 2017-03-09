@@ -7,7 +7,7 @@ import yaml
 import numpy as np
 
 
-TIMECONSTANT = 20E-8
+TIMECONSTANT = 1000E-9
 # helper functions
 
 
@@ -56,6 +56,9 @@ def create_nn_singleinitial(linearsize, dimension, weight, meanactivity,
 
     W, b = _create_nn_unit_weights_biases(linearsize=linearsize,
                                             dimension=dimension)
+    W *= weight
+    b *= weight
+
     states = np.random.random(size=linearsize**dimension) < meanactivity
     states = states.astype(int)
     states[states == 1] = onestatetau
