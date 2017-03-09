@@ -110,6 +110,12 @@ def run_experiment(experimentfile):
     folders = _get_folders(ex_dicts, sim_folder_template)
     if write_configs:
         _write_configs(ex_dicts, folders)
+    else:
+        missing_folders = []
+        for folder in folders:
+            if not utils.exists(os.path.join(folder, 'analysis_output')):
+                missing_folders.append(folder)
+        folders = missing_folders
     elapsed_time = time.time() - t0
     print("{}: Generated {} simulations in {} "
         "seconds.".format(datetime.datetime.now(), len(folders), elapsed_time))
