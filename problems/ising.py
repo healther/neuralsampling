@@ -11,22 +11,35 @@ TIMECONSTANT = 1000E-9
 # helper functions
 
 
-def _biases_from_weights(weights, biasfactor=1., biasoffset=0.):
-    return -biasfactor * np.sum(weights, axis=-1) / 2. + biasoffset
+def _biases_from_weights(wlist):
+    bias = []
+
+    nid = wlist[0][0]
+    weightsum = 0.
+    for wline in wlist:
+        if nid != wline[0]:
+            bias.append(-weightsum * .5)
+            weightsum = wline[2]
+            nid = wline[0]
+        else:
+            weightsum += wline[2]
+
+    return np.array(bias)
 
 
-def _create_nn_unit_weights_biases(linearsize=10, dimension=2):
-    weights = np.zeros((linearsize**dimension, linearsize**dimension))
+def _create_nn_unit_weights(linearsize=10, dimension=2):
+    # returns list of lists for weights and ndarray for bias
+    weights = []
     for nid in range(linearsize**dimension):
         connlist = [(nid + o) % (linearsize**(d + 1)) +
                     int(nid / linearsize**(d + 1)) * linearsize**(d + 1)
                     for d in range(dimension)
                     for o in [linearsize**d, -linearsize**d]
                     ]
-        weights[nid, connlist] = 1.
-    biases = _biases_from_weights(weights)
+        for connid in connlist:
+            weights.append([nid, connid, 1.])
 
-    return weights, biases
+    return weights
 
 
 # public facing functions
@@ -54,7 +67,7 @@ def create_nn_singleinitial(linearsize, dimension, weight, meanactivity,
             weightnoise=0., biasnoise=0., biasfactor=1., biasoffset=0.):
     np.random.seed(rseed)
 
-    W, b = _create_nn_unit_weights_biases(linearsize=linearsize,
+    wlist = _create_nn_unit_weights(linearsize=linearsize,
                                             dimension=dimension)
     W *= weight
     b *= weight
@@ -64,14 +77,22 @@ def create_nn_singleinitial(linearsize, dimension, weight, meanactivity,
     states[states == 1] = onestatetau
     states[states == 0] = zerostatetau
 
+    # scale weights and noise if applicable
+    weights = weight * np.array([wline[2] for wline in wlist])
     if weightnoise != 0.:
-        W *= np.random.normal(loc=1., scale=biasnoise, size=W.shape)
+        weights *= np.random.normal(loc=1., scale=weightnoise,
+                                        size=weights.shape)
+    for i, w in enumerate(weights):
+        wlist[i][2] = w
+
+    # generate appropriate bias and add noise if applicable
+    b = _biases_from_weights(wlist)
     if biasnoise != 0.:
         b *= np.random.normal(loc=1., scale=biasnoise, size=b.shape)
     b *= biasfactor
     b += biasoffset
 
-    return W.tolist(), b.tolist(), states.tolist()
+    return wlist, b.tolist(), states.tolist()
 
 
 def analysis_mean(outfile):
