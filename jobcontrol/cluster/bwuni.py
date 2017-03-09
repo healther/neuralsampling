@@ -25,16 +25,16 @@ python {jobcontrolfolder}/execute_taskfile.py {tasklistfile}
 """
 
 
-def clean_submitted(submittedfolder):
+def clean_taskfolder(submittedfolder):
     additional_tasks = []
     for f in os.listdir(submittedfolder):
         if 'moab' in f:
             if not f.endswith('moab'):
-                taskname, jobid = f.split('moab')
-                jobinfo = subprocess.call(['checkjob', jobid])
+                taskname, jobid = f.split('.moab')
+                jobinfo = subprocess.check_output(['checkjob', jobid])
                 stateline = [line for line in jobinfo.split('\n')
                                             if 'State: ' in line]
-                if not stateline.endswith('Running'):
+                if not stateline[0].endswith('Running'):
                     additional_tasks.append(taskname)
                 for ff in glob.glob(taskname+'*'):
                     os.remove(ff)
