@@ -47,7 +47,7 @@ python {cwd}/control.py expand {folder}
 {binaryLocation} {folder}/run.yaml
 python {cwd}/control.py analysis {folder}
 
-rm {files_to_remove}
+/usr/bin/rm {files_to_remove}
     """
     content = stub.format(envscript=envfile,
                 cwd=os.path.split(os.path.realpath(__file__))[0],
