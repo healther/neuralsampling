@@ -11,6 +11,7 @@ import sys
 import datetime
 import errno
 import shutil
+import time
 
 import utils
 import cluster.bwuni
@@ -53,6 +54,10 @@ def action_reset(args):
                     filename.endswith('success') or
                     filename.endswith('run')):
                 shutil.move(os.path.join(dirpath, filename), jobstage)
+    for dirpath, dirnames, filenames in os.walk(jobtasklists):
+        print(filenames)
+        for filename in filenames:
+            os.remove(os.path.join(dirpath, filename))
 
 
 def action_config(args):
@@ -72,7 +77,7 @@ def action_config(args):
 
 
 def _package_jobs_to_tasks():
-    cpusecseta = config['ncpus'] * config['maxcpuhours'] * 3600.
+    cpusecseta = int(config['ncpus']) * float(config['maxcpuhours']) * 3600.
     tasks = []
     for dirpath, dirnames, filenames in os.walk(jobstage):
         print(filenames)
@@ -82,10 +87,9 @@ def _package_jobs_to_tasks():
             with open(os.path.join(dirpath, f), 'r') as myfile:
                 eta = float(next(myfile))
 
-            if currenteta + eta < cpusecseta:
-                currenttask.append(f)
-                currenteta += eta
-            else:
+            currenttask.append(f)
+            currenteta += eta
+            if currenteta > cpusecseta:
                 tasks.append((currenttask, currenteta))
                 currenttask = []
                 currenteta = 0.
@@ -109,7 +113,7 @@ def _submit_task(task):
     with open(taskfilename, 'w') as f:
         for jobfile in task[0]:
             shutil.move(os.path.join(jobstage, jobfile), jobsubmmited)
-            # shutil.copy(os.path.join(jobstage, jobfile), jobsubmmited)
+            #  shutil.copy(os.path.join(jobstage, jobfile), jobsubmmited)
             f.write(os.path.join(jobsubmmited,
                                  os.path.split(jobfile)[1]) + '\n')
     return taskfilename
@@ -118,7 +122,14 @@ def _submit_task(task):
 def action_execute(args):
     tasks = _package_jobs_to_tasks()
     taskfilenames = [_submit_task(task) for task in tasks]
+
     if config['slurmmode'] == 'local':
+        for f in os.listdir(jobsubmmited):
+            if not f.endswith('started') and not f.endswith('finished'):
+                # may restart aready running tasks use with care.
+                if not utils.exists(f + 'finished'):
+                    taskfilenames.prepend(os.path.join(jobsubmmited, f))
+                    print("Added {} as an failed task".format(f))
         os.environ['SLURM_NPROCS'] = '1'
         for taskfilename in taskfilenames:
             # print(taskfilename)
@@ -126,6 +137,7 @@ def action_execute(args):
                                 os.path.split(os.path.realpath(__file__))[0],
                                 'execute_taskfile.py'), taskfilename])
     elif config['slurmmode'] == 'bwuni':
+        taskfilenames = cluster.bwuni.clean_submitted(jobsubmmited) + taskfilenames
         for taskfilename in taskfilenames:
             cluster.bwuni.submit_task(config, taskfilename)
     elif config['slurmmode'] == 'heidelberg':

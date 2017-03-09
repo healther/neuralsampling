@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import sys
 import os
 import subprocess
@@ -50,4 +52,6 @@ for jobfile in jobfiles:
         os.remove(jobfile)
 
 os.remove(taskfile)
-print("Readded {} out of {}.".format(readded, len(jobfiles)))
+os.remove(taskfile + 'started')
+os.remove(taskfile + 'finished')
+print("Readded {} out of {} jobs.".format(readded, len(jobfiles)))

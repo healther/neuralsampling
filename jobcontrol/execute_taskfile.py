@@ -25,7 +25,9 @@ def execute_jobfile(jobfile):
 
         time.sleep(.1)
 
-        stdoutfile = open(os.devnull, 'wb')
+        print("".join(content))
+
+        stdoutfile = open(jobfile + 'out', 'w')
         ret_value = subprocess.call(['bash', jobfile + 'run'], cwd=cwd,
                                      stdout=stdoutfile)
         utils.touch(jobfile + '.finish')
@@ -39,6 +41,7 @@ def execute_jobfile(jobfile):
 
 # read file with the task scripts
 taskfile = sys.argv[1]
+utils.touch(taskfile + 'started')
 with open(taskfile, 'r') as f:
     jobfiles = [line.strip() for line in f]
 
@@ -49,5 +52,7 @@ pool.close()
 pool.join()
 # for debug purposes use
 # execute(jobfiles[0])
+utils.touch(taskfile + 'finished')
 
-subprocess.call(['check_taskfile.py', taskfile])
+directory = os.path.split(os.path.realpath(__file__))[0]
+subprocess.call([os.path.join(directory, 'check_taskfile.py'), taskfile])

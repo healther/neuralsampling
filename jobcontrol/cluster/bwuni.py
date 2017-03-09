@@ -2,6 +2,7 @@
 import time
 import subprocess
 
+import glob
 import os
 import sys
 import inspect
@@ -18,14 +19,29 @@ stub = """#!/bin/bash
 #MSUB -l nodes=1:ppn={ncpus}
 #MSUB -l walltime={eta}
 
-{jobcontrolfolder}/execute_taskfile.py {tasklistfile}
-{jobcontrolfolder}/check_taskfile.py {tasklistfile}
+python {jobcontrolfolder}/execute_taskfile.py {tasklistfile}
 
-rm {tasklistfile}
+/usr/bin/rm {tasklistfile}*
 """
 
 
-def submit_job(config, tasklistfile):
+def clean_submitted(submittedfolder):
+    additional_tasks = []
+    for f in os.listdir(submittedfolder):
+        if 'moab' in f:
+            if not f.endswith('moab'):
+                taskname, jobid = f.split('moab')
+                jobinfo = subprocess.call(['checkjob', jobid])
+                stateline = [line for line in jobinfo.split('\n')
+                                            if 'State: ' in line]
+                if not stateline.endswith('Running'):
+                    additional_tasks.append(taskname)
+                for ff in glob.glob(taskname+'*'):
+                    os.remove(ff)
+    return additional_tasks
+
+
+def submit_task(config, tasklistfile):
     """
 
     Input:
@@ -36,16 +52,23 @@ def submit_job(config, tasklistfile):
     """
 
     ncpus = config['ncpus']
-    eta = config['maxhours']
+    eta = int(float(config['maxcpuhours'])*3600.)
     jobcontrolfolder = utils.get_parentdirectory(__file__)
 
     content = stub.format(ncpus=ncpus, eta=eta,
                             tasklistfile=tasklistfile,
                             jobcontrolfolder=jobcontrolfolder)
-    with open(jobcontrol.jobtasklists + '.moab', 'w') as f:
+    moabfile = os.path.join(jobcontrol.jobtasklists, tasklistfile + '.moab')
+    with open(moabfile, 'w') as f:
         f.write(content)
 
     # ensure that the filesystem is up to date
     time.sleep(1.)
 
-    subprocess.call(['msub', jobcontrol.jobtasklists + '.moab'])
+    try:
+        jobid = subprocess.check_output(['msub', moabfile])
+    except subprocess.CalledProcessError as e:
+        jobid = e.output
+        raise
+
+    utils.touch(moabfile + jobid.strip())
