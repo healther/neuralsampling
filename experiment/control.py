@@ -41,13 +41,13 @@ def _write_configs(ex_dicts, folders):
 
 def _generate_job(folder, envfile, binary_location, files_to_remove):
     stub = """
-cd {folder}
-source {envscript}
-python {cwd}/control.py expand {folder}
-{binaryLocation} {folder}/run.yaml
-python {cwd}/control.py analysis {folder}
+cd {folder} &&
+source {envscript} &&
+python {cwd}/control.py expand {folder} &&
+{binaryLocation} {folder}/run.yaml &&
+python {cwd}/control.py analysis {folder} &&
 
-/usr/bin/rm {files_to_remove}
+/usr/bin/rm {files_to_remove} &&
     """
     content = stub.format(envscript=envfile,
                 cwd=os.path.split(os.path.realpath(__file__))[0],
@@ -57,14 +57,17 @@ python {cwd}/control.py analysis {folder}
         f.write(content)
 
 
-def _submit_job(folder):
-    sim_config = yaml.load(open(os.path.join(folder, 'sim.yaml'), 'r'))
-    eta_function = utils.get_function_from_name(
-                            sim_config['network']['etaFunction'])
-    eta = eta_function(sim_config)
-    subprocess.call(
-        [os.environ['JOBCONTROLEXE'],
-            'a', os.path.join(folder, 'job'), folder, eta])
+def _submit_job(folder, eta='None'):
+    if eta is 'None':
+        sim_config = yaml.load(open(os.path.join(folder, 'sim.yaml'), 'r'))
+        eta_function = utils.get_function_from_name(
+                                sim_config['network']['etaFunction'])
+        eta = eta_function(sim_config)
+    eta = str(eta)
+    exe = os.environ['JOBCONTROLEXE']
+    jobfile = os.path.join(folder, 'job')
+    subprocess.Popen([exe, 'a', jobfile, folder, eta])
+    time.sleep(0.001)   # ensure that jobfiles are named differently
 
 
 def _execute_jobs():
@@ -96,9 +99,12 @@ def run_experiment(experimentfile):
     envfile = experiment_config.get('envfileLocation', '')
     binary_location = experiment_config.get('binaryLocation', '')
     files_to_remove = experiment_config.get('filesToRemove', '')
+    eta = experiment_config.get('eta', 'None')
 
     sim_folder_template = utils.generate_folder_template(
                     replacements, dictionary, 'simulations', experimentname)
+
+    dictionary['folderTemplate'] = sim_folder_template
 
     _sanity_check(experiment_config)
 
@@ -108,13 +114,14 @@ def run_experiment(experimentfile):
     # generate skeletons
     t0 = time.time()
     folders = _get_folders(ex_dicts, sim_folder_template)
+
     print("Generating {} simulations".format(len(folders)))
     if write_configs:
         _write_configs(ex_dicts, folders)
     else:
         missing_folders = []
         for folder in folders:
-            if not utils.exists(os.path.join(folder, 'analysis')):
+            if not os.path.exists(os.path.join(folder, 'analysis')):
                 missing_folders.append(folder)
         folders = missing_folders
     elapsed_time = time.time() - t0
@@ -122,15 +129,27 @@ def run_experiment(experimentfile):
         "seconds.".format(datetime.datetime.now(), len(folders), elapsed_time))
 
     if generate_jobs:
+        print("{}: Generating {} jobfiles".format(
+            datetime.datetime.now(), len(folders)))
         for folder in folders:
             _generate_job(folder, envfile, binary_location, files_to_remove)
+        print("{}: Generated {} jobfiles".format(
+            datetime.datetime.now(), len(folders)))
 
     if submit_jobs:
-        for folder in folders:
-            _submit_job(folder)
+        print("{}: Submitting {} jobfiles".format(
+            datetime.datetime.now(), len(folders)))
+        for i, folder in enumerate(folders):
+            if i % 10000 == 0:
+                print("{}: {}/{}".format(datetime.datetime.now(), i, len(folders)))
+            _submit_job(folder, eta=eta)
+        print("{}: Submitted {} jobfiles".format(
+            datetime.datetime.now(), len(folders)))
 
     if execute_jobs:
+        print("{}: Executing jobs".format(datetime.datetime.now()))
         _execute_jobs()
+        print("{}: Executed jobs".format(datetime.datetime.now()))
 
 
 def expand(folder):

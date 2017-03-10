@@ -4,6 +4,18 @@ import collections
 import imp
 
 
+class memorize(dict):
+    def __init__(self, func):
+        self.func = func
+
+    def __call__(self, *args):
+        return self[args]
+
+    def __missing__(self, key):
+        result = self[key] = self.func(*key)
+        return result
+
+
 def find_key_from_identifier(dict_to_expand, identifier):
     """Return a list of keys to all leaves of dict_to_expand whose values are
             identifier.
@@ -117,6 +129,7 @@ def ensure_exist(folder):
             raise
 
 
+@memorize
 def get_function_from_name(function_identifier):
     """Return the callable function_identifier=problem.function ."""
     problemname, functionname = function_identifier.split('.')
