@@ -23,6 +23,8 @@ def _biases_from_weights(wlist):
             nid = wline[0]
         else:
             weightsum += wline[2]
+    else:
+        bias.append(-weightsum * .5)
 
     return np.array(bias)
 
@@ -69,8 +71,6 @@ def create_nn_singleinitial(linearsize, dimension, weight, meanactivity,
 
     wlist = _create_nn_unit_weights(linearsize=linearsize,
                                             dimension=dimension)
-    W *= weight
-    b *= weight
 
     states = np.random.random(size=linearsize**dimension) < meanactivity
     states = states.astype(int)
@@ -83,7 +83,7 @@ def create_nn_singleinitial(linearsize, dimension, weight, meanactivity,
         weights *= np.random.normal(loc=1., scale=weightnoise,
                                         size=weights.shape)
     for i, w in enumerate(weights):
-        wlist[i][2] = w
+        wlist[i][2] = float(w)
 
     # generate appropriate bias and add noise if applicable
     b = _biases_from_weights(wlist)
@@ -95,7 +95,7 @@ def create_nn_singleinitial(linearsize, dimension, weight, meanactivity,
     return wlist, b.tolist(), states.tolist()
 
 
-def analysis_mean(outfile):
+def analysis_mean(outfile, **kwargs):
     with open(outfile, 'r') as f:
         activities = [int(line) for line in f]
     mean, std = float(np.mean(activities)), float(np.std(activities))

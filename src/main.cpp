@@ -43,18 +43,18 @@ int main(int argc, char const *argv[])
     for(YAML::const_iterator it=biasNode.begin(); it!=biasNode.end(); it++) {
         bias.push_back(it->as<double>());
     }
-    std::vector<std::vector<double>> weights(biases.size());
-    for(unsigned int i = 0; i < biases.size(); ++i) {
-        std::vector<double> weight_line(biases.size());
-        for(unsigned int j = 0; j < biases.size(); ++j) {weight_line[j] = 0.;}
+    std::vector<std::vector<double>> weights(bias.size());
+    for(unsigned int i = 0; i < bias.size(); ++i) {
+        std::vector<double> weight_line(bias.size());
+        for(unsigned int j = 0; j < bias.size(); ++j) {weight_line[j] = 0.;}
         weights[i] = weight_line;
     }
     int i, j;
     double w;
     for(YAML::const_iterator it=weightNode.begin(); it!=weightNode.end(); it++) {
-        i = it[0].as<int>();
-        j = it[1].as<int>();
-        w = it[2].as<double>();
+        i = (*it)[0].as<int>();
+        j = (*it)[1].as<int>();
+        w = (*it)[2].as<double>();
         weights[i][j] = w;
     }
     std::vector<int> initialstate;

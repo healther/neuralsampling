@@ -108,6 +108,7 @@ def run_experiment(experimentfile):
     # generate skeletons
     t0 = time.time()
     folders = _get_folders(ex_dicts, sim_folder_template)
+    print("Generating {} simulations".format(len(folders)))
     if write_configs:
         _write_configs(ex_dicts, folders)
     else:
@@ -154,7 +155,8 @@ def analysis(folder):
     simdict = yaml.load(open(os.path.join(folder, 'sim.yaml'), 'r'))
     analysis_function = utils.get_function_from_name(
                                     simdict['analysis']['analysisFunction'])
-    analysis_function(**simdict['analysis']['parameters'])
+    analysis_function(outfile=os.path.join(folder, 'output'),
+            **simdict['analysis']['parameters'])
 
 
 if __name__ == "__main__":
