@@ -67,7 +67,7 @@ def _submit_job(folder, eta='None'):
     exe = os.environ['JOBCONTROLEXE']
     jobfile = os.path.join(folder, 'job')
     subprocess.Popen([exe, 'a', jobfile, folder, eta])
-    time.sleep(0.001)   # ensure that jobfiles are named differently
+    time.sleep(0.005)   # ensure that jobfiles are named differently
 
 
 def _execute_jobs():
@@ -150,6 +150,8 @@ def run_experiment(experimentfile):
         print("{}: Executing jobs".format(datetime.datetime.now()))
         _execute_jobs()
         print("{}: Executed jobs".format(datetime.datetime.now()))
+
+    time.sleep(300.)  # ensure that all subprocesses have finished
 
 
 def expand(folder):
