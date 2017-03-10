@@ -114,7 +114,7 @@ def run_experiment(experimentfile):
     else:
         missing_folders = []
         for folder in folders:
-            if not utils.exists(os.path.join(folder, 'analysis_output')):
+            if not utils.exists(os.path.join(folder, 'analysis')):
                 missing_folders.append(folder)
         folders = missing_folders
     elapsed_time = time.time() - t0

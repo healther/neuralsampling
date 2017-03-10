@@ -80,7 +80,7 @@ def _package_jobs_to_tasks():
     cpusecseta = int(config['ncpus']) * float(config['maxcpuhours']) * 3600.
     tasks = []
     for dirpath, dirnames, filenames in os.walk(jobstage):
-        print(filenames)
+        print("Found {} jobs to execute.".format(len(filenames)))
         currenteta = 0.
         currenttask = []
         for f in filenames:
@@ -97,6 +97,7 @@ def _package_jobs_to_tasks():
         if len(currenttask) > 0:
             tasks.append((currenttask, currenteta))
         break
+    print("Packaged them to {} tasks.".format(len(tasks)))
 
     return tasks
 
