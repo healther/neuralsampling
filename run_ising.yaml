@@ -1,0 +1,51 @@
+experimentConfig:
+  writeConfigs: True
+  generateJobs: True
+  submitJobs: True
+  executeJobs: True
+  binaryLocation: /home/hd/hd_hd/hd_wv385/git/neuralsampling/bin/neuralsampler
+  envfileLocation: /home/hd/hd_hd/hd_wv385/git/neuralsampling/load_env.sh
+  filesToRemove:
+    - run.yaml
+Config:
+  Tmax: 1.
+  Tmin: 1.
+  neuronType: log
+  synapseType: synapseType
+  nupdates: 100000
+  randomSeed: 42434343
+  randomSkip: 1000000
+  tauref: tau
+  tausyn: tau
+  delay: 1
+  outputScheme: MeanActivity
+  networkUpdateScheme: update
+  removeConfigFile: False
+network:
+  etaFunction: ising.eta
+  problemName: ising.create_nn_singleinitial
+  parameters:
+    linearsize: 40
+    dimension: 2
+    weight: w
+    meanactivity: ia
+    zerostatetau: 101
+    onestatetau: tau1
+    rseed: 42424242
+    weightnoise: 0.
+    biasnoise: 0.
+    biasfactor: 1.
+    biasoffset: 0.
+analysis:
+  analysisFunction: ising.analysis_mean
+  parameters:
+    blub: nothinguseful
+experimentName: TestIsing001
+
+replacements:
+  synapseType: [rect, exp, tail, cuto]
+  tau: [1, 3, 10, 30, 100, 300, 1000]
+  update: [InOrder, Random, BatchRandom]
+  w: [1.3, 1.6, 1.65, 1.7, 1.75, 1.8, 1.85, 1.9, 2.2]
+  ia: [.1, .3, .5, .55, .6, .65 .7, .75, .9]
+  tau1: [0, 1, 2, 4, 8, 16, 32, 64, 128, 256]
