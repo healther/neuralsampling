@@ -96,12 +96,14 @@ def create_nn_singleinitial(linearsize, dimension, weight, meanactivity,
 
 
 def analysis_mean(outfile, **kwargs):
+    print(outfile)
     with open(outfile, 'r') as f:
+        next(f)
         activities = [int(line) for line in f]
     mean, std = float(np.mean(activities)), float(np.std(activities))
     nsamples = len(activities)
 
-    with open(os.path.join(os.path.realpath(outfile)[0], 'output'), 'w') as f:
+    with open(os.path.join(os.path.split(outfile)[0], 'analysis'), 'w') as f:
         f.write(yaml.dump({'nsamples': nsamples, 'mean': mean, 'std': std}))
 
 
