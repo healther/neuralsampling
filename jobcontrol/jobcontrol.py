@@ -79,24 +79,28 @@ def action_config(args):
 def _package_jobs_to_tasks():
     cpusecseta = int(config['ncpus']) * float(config['maxcpuhours']) * 3600.
     tasks = []
-    for dirpath, dirnames, filenames in os.walk(jobstage):
-        print("Found {} jobs to execute.".format(len(filenames)))
-        currenteta = 0.
-        currenttask = []
-        for f in filenames:
-            with open(os.path.join(dirpath, f), 'r') as myfile:
-                eta = float(next(myfile))
 
-            currenttask.append(f)
-            currenteta += eta
-            if currenteta > cpusecseta:
-                tasks.append((currenttask, currenteta))
-                currenttask = []
-                currenteta = 0.
+    filenames = os.listdir(jobstage)
+    print("Found {} jobs to execute.".format(len(filenames)))
 
-        if len(currenttask) > 0:
+    currenteta = 0.
+    currenttask = []
+    for i, f in enumerate(filenames):
+        if i % 10000 == 0:
+            print("{} {}/{} done".format(datetime.datetime.now(),
+                                                i, len(filenames)))
+
+        eta = float(f.split('_')[1])
+
+        currenttask.append(f)
+        currenteta += eta
+        if currenteta > cpusecseta:
             tasks.append((currenttask, currenteta))
-        break
+            currenttask = []
+            currenteta = 0.
+
+    if len(currenttask) > 0:
+        tasks.append((currenttask, currenteta))
     print("Packaged them to {} tasks.".format(len(tasks)))
 
     return tasks
@@ -128,7 +132,7 @@ def action_execute(args):
         for f in os.listdir(jobsubmmited):
             if not f.endswith('started') and not f.endswith('finished'):
                 # may restart aready running tasks use with care.
-                if not utils.exists(f + 'finished'):
+                if not os.exists(f + 'finished'):
                     taskfilenames.prepend(os.path.join(jobsubmmited, f))
                     print("Added {} as an failed task".format(f))
         os.environ['SLURM_NPROCS'] = '1'
@@ -163,11 +167,11 @@ def action_add(args):
                             "not exist. Didn't add {}".format(args['script']))
     eta = args['eta']
     try:
-        float(eta)
+        eta = str(int(float(eta) + 1.))
     except ValueError:
         raise ValueError("Eta must be specified in seconds.")
 
-    with open(os.path.join(jobstage, unique_name), 'w') as staged:
+    with open(os.path.join(jobstage, unique_name + '_' + eta), 'w') as staged:
         staged.write(str(eta) + '\n' + cwd + '\n' + data)
 
 

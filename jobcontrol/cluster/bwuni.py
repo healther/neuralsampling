@@ -19,7 +19,7 @@ stub = """#!/bin/bash
 #MSUB -l nodes=1:ppn={ncpus}
 #MSUB -l walltime={eta}
 
-python {jobcontrolfolder}/execute_taskfile.py {tasklistfile}
+python {jobcontrolfolder}/execute_taskfile.py {tasklistfile} &&
 
 /usr/bin/rm {tasklistfile}*
 """
