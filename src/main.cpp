@@ -32,6 +32,7 @@ int main(int argc, char const *argv[])
         YAML::Node initialStateFileNode = baseNode["initialstateFile"];
         initialStateNode = YAML::LoadFile(initialStateFileNode.as<std::string>());
     }
+    YAML::Node temperatureNode = baseNode["temperature"];
 
     if (!biasNode || !weightNode || !initialStateNode || !temperatureNode) {
         std::cout << "Corrupted configuration file" << std::endl;
@@ -73,7 +74,7 @@ int main(int argc, char const *argv[])
     if (temperature_type=="Linear") {
         ttype = Linear;
     } else if (temperature_type=="Const") {
-        ttype = Constant;
+        ttype = Const;
     } else {
         std::cout << "Invalid temperature type. Aborting" << std::endl;
     }

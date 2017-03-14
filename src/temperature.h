@@ -28,7 +28,7 @@ private:
 
 
 public:
-    Temperature(YAML::Node temperatureNode);
+    Temperature(ChangeType type, YAML::Node temperatureNode);
     ~Temperature() {};
 
     double get_temperature(int nupdate);

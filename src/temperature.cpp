@@ -9,7 +9,7 @@
 
 
 Temperature::Temperature(ChangeType type, YAML::Node temperatureParameters):
-    change_type(type),
+    change_type(type)
 {
     YAML::Node temperatureTimeNode = temperatureParameters["times"];
     for(YAML::const_iterator it=temperatureTimeNode.begin(); it!=temperatureTimeNode.end(); it++) {
@@ -21,13 +21,12 @@ Temperature::Temperature(ChangeType type, YAML::Node temperatureParameters):
     }
 
     currentposition = 0;
-    update_temperature(currentposition);
+    currenttemperature = 1.;
 }
 
 
 double Temperature::get_temperature(int nupdate) {
-
-    if (change_type == Constant) {
+    if (change_type == Const) {
         if (nupdate >= times[currentposition+1]) {
             currentposition++;
             currenttemperature = values[currentposition];
@@ -46,9 +45,3 @@ double Temperature::get_temperature(int nupdate) {
     }
     return currenttemperature;
 }
-
-
-void Temperature::update_temperature(int nupdate) {
-
-}
-
