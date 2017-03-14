@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import collections
+
 
 def flatten_dictionary(d, parent_key='', sep='_'):
     """Return a flat dictionary with concatenated keys for a nested dictionary d.
