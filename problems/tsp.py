@@ -8,88 +8,56 @@ import itertools
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-import analysis
-import misc
+import utils
 
 
-### input/output functions
-def readtsp(filename):
+# misc functions
+
+# could be extended to different file formats...
+def _readtsp(filename):
     """Return the distance matrix in filename."""
     d = np.loadtxt(filename)
     return d
 
 
-### misc functions
-def double_index_to_single(x, i, n_cities):
-    """Transform double index (city, position) in single index.
 
-    >>> double_index_to_single(0, 0, 5)
-    0
-    >>> double_index_to_single(1, 0, 5)
-    5
-    >>> double_index_to_single(1, 1, 5)
-    6
-    >>> double_index_to_single(6, 1, 4)
-    9
-    >>> double_index_to_single(6, 7, 5)
-    7
+
+
+def create_tsp(tspfilename, temporal, spatial, number, data, start11=False):
     """
-    return ( (x%n_cities) *n_cities + (i%n_cities) )
 
-
-def single_index_to_double(n, n_cities):
-    """Transform single index i to double index (city, position).
-
-    >>> single_index_to_double(7, 5)
-    (1, 2)
-    >>> single_index_to_double(17, 4)
-    (0, 1)
+        temporal: each city at exactly one position
+        spatial:  at each position exactly one city
+        number:   in total n cities in route
+        data:     distance weights
+        start11:  whether city 1 should be the starting point
     """
-    return int(n/n_cities) % n_cities, n%n_cities
 
+    distances = _readtsp(tspfilename)
+    # weights = np.zeros(len(distances)**2, len(distances)**2)
+    weightlist = []
+    for city1 in range(len(distances)):
+        for position1 in range(len(distances)):
+            n1 = utils.double_index_to_single(city1, position1)
+            for city2 in range(len(distances)):
+                for position2 in range(len(distances)):
+                    n2 = utils.double_index_to_single(city2, position2)
+                    if city1 == city2:
+                        if position1 != position2:
+                            weightlist.append([n1, n2, spatial])
+                        else:
+                            continue  ## TODO: Check
+                    else:
+                        if position1 == position2:
+                            weightlist.append([n1, n2, temporal])
+                        elif abs(position1 - position2) == 1:
+                            weightlist.append([n1, n2,
+                                data * distances[city1, city2]])
 
-def row_connections(i,j,x,y):
-    """Return True if the entry penalizes multiple positions of a city in a route.
+    # TODO: Implement the target activity
 
-    Expects all coordinates to be 0<= {i,j,x,y} <n_cities
+    return weightlist
 
-    >>> row_connections(0,0,0,0)
-    0
-    >>> row_connections(0,0,0,1)
-    0
-    >>> row_connections(0,1,0,1)
-    0
-    >>> row_connections(0,1,0,0)
-    1
-    >>> row_connections(2,1,0,0)
-    1
-    """
-    return (x==y)*(1-(i==j))
-
-
-def column_connections(i,j,x,y):
-    """Return True if the entry penalizes multiple cities at a single position in a route.
-
-    Expects all coordinates to be 0<= {i,j,x,y} <n_cities
-
-    >>> column_connections(0,0,0,0)
-    0
-    >>> column_connections(0,1,0,0)
-    0
-    >>> column_connections(0,1,0,1)
-    0
-    >>> column_connections(0,0,0,1)
-    1
-    >>> column_connections(0,0,2,1)
-    1
-    """
-    return (i==j)*(1-(x==y))
-
-
-def dataterm(i,j,x,y, tsp_data):
-    """Return the appropriate dataterm, if entry penalizes distance."""
-    n_cities=len(tsp_data)
-    return tsp_data[x,y] * ((j==(i+1)%n_cities)+(j==(i-1)%n_cities))
 
 
 def create_general_tsp(n_cities, A, B, C):
