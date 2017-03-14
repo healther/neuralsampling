@@ -8,10 +8,12 @@
 #include "myrandom.h"
 #include "neuron.h"
 #include "network.h"
+#include "temperature.h"
 
 
 int main(int argc, char const *argv[])
 {
+    // report inputfilename and load the yaml content
     std::cout << argv[1] << std::endl;
     YAML::Node baseNode = YAML::LoadFile(argv[1]);
     YAML::Node configNode = baseNode["Config"];
@@ -31,7 +33,7 @@ int main(int argc, char const *argv[])
         initialStateNode = YAML::LoadFile(initialStateFileNode.as<std::string>());
     }
 
-    if (!biasNode || !weightNode || !initialStateNode) {
+    if (!biasNode || !weightNode || !initialStateNode || !temperatureNode) {
         std::cout << "Corrupted configuration file" << std::endl;
         return -1;
     }
@@ -43,12 +45,14 @@ int main(int argc, char const *argv[])
     for(YAML::const_iterator it=biasNode.begin(); it!=biasNode.end(); it++) {
         bias.push_back(it->as<double>());
     }
+    // read sparse representation of weight matrix in
     std::vector<std::vector<double>> weights(bias.size());
     for(unsigned int i = 0; i < bias.size(); ++i) {
         std::vector<double> weight_line(bias.size());
         for(unsigned int j = 0; j < bias.size(); ++j) {weight_line[j] = 0.;}
         weights[i] = weight_line;
     }
+    // translate in dense matrix
     int i, j;
     double w;
     for(YAML::const_iterator it=weightNode.begin(); it!=weightNode.end(); it++) {
@@ -57,10 +61,23 @@ int main(int argc, char const *argv[])
         w = (*it)[2].as<double>();
         weights[i][j] = w;
     }
+
     std::vector<int> initialstate;
     for(YAML::const_iterator it=initialStateNode.begin(); it!=initialStateNode.end(); it++) {
         initialstate.push_back(it->as<int>());
     }
+
+    // get temperature
+    std::string temperature_type = temperatureNode["type"].as<std::string>();
+    ChangeType ttype;
+    if (temperature_type=="Linear") {
+        ttype = Linear;
+    } else if (temperature_type=="Const") {
+        ttype = Constant;
+    } else {
+        std::cout << "Invalid temperature type. Aborting" << std::endl;
+    }
+    Temperature temperature(ttype, temperatureNode);
 
     int random_seed = configNode["randomSeed"].as<int>();
     int random_skip = configNode["randomSkip"].as<int>();
@@ -68,9 +85,6 @@ int main(int argc, char const *argv[])
     int tauref = configNode["tauref"].as<int>();
     int tausyn = configNode["tausyn"].as<int>();
     int delay = configNode["delay"].as<int>();
-    double Tmin = configNode["Tmin"].as<double>();
-    double Tmax = configNode["Tmax"].as<double>();
-    double T = (Tmax-Tmin)/nupdates + Tmin;
     std::string neuron_type = configNode["neuronType"].as<std::string>();
     std::string synapse_type = configNode["synapseType"].as<std::string>();
     std::string network_update_scheme = configNode["networkUpdateScheme"].as<std::string>();
@@ -153,9 +167,11 @@ int main(int argc, char const *argv[])
     mt_random.discard(random_skip);
 
     // actual simulation
+    double T;
     for (int i = 0; i < nupdates; ++i)
     {
-        T = (Tmax-Tmin)*(i+1)/nupdates + Tmin;
+        T = temperature.get_temperature(i);
+
         net.update_state(T);
         net.get_state();
         net.produce_output(output);

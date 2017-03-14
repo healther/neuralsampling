@@ -42,6 +42,9 @@ doc/pdf/TSP.pdf:
 	$(MV) tmp/main.pdf doc/pdf/TSP.pdf
 	$(RM) tmp/main.aux tmp/main.log
 
+build/temperature.o: src/temperature.cpp src/temperature.h
+	$(CXX) $(CPPFLAGS) -c src/temperature.cpp -o build/temperature.o
+
 build/fixed_queue.o: src/fixed_queue.cpp src/fixed_queue.h
 	$(CXX) $(CPPFLAGS) -c src/fixed_queue.cpp -o build/fixed_queue.o
 
@@ -57,7 +60,7 @@ build/neuron.o: src/neuron.cpp src/neuron.h
 tests/test_neuron: src/neuron_test.cpp src/neuron.cpp src/neuron.h build/fixed_queue.o
 	$(CXX) $(INCLUDEPATH) $(LIBPATH) $(LDFLAGS) $(CPPFLAGS) src/neuron_test.cpp build/neuron.o build/fixed_queue.o $(LDLIBS) -o tests/test_neuron
 
-bin/neuralsampler: src/main.cpp src/main.h src/myrandom.h build/neuron.o build/network.o build/fixed_queue.o
+bin/neuralsampler: src/main.cpp src/main.h src/myrandom.h build/neuron.o build/network.o build/fixed_queue.o build/temperature.o
 	$(CXX) $(INCLUDEPATH) $(LIBPATH) $(LDFLAGS) $(CPPFLAGS) -o bin/neuralsampler build/neuron.o build/network.o build/fixed_queue.o src/main.cpp $(LDLIBS)
 
 
