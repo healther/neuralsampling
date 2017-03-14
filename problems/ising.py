@@ -96,15 +96,27 @@ def create_nn_singleinitial(linearsize, dimension, weight, meanactivity,
 
 
 def analysis_mean(outfile, **kwargs):
-    print(outfile)
+    # get results
     with open(outfile, 'r') as f:
         next(f)
         activities = [int(line) for line in f]
     mean, std = float(np.mean(activities)), float(np.std(activities))
     nsamples = len(activities)
+    analysisdict = yaml.dump({'nsamples': nsamples, 'mean': mean, 'std': std})
+
+    # get simulation paramters
+    with open(os.path.join(os.path.split(outfile)[0], 'sim.yaml'), 'r') as f:
+        simdict = yaml.load(f)
+    foldertemplate = simdict['foldertemplate']
+    simparameterkeys = utils.get_simparameters_from_template(foldertemplate)
+    flatsimdict = utils.flatten_dictionary(simdict)
+    for spkey in simparameterkeys:
+        analysisdict[spkey] = flatsimdict[spkey]
 
     with open(os.path.join(os.path.split(outfile)[0], 'analysis'), 'w') as f:
-        f.write(yaml.dump({'nsamples': nsamples, 'mean': mean, 'std': std}))
+
+        f.write(yaml.dump(analysisdict))
+    print(outfile)
 
 
 if __name__ == "__main__":
