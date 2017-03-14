@@ -30,7 +30,8 @@ private:
     bool boptimized;
 
     void generate_connected_neuron_ids();
-
+    std::vector<int> get_update_inds(unsigned int len);
+    double get_potential_for_neuronid(unsigned int id);
 
 public:
     Network(std::vector<double> &_biases,
@@ -50,6 +51,7 @@ public:
     void get_state();
     void get_internalstate();
     void update_state(double T);
+    void update_state(double T, double Iext);
     bool _check_consistency();
 };
 

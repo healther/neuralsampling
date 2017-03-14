@@ -8,6 +8,19 @@
 #include "temperature.h"
 
 
+Temperature::Temperature(double T, int nupdates):
+    change_type(Const)
+{
+    times.push_back(0);
+    times.push_back(nupdates+1);
+    values.push_back(T);
+    values.push_back(T);
+
+    currentposition = 0;
+    currenttemperature = 1.;
+}
+
+
 Temperature::Temperature(ChangeType type, YAML::Node temperatureParameters):
     change_type(type)
 {

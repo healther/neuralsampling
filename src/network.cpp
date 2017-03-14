@@ -108,8 +108,7 @@ void Network::get_internalstate()
     }
 }
 
-void Network::update_state(double T)
-{
+std::vector<int> Network::get_update_inds(unsigned int len) {
     std::vector<int> update_inds(biases.size()) ;
 
     if (update_scheme==Random) {
@@ -124,26 +123,57 @@ void Network::update_state(double T)
         }
     }
 
+    return update_inds;
+}
+
+double Network::get_potential_for_neuronid(unsigned int neuronid) {
+    double pot = biases[neuronid];
+
+    if (boptimized)
+    {
+        int conid;
+        for (unsigned int j = 0; j < connected_neuron_ids[neuronid].size(); ++j)
+        {
+            conid = connected_neuron_ids[neuronid][j];
+            pot += neurons[conid].get_interaction() * weights[neuronid][conid];
+        }
+    } else {    // not boptimized
+        for (unsigned int j = 0; j < biases.size(); ++j)
+        {
+            pot += neurons[j].get_interaction() * weights[neuronid][j];
+        }
+    }
+
+    return pot;
+}
+
+void Network::update_state(double T)
+{
+    // generate ids to update (depends on the update scheme)
+    std::vector<int> update_inds = get_update_inds(biases.size()) ;
+
+    // update neurons in sequence determined above
     for (unsigned int i = 0; i < biases.size(); ++i)
     {
-        int ii = update_inds[i];
-        double pot = biases[ii];
-        if (boptimized)
-        {
-            int conid;
-            for (unsigned int j = 0; j < connected_neuron_ids[ii].size(); ++j)
-            {
-                conid = connected_neuron_ids[ii][j];
-                pot += neurons[conid].get_interaction() * weights[ii][conid];
-            }
-        } else {    // not boptimized
-            for (unsigned int j = 0; j < biases.size(); ++j)
-            {
-                pot += neurons[j].get_interaction() * weights[ii][j];
-            }
-        }   // endif boptimized
-        neurons[ii].update_state(pot/T);
-        neurons[ii].update_interaction();
+        int neuronid = update_inds[i];
+        double pot = get_potential_for_neuronid(neuronid);
+        neurons[neuronid].update_state(pot/T);
+        neurons[neuronid].update_interaction();
+    }
+}
+
+void Network::update_state(double T, double Iext)
+{
+    // generate ids to update (depends on the update scheme)
+    std::vector<int> update_inds = get_update_inds(biases.size()) ;
+
+    // update neurons in sequence determined above
+    for (unsigned int i = 0; i < biases.size(); ++i)
+    {
+        int neuronid = update_inds[i];
+        double pot = get_potential_for_neuronid(neuronid) + Iext;
+        neurons[neuronid].update_state(pot/T);
+        neurons[neuronid].update_interaction();
     }
 }
 

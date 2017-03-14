@@ -33,8 +33,9 @@ int main(int argc, char const *argv[])
         initialStateNode = YAML::LoadFile(initialStateFileNode.as<std::string>());
     }
     YAML::Node temperatureNode = baseNode["temperature"];
+    YAML::Node currentNode = baseNode["externalCurrent"];
 
-    if (!biasNode || !weightNode || !initialStateNode || !temperatureNode) {
+    if (!biasNode || !weightNode || !initialStateNode) {
         std::cout << "Corrupted configuration file" << std::endl;
         return -1;
     }
@@ -69,16 +70,38 @@ int main(int argc, char const *argv[])
     }
 
     // get temperature
-    std::string temperature_type = temperatureNode["type"].as<std::string>();
-    ChangeType ttype;
-    if (temperature_type=="Linear") {
-        ttype = Linear;
-    } else if (temperature_type=="Const") {
-        ttype = Const;
+    Temperature temperature;
+    if (temperatureNode) {
+        std::string temperature_type = temperatureNode["type"].as<std::string>();
+        ChangeType ttype;
+        if (temperature_type=="Linear") {
+            ttype = Linear;
+        } else if (temperature_type=="Const") {
+            ttype = Const;
+        } else {
+            std::cout << "Invalid temperature type. Aborting" << std::endl;
+        }
+        temperature(ttype, temperatureNode);
     } else {
-        std::cout << "Invalid temperature type. Aborting" << std::endl;
+        temperature(1., nupdates);
     }
-    Temperature temperature(ttype, temperatureNode);
+
+    // get external current
+    Temperature current;
+    if (currentNode) {
+        std::string current_type = currentNode["type"].as<std::string>();
+        ChangeType ttype;
+        if (current_type=="Linear") {
+            ttype = Linear;
+        } else if (current_type=="Const") {
+            ttype = Const;
+        } else {
+            std::cout << "Invalid current type. Aborting" << std::endl;
+        }
+        current(ttype, temperatureNode);
+    } else {
+        current(0., nupdates);
+    }
 
     int random_seed = configNode["randomSeed"].as<int>();
     int random_skip = configNode["randomSkip"].as<int>();
@@ -172,8 +195,8 @@ int main(int argc, char const *argv[])
     for (int i = 0; i < nupdates; ++i)
     {
         T = temperature.get_temperature(i);
-
-        net.update_state(T);
+        Iext = current.get_temperature(i);
+        net.update_state(T, Iext);
         net.get_state();
         net.produce_output(output);
     }
