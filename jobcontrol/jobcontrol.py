@@ -46,19 +46,34 @@ utils.ensure_exist(jobtasklists)
 
 
 def action_reset(args):
-    for dirpath, dirnames, filenames in os.walk(jobsubmmited):
-        print(filenames)
-        for filename in filenames:
-            if not (filename.endswith('start') or
-                    filename.endswith('finish') or
-                    filename.endswith('success') or
+    i = 0
+    for filename in os.listdir(jobsubmmited):
+        if filename.endswith('.success'):
+            basename = os.path.join(jobsubmmited, filename.split('.')[0])
+            endings = ['run', '.start', '.finish', '.success']
+            i += 1
+            for end in endings:
+                filepath = basename + end
+                if not os.path.exists(filepath):
+                    print("Didn't find {}, something "
+                            "weird happened".format(filepath))
+                else:
+                    os.remove(filepath)
+            os.remove(basename)
+    print("Removed {} completed jobs".format(i))
+    if args[0] == 'hard':
+        for filename in os.listdir(jobsubmmited):
+            if not (filename.endswith('.start') or
+                    filename.endswith('.finish') or
+                    filename.endswith('.success') or
+                    filename.endswith('out') or
                     filename.endswith('run')):
-                shutil.move(os.path.join(dirpath, filename), jobstage)
-    for dirpath, dirnames, filenames in os.walk(jobtasklists):
-        print(filenames)
-        for filename in filenames:
-            os.remove(os.path.join(dirpath, filename))
-
+                shutil.move(os.path.join(jobsubmmited, filename), jobstage)
+            elif not filename.endswith('out'):
+                os.remove(os.path.join(jobsubmmited, filename))
+        for dirpath, dirnames, filenames in os.walk(jobtasklists):
+            for filename in filenames:
+                os.remove(os.path.join(dirpath, filename))
 
 def action_config(args):
     if len(args) == 0:
