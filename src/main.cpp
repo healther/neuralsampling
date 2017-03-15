@@ -69,40 +69,7 @@ int main(int argc, char const *argv[])
         initialstate.push_back(it->as<int>());
     }
 
-    // get temperature
-    Temperature temperature;
-    if (temperatureNode) {
-        std::string temperature_type = temperatureNode["type"].as<std::string>();
-        ChangeType ttype;
-        if (temperature_type=="Linear") {
-            ttype = Linear;
-        } else if (temperature_type=="Const") {
-            ttype = Const;
-        } else {
-            std::cout << "Invalid temperature type. Aborting" << std::endl;
-        }
-        temperature(ttype, temperatureNode);
-    } else {
-        temperature(1., nupdates);
-    }
-
-    // get external current
-    Temperature current;
-    if (currentNode) {
-        std::string current_type = currentNode["type"].as<std::string>();
-        ChangeType ttype;
-        if (current_type=="Linear") {
-            ttype = Linear;
-        } else if (current_type=="Const") {
-            ttype = Const;
-        } else {
-            std::cout << "Invalid current type. Aborting" << std::endl;
-        }
-        current(ttype, temperatureNode);
-    } else {
-        current(0., nupdates);
-    }
-
+    // get general config
     int random_seed = configNode["randomSeed"].as<int>();
     int random_skip = configNode["randomSkip"].as<int>();
     unsigned int nupdates = configNode["nupdates"].as<int>();
@@ -113,7 +80,29 @@ int main(int argc, char const *argv[])
     std::string synapse_type = configNode["synapseType"].as<std::string>();
     std::string network_update_scheme = configNode["networkUpdateScheme"].as<std::string>();
     std::string output_scheme = configNode["outputScheme"].as<std::string>();
-    // bool b_remove_config_file = configNode["removeConfigFile"].as<bool>();
+
+    // get temperature
+    std::string temperature_type = temperatureNode["type"].as<std::string>();
+    ChangeType ttype;
+    if (temperature_type=="Linear") {
+        ttype = Linear;
+    } else if (temperature_type=="Const") {
+        ttype = Const;
+    } else {
+        std::cout << "Invalid temperature type. Aborting" << std::endl;
+    }
+    Temperature temperature = Temperature(ttype, temperatureNode);
+
+    // get external current
+    std::string current_type = currentNode["type"].as<std::string>();
+    if (current_type=="Linear") {
+        ttype = Linear;
+    } else if (current_type=="Const") {
+        ttype = Const;
+    } else {
+        std::cout << "Invalid current type. Aborting" << std::endl;
+    }
+    Temperature current = Temperature(ttype, currentNode);
 
     // create corresponding network
     TInteraction neuron_interaction_type;
@@ -191,7 +180,7 @@ int main(int argc, char const *argv[])
     mt_random.discard(random_skip);
 
     // actual simulation
-    double T;
+    double T, Iext;
     for (int i = 0; i < nupdates; ++i)
     {
         T = temperature.get_temperature(i);

@@ -1,13 +1,14 @@
 #ifndef TEMPERATURE_H
 #define TEMPERATURE_H
 
-#include "yaml-cpp/yaml.h"
 #include <ostream>
 #include <vector>
 #include <random>
 #include <algorithm>
 
-enum ChangeType
+#include "main.h"
+
+    enum ChangeType
 {
     Const,
     Linear
@@ -30,6 +31,7 @@ private:
 public:
     Temperature(ChangeType type, YAML::Node temperatureNode);
     Temperature(double T, int nupdates);
+    Temperature();
     ~Temperature() {};
 
     double get_temperature(int nupdate);

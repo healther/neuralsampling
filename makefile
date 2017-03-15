@@ -42,7 +42,7 @@ doc/pdf/TSP.pdf:
 	$(MV) tmp/main.pdf doc/pdf/TSP.pdf
 	$(RM) tmp/main.aux tmp/main.log
 
-build/temperature.o: src/temperature.cpp src/temperature.h
+build/temperature.o: src/temperature.cpp src/temperature.h src/main.h
 	$(CXX) $(CPPFLAGS) -c src/temperature.cpp -o build/temperature.o
 
 build/fixed_queue.o: src/fixed_queue.cpp src/fixed_queue.h
