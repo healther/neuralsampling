@@ -162,8 +162,11 @@ int main(int argc, char const *argv[])
     std::ostream output(buf);
     // output << "Remove config file at the end: " << b_remove_config_file << std::endl;
     output << "Outputformat Updatescheme Activationtype Interactiontype: "
-        << network_output_scheme_type << network_update_scheme_type
-        << neuron_interaction_type << neuron_activation_type << std::endl;
+        << network_output_scheme_type
+        << network_update_scheme_type
+        << neuron_activation_type
+        << neuron_interaction_type
+        << std::endl;
 
     Network net(bias, weights, initialstate, tauref, tausyn, delay,
         network_output_scheme_type,
