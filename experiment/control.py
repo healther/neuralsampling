@@ -166,7 +166,7 @@ def expand(folder):
     rundict['bias']         = b
     rundict['initialstate'] = i
     rundict['temperature']  = simdict['temperature']
-    rundict['ExternalCurrent'] = simdict['ExternalCurrent']
+    rundict['externalCurrent'] = simdict['externalCurrent']
     rundict['outfile'] = os.path.join(folder, 'output')
 
     yaml.dump(rundict, open(os.path.join(folder, 'run.yaml'), 'w'))
