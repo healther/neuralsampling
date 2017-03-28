@@ -165,8 +165,8 @@ def expand(folder):
     rundict['weight']       = W
     rundict['bias']         = b
     rundict['initialstate'] = i
-    # extend for other input, e.g. external currents, temperature etc.
-    # once implemented in neuralsampler
+    rundict['temperature']  = simdict['temperature']
+    rundict['ExternalCurrent'] = simdict['ExternalCurrent']
     rundict['outfile'] = os.path.join(folder, 'output')
 
     yaml.dump(rundict, open(os.path.join(folder, 'run.yaml'), 'w'))
