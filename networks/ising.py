@@ -74,8 +74,10 @@ def create_nn_singleinitial(linearsize, dimension, weight, meanactivity,
 
     states = np.random.random(size=linearsize**dimension) < meanactivity
     states = states.astype(int)
-    states[states == 1] = onestatetau
-    states[states == 0] = zerostatetau
+    onestateids = states == 1
+    zerostateids = states == 0
+    states[onestateids] = onestatetau
+    states[zerostateids] = zerostatetau
 
     # scale weights and noise if applicable
     weights = weight * np.array([wline[2] for wline in wlist])
