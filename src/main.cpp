@@ -80,6 +80,7 @@ int main(int argc, char const *argv[])
     std::string synapse_type = configNode["synapseType"].as<std::string>();
     std::string network_update_scheme = configNode["networkUpdateScheme"].as<std::string>();
     std::string output_scheme = configNode["outputScheme"].as<std::string>();
+    bool output_env = configNode["outputEnv"].as<bool>(false);
 
     // get temperature
     std::string temperature_type = temperatureNode["type"].as<std::string>();
@@ -161,8 +162,9 @@ int main(int argc, char const *argv[])
     }
     std::ostream output(buf);
     // output << "Remove config file at the end: " << b_remove_config_file << std::endl;
-    output << "Outputformat Updatescheme Activationtype Interactiontype: "
+    output << "Outputformat OutputEnv Updatescheme Activationtype Interactiontype: "
         << network_output_scheme_type
+        << output_env
         << network_update_scheme_type
         << neuron_activation_type
         << neuron_interaction_type
@@ -188,6 +190,9 @@ int main(int argc, char const *argv[])
     {
         T = temperature.get_temperature(i);
         Iext = current.get_temperature(i);
+        if (output_env) {
+            output << T << " " << Iext << " ";
+        }
         net.update_state(T, Iext);
         net.get_state();
         net.produce_output(output);
