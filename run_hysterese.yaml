@@ -6,11 +6,11 @@ experimentConfig:
   binaryLocation: /work/workspace/scratch/hd_wv385-neuralsampling-0/hysterese/bin/neuralsampler
   envfileLocation: /work/workspace/scratch/hd_wv385-neuralsampling-0/hysterese/load_env.sh
   filesToRemove: []
-  eta: 90.
+  eta: 15000.
 Config:
   neuronType: log
   synapseType: synapseType
-  nupdates: 1000000
+  nupdates: 10000000
   randomSeed: 42434343
   randomSkip: 1000000
   tauref: tau
@@ -18,14 +18,15 @@ Config:
   delay: 1
   outputScheme: MeanActivity
   networkUpdateScheme: update
+  outputEnv: True
 temperature:
     type: Const
     times: [0, 100000001]
     values: [1., 1.]
 externalCurrent:
-    type: Const
-    times: [0, 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000]
-    values: [0., 2.5, -2.5, 2., -2., 1.5, -1.5, 1.0, -1.0, .5, -.5]
+    type: ectype
+    times: [0, 10000, 1010000, 2010000, 3010000, 4010000, 5010000, 6010000, 7010000, 8010000, 9010000, 10010000]
+    values: [0., 0., .2, -.2, .3, -.3, .4, -.4, .6, -.6, .8, -.8]
 network:
   etaFunction: ising.eta
   problemName: ising.create_nn_singleinitial
@@ -39,18 +40,19 @@ network:
     rseed: 42424242
     weightnoise: 0.
     biasnoise: 0.
-    biasfactor: 1.
+    biasfactor: bf
     biasoffset: 0.
 analysis:
   analysisFunction: ising.analysis_mean
   parameters:
     blub: nothinguseful
-experimentName: Hysterese002
+experimentName: Hysterese003
 
 replacements:
   ls: [10, 30, 50, 70, 90]
   synapseType: [rect, exp, tail, cuto]
-  tau: [1, 3, 10, 30, 100, 300, 1000, 3000, 10000]
+  tau: [1, 1000]
   update: [InOrder, Random, BatchRandom]
-  w: [0.5, 1.5, 1.75, 2., 2.5]
-
+  w: [0.5, 1.5, 1.7, 1.76, 1.8, 2., 2.5, 3., 4., 5.]
+  bf: [1., 1.22]
+  ectype: [Const, Linear]
