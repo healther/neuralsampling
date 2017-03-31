@@ -46,8 +46,13 @@ Temperature::Temperature(ChangeType type, YAML::Node temperatureParameters):
         values.push_back(it->as<double>());
     }
 
-    currentposition = 0;
-    currenttemperature = 0;
+    if ( (times[0] <= 0) && (times[1] > 0))
+    {
+        currentposition = 0;
+        currenttemperature = values[0];
+    } else {
+        throw;
+    }
 }
 
 
