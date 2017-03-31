@@ -130,13 +130,13 @@ def ensure_exist(folder):
 
 
 @memorize
-def get_function_from_name(function_identifier):
-    """Return the callable function_identifier=problem.function ."""
-    problemname, functionname = function_identifier.split('.')
+def get_function_from_name(function_identifier, folder='networks'):
+    """Return the callable function_identifier=network.function ."""
+    modulename, functionname = function_identifier.split('.')
     directory = os.path.split(os.path.realpath(__file__))[0]
     parentdirectory = os.path.join(directory, os.pardir)
-    module = imp.load_source('problem',
-                os.path.join(parentdirectory, 'problems', problemname + '.py'))
+    module = imp.load_source('network',
+                os.path.join(parentdirectory, folder, modulename + '.py'))
     func = getattr(module, functionname)
     return func
 
