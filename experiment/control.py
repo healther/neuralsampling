@@ -99,6 +99,7 @@ def run_experiment(experimentfile):
     generate_jobs = experiment_config.get('generateJobs', False)
     submit_jobs = experiment_config.get('submitJobs', False)
     execute_jobs = experiment_config.get('executeJobs', False)
+    collect_jobs = experiment_config.get('collectJobs', False)
     envfile = experiment_config.get('envfileLocation', '')
     binary_location = experiment_config.get('binaryLocation', '')
     files_to_remove = experiment_config.get('filesToRemove', '')
@@ -158,7 +159,39 @@ def run_experiment(experimentfile):
         _execute_jobs()
         print("{}: Executed jobs".format(datetime.datetime.now()))
 
-    time.sleep(3.)  # ensure that all subprocesses have finished
+        time.sleep(3.)  # ensure that all subprocesses have finished
+
+    if collect_jobs:
+        print("{}: Collecting results".format(datetime.datetime.now()))
+        get_simparameters_from_template = utils.get_function_from_name(
+                                        'utils.get_simparameters_from_template')
+        collect = []
+        nNones = 0
+        for simdict, folder in zip(ex_dicts, folders):
+            collectdict = {}
+            foldertemplate = simdict['folderTemplate']
+            simparameterkeys = get_simparameters_from_template(foldertemplate)
+            flatsimdict = utils.flatten_dictionary(simdict)
+            for spkey in simparameterkeys:
+                collectdict[spkey] = flatsimdict[spkey]
+
+            try:
+                with open(os.path.join(folder, 'analysis'), 'r') as f:
+                    analysisdict = yaml.load(f)
+
+                collectdict['analysis'] = analysisdict
+            except:
+                collectdict['analysis'] = None
+                nNones += 1
+
+            collect.append(collectdict)
+
+        with open(os.path.join('collect', experimentname), 'w') as f:
+            yaml.dump(collect, f)
+        print("{}: Collected {} results, {} missing".format(
+            datetime.datetime.now(), len(folders)-nNones, nNones))
+
+        time.sleep(1.)
 
 
 def expand(folder):
