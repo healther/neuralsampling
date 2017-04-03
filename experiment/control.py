@@ -49,7 +49,7 @@ python {cwd}/control.py expand {folder} &&
 python {cwd}/control.py analysis {folder} &&
 touch {cwd}/success
 
-/usr/bin/rm {files_to_remove}
+/usr/bin/rm -f {files_to_remove}
     """
     content = stub.format(envscript=envfile,
                 cwd=os.path.split(os.path.realpath(__file__))[0],
