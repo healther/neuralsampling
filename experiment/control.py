@@ -11,6 +11,7 @@ import subprocess
 import sys
 import datetime
 import time
+import shutil
 
 import utils
 
@@ -90,6 +91,7 @@ def run_experiment(experimentfile):
 
     replacements = dictionary.pop('replacements', {})
     experimentname = dictionary.get('experimentName', '')
+    shutil.copy(experimentfile, os.path.join('simulations', '01_runs', experimentname))
 
     experiment_config = dictionary.pop('experimentConfig')
     write_configs = experiment_config.get('writeConfigs', False)
