@@ -47,6 +47,7 @@ source {envscript} &&
 python {cwd}/control.py expand {folder} &&
 {binaryLocation} {folder}/run.yaml &&
 python {cwd}/control.py analysis {folder} &&
+touch {cwd}/success
 
 /usr/bin/rm {files_to_remove}
     """
@@ -123,7 +124,7 @@ def run_experiment(experimentfile):
     else:
         missing_folders = []
         for folder in folders:
-            if not os.path.exists(os.path.join(folder, 'analysis')):
+            if not os.path.exists(os.path.join(folder, 'success')):
                 missing_folders.append(folder)
         folders = missing_folders
     elapsed_time = time.time() - t0
@@ -182,6 +183,8 @@ def analysis(folder):
     simdict = yaml.load(open(os.path.join(folder, 'sim.yaml'), 'r'))
     analysis_function = utils.get_function_from_name(
                                     simdict['analysis']['analysisFunction'])
+    if analysis_function=="nothing":
+        return
     analysis_function(outfile=os.path.join(folder, 'output'),
             **simdict['analysis']['parameters'])
 
