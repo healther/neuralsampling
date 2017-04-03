@@ -7,7 +7,7 @@ import yaml
 import numpy as np
 
 
-TIMECONSTANT = 1000E-9
+TIMECONSTANT = 150E-9
 # helper functions
 
 
@@ -101,7 +101,7 @@ def analysis_mean(outfile, **kwargs):
     # get results
     with open(outfile, 'r') as f:
         next(f)
-        activities = [int(line) for line in f]
+        activities = [int(line.split(' ')[-1]) for line in f]
     mean, std = float(np.mean(activities)), float(np.std(activities))
     nsamples = len(activities)
     analysisdict = yaml.dump({'nsamples': nsamples, 'mean': mean, 'std': std})
