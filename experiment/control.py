@@ -136,6 +136,8 @@ def run_experiment(experimentfile):
         print("{}: Generated {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
 
+        time.sleep(1.)
+
     if submit_jobs:
         print("{}: Submitting {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
@@ -146,12 +148,14 @@ def run_experiment(experimentfile):
         print("{}: Submitted {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
 
+        time.sleep(5.)
+
     if execute_jobs:
         print("{}: Executing jobs".format(datetime.datetime.now()))
         _execute_jobs()
         print("{}: Executed jobs".format(datetime.datetime.now()))
 
-    time.sleep(300.)  # ensure that all subprocesses have finished
+    time.sleep(3.)  # ensure that all subprocesses have finished
 
 
 def expand(folder):

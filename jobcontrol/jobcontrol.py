@@ -157,7 +157,8 @@ def action_execute(args):
                                 os.path.split(os.path.realpath(__file__))[0],
                                 'execute_taskfile.py'), taskfilename])
     elif config['slurmmode'] == 'bwuni':
-        taskfilenames = cluster.bwuni.clean_taskfolder(jobtasklists) + taskfilenames
+        # resubmit tasks
+        # taskfilenames = cluster.bwuni.clean_taskfolder(jobtasklists) + taskfilenames
         for taskfilename in taskfilenames:
             cluster.bwuni.submit_task(config, taskfilename)
     elif config['slurmmode'] == 'heidelberg':
