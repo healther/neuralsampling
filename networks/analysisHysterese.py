@@ -6,6 +6,8 @@ import yaml
 import itertools as it
 import numpy as np
 
+import utils
+
 
 def get_data(outfile, subsampling=1):
     Ts = []
@@ -104,8 +106,11 @@ def get_simdict(outfile):
     foldertemplate = simdict['folderTemplate']
     simparameterkeys = utils.get_simparameters_from_template(foldertemplate)
     flatsimdict = utils.flatten_dictionary(simdict)
+    outdict = {}
+    for spkey in simparameterkeys:
+        outdict[spkey] = flatsimdict[key]
 
-    return flatsimdict
+    return outdict
 
 
 def hysteresis(outfile, nIpoints=100, subsampling=1, plot=False, **kwargs):
@@ -120,7 +125,7 @@ def hysteresis(outfile, nIpoints=100, subsampling=1, plot=False, **kwargs):
     analysisdict['area'] = get_area_from_lists(listAs, listIs)
     analysisdict['remanenz'] = get_remanence_from_lists(listAs, listIs)
     analysisdict['coercivity'] = get_coercivity_from_lists(listAs, listIs, maxA)
-  #  analysisdict['simdict'] = get_simdict(outfile)
+    analysisdict['simdict'] = get_simdict(outfile)
 
     with open(os.path.join(os.path.split(outfile)[0], 'analysis'), 'w') as f:
         f.write(yaml.dump(analysisdict))
