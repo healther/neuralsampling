@@ -42,11 +42,11 @@ def _write_configs(ex_dicts, folders):
 
 def _generate_job(folder, envfile, binary_location, files_to_remove):
     stub = """
-cd {folder} &&
+cd "{folder}" &&
 source {envscript} &&
-python {cwd}/control.py expand {folder} &&
-{binaryLocation} {folder}/run.yaml &&
-python {cwd}/control.py analysis {folder} &&
+python {cwd}/control.py expand "{folder}" &&
+{binaryLocation} "{folder}/run.yaml" &&
+python {cwd}/control.py analysis "{folder}" &&
 touch {cwd}/success
 
 /usr/bin/rm -f {files_to_remove}

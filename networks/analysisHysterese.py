@@ -108,7 +108,7 @@ def get_simdict(outfile):
     flatsimdict = utils.flatten_dictionary(simdict)
     outdict = {}
     for spkey in simparameterkeys:
-        outdict[spkey] = flatsimdict[key]
+        outdict[spkey] = flatsimdict[spkey]
 
     return outdict
 
@@ -143,8 +143,8 @@ def hysteresis(outfile, nIpoints=100, subsampling=1, plot=False, **kwargs):
         with open(os.path.join(os.path.split(outfile)[0], 'hysteresis.pdf'), 'w') as pdf:
             fig = plt.figure()
             ax = fig.add_subplot(111)
-            ax.errorbar(listIs, upperAsmean, upperAsstd, 'bx')
-            ax.errorbar(listIs, lowerAsmean, lowerAsstd, 'bx')
+            ax.errorbar(listIs, upperAsmean, upperAsstd, fmt='bx')
+            ax.errorbar(listIs, lowerAsmean, lowerAsstd, fmt='bx')
             ax.set_title('Hysteresis Curve')
             ax.set_xlabel('External Current')
             ax.set_ylabel('Active neurons')
