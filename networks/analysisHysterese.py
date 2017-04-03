@@ -131,7 +131,19 @@ def hysteresis(outfile, nIpoints=100, subsampling=1, plot=False, **kwargs):
         import matplotlib.pyplot as plt
         from matplotlib.backends.backend_pdf import PdfPages
 
-        pass
+        upperAsmean = [A[0][0] for A in listAs]
+        upperAsstd = [A[0][1] for A in listAs]
+        lowerAsmean = [A[1][0] for A in listAs]
+        lowerAsstd = [A[1][1] for A in listAs]
+        with open(os.path.join(os.path.split(outfile)[0], 'hysteresis.pdf'), 'w') as pdf:
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            ax.errorbar(listIs, upperAsmean, upperAsstd, 'bx')
+            ax.errorbar(listIs, lowerAsmean, lowerAsstd, 'bx')
+            ax.set_title('Hysteresis Curve')
+            ax.set_xlabel('External Current')
+            ax.set_ylabel('Active neurons')
+            plt.savefig(pdf, format='pdf')
 
 
 if __name__ == "__main__":
@@ -140,7 +152,7 @@ if __name__ == "__main__":
         import doctest
         print(doctest.testmod())
     elif len(sys.argv) == 4:
-        hysteresis(outfile=sys.argv[1], nIpoints=int(sys.argv[2]), subsampling=int(sys.argv[3]))
+        hysteresis(outfile=sys.argv[1], nIpoints=int(sys.argv[2]), subsampling=int(sys.argv[3]), plot=True)
     else:
         print("Don't know what to do.")
         print(sys.argv)
