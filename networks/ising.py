@@ -3,9 +3,10 @@ from __future__ import division
 
 import os
 import yaml
-
+import itertools as it
 import numpy as np
 
+import utils
 
 TIMECONSTANT = 150E-9
 # helper functions
@@ -97,28 +98,29 @@ def create_nn_singleinitial(linearsize, dimension, weight, meanactivity,
     return wlist, b.tolist(), states.tolist()
 
 
-def analysis_mean(outfile, **kwargs):
+def analysis_mean(outfile, subsampling=1, **kwargs):
     # get results
+    activities = []
     with open(outfile, 'r') as f:
         next(f)
-        activities = [int(line.split(' ')[-1]) for line in f]
+        for line in it.islice(f, 0, None, subsampling):
+            activities.append(int(line.split(' ')[-1]))
     mean, std = float(np.mean(activities)), float(np.std(activities))
     nsamples = len(activities)
-    analysisdict = yaml.dump({'nsamples': nsamples, 'mean': mean, 'std': std})
+    analysisdict = {'nsamples': nsamples, 'mean': mean, 'std': std}
 
     # get simulation paramters
     with open(os.path.join(os.path.split(outfile)[0], 'sim.yaml'), 'r') as f:
         simdict = yaml.load(f)
-    foldertemplate = simdict['foldertemplate']
+    foldertemplate = simdict['folderTemplate']
     simparameterkeys = utils.get_simparameters_from_template(foldertemplate)
     flatsimdict = utils.flatten_dictionary(simdict)
     for spkey in simparameterkeys:
         analysisdict[spkey] = flatsimdict[spkey]
 
     with open(os.path.join(os.path.split(outfile)[0], 'analysis'), 'w') as f:
-
         f.write(yaml.dump(analysisdict))
-    print(outfile)
+
 
 
 if __name__ == "__main__":
