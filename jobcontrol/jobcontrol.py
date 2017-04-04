@@ -78,6 +78,7 @@ def action_reset(args):
 def action_config(args):
     if len(args) == 0:
         print(config)
+        print("JOB_FOLDER", jobfolder)
     else:
         key = args[0].split('.')
         if len(args) == 1:

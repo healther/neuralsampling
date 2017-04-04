@@ -146,20 +146,20 @@ def run_experiment(experimentfile):
         print("{}: Submitting {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
         for i, folder in enumerate(folders):
-            if i % 10000 == 0:
+            if i % 1000 == 0:
                 print("{}: {}/{}".format(datetime.datetime.now(), i, len(folders)))
             _submit_job(folder, eta=eta)
         print("{}: Submitted {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
 
-        time.sleep(5.)
+        time.sleep(15.)
 
     if execute_jobs:
         print("{}: Executing jobs".format(datetime.datetime.now()))
         _execute_jobs()
         print("{}: Executed jobs".format(datetime.datetime.now()))
 
-        time.sleep(3.)  # ensure that all subprocesses have finished
+        time.sleep(5.)  # ensure that all subprocesses have finished
 
     if collect_jobs:
         print("{}: Collecting results".format(datetime.datetime.now()))
