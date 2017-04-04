@@ -1,0 +1,59 @@
+experimentConfig:
+  writeConfigs: False 
+  generateJobs: False 
+  submitJobs:   False 
+  executeJobs:  False 
+  collectJobs:  True
+  binaryLocation: /wang/users/wv385/cluster_home/git/neuralsampling/bin/neuralsampler
+  envfileLocation: /wang/users/wv385/cluster_home/git/neuralsampling/load_env_hel.sh
+  filesToRemove: []
+  eta: 300
+Config:
+  neuronType: log
+  synapseType: synapseType
+  nupdates: 1000000
+  randomSeed: 42434343
+  randomSkip: 1000000
+  tauref: tau
+  tausyn: tau
+  delay: 1
+  outputScheme: MeanActivity
+  networkUpdateScheme: update
+  outputEnv: True
+temperature:
+    type: Const
+    times: [0, 100000001]
+    values: [T, T]
+externalCurrent:
+    type: Const
+    times: [0, 100000001]
+    values: [0., 0.]
+network:
+  etaFunction: ising.eta
+  problemName: ising.create_nn_singleinitial
+  parameters:
+    linearsize: ls
+    dimension: 2
+    weight: 1.
+    meanactivity: 0.5
+    zerostatetau: 10001
+    onestatetau: 0
+    rseed: 42424242
+    weightnoise: 0.
+    biasnoise: 0.
+    biasfactor: bf
+    biasoffset: bo
+analysis:
+  analysisFunction: ising.analysis_mean
+  parameters:
+    blub: nothinguseful
+experimentName: CurieWeiss002
+
+replacements:
+  ls: [50]
+  synapseType: [rect, exp, tail, cuto]
+  tau: [1000]
+  update: [InOrder]
+  bf: [1., 1.2, 1.25]
+  bo: [0.01, 0.03]
+  T: [0.05, 0.1, 0.25, .5, 1., 2.5, 5., 10.]
