@@ -47,7 +47,7 @@ source {envscript} &&
 python {cwd}/control.py expand "{folder}" &&
 {binaryLocation} "{folder}/run.yaml" &&
 python {cwd}/control.py analysis "{folder}" &&
-touch {cwd}/success
+touch {folder}/success
 
 /usr/bin/rm -f {files_to_remove}
     """
