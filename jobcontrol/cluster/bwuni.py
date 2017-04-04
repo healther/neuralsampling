@@ -36,7 +36,7 @@ def clean_taskfolder(submittedfolder):
                                             if 'State: ' in line]
                 if not stateline[0].endswith('Running'):
                     additional_tasks.append(taskname)
-                for ff in glob.glob(taskname+'*'):
+                for ff in glob.glob(taskname + '*'):
                     os.remove(ff)
     return additional_tasks
 
@@ -52,7 +52,7 @@ def submit_task(config, tasklistfile):
     """
 
     ncpus = config['ncpus']
-    eta = int(float(config['maxcpuhours'])*3600.)
+    eta = int(float(config['maxcpuhours']) * 3600.)
     jobcontrolfolder = utils.get_parentdirectory(__file__)
 
     content = stub.format(ncpus=ncpus, eta=eta,

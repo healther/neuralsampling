@@ -45,7 +45,7 @@ utils.touch(taskfile + 'started')
 with open(taskfile, 'r') as f:
     jobfiles = [line.strip() for line in f]
 
-nproc = int(os.getenv('SLURM_NPROCS', '1'))
+nproc = int(os.getenv('SLURM_CPUS_ON_NODE', '1'))
 pool = mp.Pool(nproc)
 pool.map(execute_jobfile, jobfiles)
 pool.close()

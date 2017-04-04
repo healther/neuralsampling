@@ -148,7 +148,7 @@ def action_execute(args):
         for f in os.listdir(jobsubmmited):
             if not f.endswith('started') and not f.endswith('finished'):
                 # may restart aready running tasks use with care.
-                if not os.exists(f + 'finished'):
+                if not os.path.exists(f + 'finished'):
                     taskfilenames.prepend(os.path.join(jobsubmmited, f))
                     print("Added {} as an failed task".format(f))
         os.environ['SLURM_NPROCS'] = '1'
