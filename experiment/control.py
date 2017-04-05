@@ -98,6 +98,7 @@ def run_experiment(experimentfile):
     write_configs = experiment_config.get('writeConfigs', False)
     generate_jobs = experiment_config.get('generateJobs', False)
     submit_jobs = experiment_config.get('submitJobs', False)
+    submit_failed_jobs = experiment_config.get('submitFailedJobs', False)
     execute_jobs = experiment_config.get('executeJobs', False)
     collect_jobs = experiment_config.get('collectJobs', False)
     envfile = experiment_config.get('envfileLocation', '')
@@ -127,13 +128,19 @@ def run_experiment(experimentfile):
         for folder in folders:
             if not os.path.exists(os.path.join(folder, 'success')):
                 missing_folders.append(folder)
-        folders = missing_folders
     elapsed_time = time.time() - t0
     print("{}: Generated {} simulations in {} "
         "seconds.".format(datetime.datetime.now(), len(folders), elapsed_time))
 
     if generate_jobs:
         print("{}: Generating {} jobfiles".format(
+            datetime.datetime.now(), len(folders)))
+        for folder in folders:
+            _generate_job(folder, envfile, binary_location, files_to_remove)
+        print("{}: Generated {} jobfiles".format(
+            datetime.datetime.now(), len(folders)))
+    elif missing_folders:
+        print("{}: Generating {} jobfiles for failed jobs".format(
             datetime.datetime.now(), len(folders)))
         for folder in folders:
             _generate_job(folder, envfile, binary_location, files_to_remove)
@@ -152,6 +159,18 @@ def run_experiment(experimentfile):
         print("{}: Submitted {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
 
+        time.sleep(15.)
+
+    if submit_failed_jobs:
+        print("{}: Submitting {} jobfiles".format(
+            datetime.datetime.now(), len(folders)))
+        for i, folder in enumerate(missing_folders):
+            if i % 1000 == 0:
+                print("{}: {}/{}".format(datetime.datetime.now(), i, len(folders)))
+            _submit_job(folder, eta=eta)
+        print("{}: Submitted {} jobfiles".format(
+            datetime.datetime.now(), len(folders)))
+        
         time.sleep(15.)
 
     if execute_jobs:
