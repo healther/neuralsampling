@@ -141,11 +141,11 @@ def run_experiment(experimentfile):
             datetime.datetime.now(), len(folders)))
     elif missing_folders:
         print("{}: Generating {} jobfiles for failed jobs".format(
-            datetime.datetime.now(), len(folders)))
-        for folder in folders:
+            datetime.datetime.now(), len(missing_folders)))
+        for folder in missing_folders:
             _generate_job(folder, envfile, binary_location, files_to_remove)
         print("{}: Generated {} jobfiles".format(
-            datetime.datetime.now(), len(folders)))
+            datetime.datetime.now(), len(missing_folders)))
 
         time.sleep(1.)
 
@@ -161,16 +161,17 @@ def run_experiment(experimentfile):
 
         time.sleep(15.)
 
-    if submit_failed_jobs:
+    if submit_failed_jobs and missing_folders:
         print("{}: Submitting {} jobfiles".format(
-            datetime.datetime.now(), len(folders)))
+            datetime.datetime.now(), len(missing_folders)))
         for i, folder in enumerate(missing_folders):
             if i % 1000 == 0:
-                print("{}: {}/{}".format(datetime.datetime.now(), i, len(folders)))
+                print("{}: {}/{}".format(datetime.datetime.now(),
+                                                i, len(missing_folders)))
             _submit_job(folder, eta=eta)
         print("{}: Submitted {} jobfiles".format(
-            datetime.datetime.now(), len(folders)))
-        
+            datetime.datetime.now(), len(missing_folders)))
+
         time.sleep(15.)
 
     if execute_jobs:

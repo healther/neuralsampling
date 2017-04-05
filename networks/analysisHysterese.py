@@ -86,6 +86,8 @@ def get_remanence_from_lists(listAs, listIs):
 def get_coercivity_from_lists(listAs, listIs, maxA):
     updone = False
     lowdone = False
+    Icoerlow = -10000.
+    Icoerup = 10000.
     for i, As in enumerate(listAs):
         if (As[0][0] > 0.5 * maxA) and not updone:
             rightA = As[0][0]
