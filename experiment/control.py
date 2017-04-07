@@ -121,10 +121,10 @@ def run_experiment(experimentfile):
     folders = _get_folders(ex_dicts, sim_folder_template)
 
     print("Generating {} simulations".format(len(folders)))
+    missing_folders = []
     if write_configs:
         _write_configs(ex_dicts, folders)
     else:
-        missing_folders = []
         for folder in folders:
             if not os.path.exists(os.path.join(folder, 'success')):
                 missing_folders.append(folder)
