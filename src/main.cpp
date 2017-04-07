@@ -114,6 +114,7 @@ int main(int argc, char const *argv[])
     } else if (neuron_type=="erf") {
         neuron_activation_type = Erf;
     } else {
+        std::cout << "Invalid neuron type. Aborting." << std::endl;
         return -1;
     }
     if (synapse_type=="rect") {
@@ -125,6 +126,7 @@ int main(int argc, char const *argv[])
     } else if (synapse_type=="tail") {
         neuron_interaction_type = Tail;
     } else  {
+        std::cout << "Invalid synapse type. Aborting." << std::endl;
         return -1;
     }
 
