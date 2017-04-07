@@ -1,0 +1,48 @@
+experimentConfig:
+  writeConfigs:     True
+  generateJobs:     True
+  submitJobs:       True
+  submitFailedJobs: False
+  executeJobs:      True
+  collectJobs:      True
+  binaryLocation: /work/workspace/scratch/hd_wv385-neuralsampling-0/neuralsampling/bin/neuralsampler
+  envfileLocation: /work/workspace/scratch/hd_wv385-neuralsampling-0/neuralsampling/load_env_withmpl.sh
+  filesToRemove: []
+  eta: 50.
+Config:
+  neuronType: neuronType
+  synapseType: rect
+  nupdates: 1000000
+  randomSeed: 42434343
+  randomSkip: 1000000
+  tauref: tau
+  tausyn: tau
+  delay: 1
+  outputScheme: Spikes
+  networkUpdateScheme: InOrder
+  outputEnv: False
+temperature:
+    type: Const
+    times: [0, 100000001]
+    values: [1., 1.]
+externalCurrent:
+    type: Const
+    times: [0, 10010000]
+    values: [0., 0.]
+network:
+  etaFunction: ising.eta
+  problemName: calibration.create
+  parameters:
+    npoints: 100
+    bmin: -7.
+    bmax: 3.
+    ic: 10000
+analysis:
+  analysisFunction: calibration.fit
+  parameters:
+    nothinguseful: None
+experimentName: Calibration001
+
+replacements:
+  neuronType: [log, erf]
+  tau: [1, 3, 10, 30, 100, 300, 1000, 3000, 10000]

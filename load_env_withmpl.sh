@@ -75,6 +75,7 @@ module load py-pyparsing-2.1.10-gcc-6.2.0-gesicgy
 module load py-pyside-1.2.2-gcc-6.2.0-vdtn7gg
 module load py-pytz-2016.6.1-gcc-6.2.0-avffpo4
 module load py-pyyaml-3.11-gcc-6.2.0-g5bqdeo
+module load py-scipy-0.18.1-gcc-6.2.0-ae6a2ka
 module load py-setuptools-34.2.0-gcc-6.2.0-imiloio
 module load py-simplegeneric-0.8.1-gcc-6.2.0-casa7em
 module load py-six-1.10.0-gcc-6.2.0-mr7r7b7
