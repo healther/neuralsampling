@@ -35,13 +35,13 @@ network:
   parameters:
     npoints: 100
     bmin: -7.
-    bmax: 3.
+    bmax: 7.
     ic: 10000
 analysis:
   analysisFunction: calibration.fit
   parameters:
     nothinguseful: None
-experimentName: Calibration001
+experimentName: Calibration002
 
 replacements:
   neuronType: [log, erf]

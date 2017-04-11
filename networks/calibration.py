@@ -11,10 +11,10 @@ from collections import Counter
 
 
 def sigma(u, u05=0., alpha=1.):
-    return 1./(1.+np.exp(-alpha*(u-u05)))
+    return 1./(1. + np.exp(-(u - u05) / alpha))
 
 
-def fit(outfile, **kwargs):
+def fit(outfile, minact=0.05, maxact=0.95, **kwargs):
     folder = os.path.dirname(outfile)
     spikes = []
     with open(os.path.join(folder, 'output'), 'r') as f:
@@ -34,11 +34,15 @@ def fit(outfile, **kwargs):
     nspikes = Counter(spikes)
     activities = [nspikes.get(i, 0)*tau/nsimupdates for i in range(len(biases))]
 
-    popt, pcov = curve_fit(sigma, biases, activities)
-
     analysisdict = {}
     analysisdict['nspikes'] = nspikes
     analysisdict['activities'] = activities
+
+    biases = [b for b, a in zip(biases, activities) if ((a<maxact) and (a>minact))]
+    activities = [a for a in activities if ((a<maxact) and (a>minact))]
+
+    popt, pcov = curve_fit(sigma, biases, activities)
+
     analysisdict['alpha'] = float(popt[1])
     analysisdict['u05'] = float(popt[0])
     analysisdict.update(simdict)
