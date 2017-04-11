@@ -92,7 +92,6 @@ def run_experiment(experimentfile):
 
     replacements = dictionary.pop('replacements', {})
     experimentname = dictionary.get('experimentName', '')
-    shutil.copy(experimentfile, os.path.join('simulations', '01_runs', experimentname))
 
     experiment_config = dictionary.pop('experimentConfig')
     write_configs = experiment_config.get('writeConfigs', False)
@@ -105,6 +104,11 @@ def run_experiment(experimentfile):
     binary_location = experiment_config.get('binaryLocation', '')
     files_to_remove = experiment_config.get('filesToRemove', '')
     eta = experiment_config.get('eta', 'None')
+
+    # save experimentfile if we are submitting jobs
+    if submit_jobs or submit_failed_jobs or execute_jobs:
+        experimentname = utils.append_iteration_of_experiment(experimentname)
+        shutil.copy(experimentfile, os.path.join('simulations', '01_runs', experimentname))
 
     sim_folder_template = utils.generate_folder_template(
                     replacements, dictionary, 'simulations', experimentname)

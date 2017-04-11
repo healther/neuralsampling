@@ -34,6 +34,19 @@ def flatten_dictionary(d, parent_key='', sep='_'):
     return dict(items)
 
 
+def append_iteration_of_experiment(experimentname):
+    maxiteration = 0
+    for fname in os.listdir(os.path.join('simulations', '01_runs')):
+        if not fname.startswith(experimentname):
+            continue
+        # find extension
+        iteration = fname.split(experimentname)[1]
+        # strip prepended _
+        maxiteration = max(maxiteration, int(iteration[1:]))
+
+    return experimentname + "_{:03d}".format(maxiteration + 1)
+
+
 def get_simparameters_from_template(foldertemplate):
     entries = foldertemplate.split('}_{')
     entries[0] = entries[0].split('{')[1]   # strip basefolder
