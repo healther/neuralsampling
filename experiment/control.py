@@ -106,8 +106,9 @@ def run_experiment(experimentfile):
     eta = experiment_config.get('eta', 'None')
 
     # save experimentfile if we are submitting jobs
-    if submit_jobs or submit_failed_jobs or execute_jobs:
-        experimentname = utils.append_iteration_of_experiment(experimentname)
+    if generate_jobs or write_configs:
+    #    experiment_iteration_name = utils.append_iteration_of_experiment(experimentname)
+    #    shutil.copy(experimentfile, os.path.join('simulations', '01_runs', experiment_iteration_name))
         shutil.copy(experimentfile, os.path.join('simulations', '01_runs', experimentname))
 
     sim_folder_template = utils.generate_folder_template(
@@ -185,7 +186,7 @@ def run_experiment(experimentfile):
 
         time.sleep(5.)  # ensure that all subprocesses have finished
 
-    if collect_jobs:
+    if collect_jobs is not False:
         print("{}: Collecting results".format(datetime.datetime.now()))
         get_simparameters_from_template = utils.get_function_from_name(
                                         'utils.get_simparameters_from_template')
