@@ -42,7 +42,7 @@ def append_iteration_of_experiment(experimentname):
         # find extension
         iteration = fname.split(experimentname)[1]
         # strip prepended _
-        maxiteration = max(maxiteration, int(iteration[1:]))
+        maxiteration = max(maxiteration, int(iteration.strip('_')))
 
     return experimentname + "_{:03d}".format(maxiteration + 1)
 
