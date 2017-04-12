@@ -21,6 +21,7 @@ protected:
     const int tauref;
     const int tausyn;
     const int delay;
+    int nspikes;
     int state;
     FixedQueue interactions;
 
@@ -37,6 +38,7 @@ public:
 
     int get_internalstate();
     int get_state();
+    int get_nspikes();
 
     double get_interaction();
     double activation(const double pot);

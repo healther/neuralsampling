@@ -73,12 +73,15 @@ void Neuron::update_interaction()
 
 bool Neuron::spike(const double pot)
 {
+    bool bspike = false;
     if (Step==activation_type) {
-        return pot>0.;
+        bspike = pot>0.;
     } else {
         double r = random_double(mt_random);
-        return activation(pot - std::log(tauref)) > r;
+        bspike = activation(pot - std::log(tauref)) > r;
     }
+    nspikes += bspike;
+    return bspike;
 }
 
 bool Neuron::has_spiked()
@@ -96,6 +99,11 @@ int Neuron::get_internalstate()
 int Neuron::get_state()
 {
     return (state<tauref);
+}
+
+int Neuron::get_nspikes()
+{
+    return nspikes;
 }
 
 

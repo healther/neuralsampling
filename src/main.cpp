@@ -149,8 +149,10 @@ int main(int argc, char const *argv[])
         network_output_scheme_type = BinaryStateOutput;
     } else if (output_scheme=="Spikes") {
         network_output_scheme_type = SpikesOutput;
+    } else if (output_scheme=="SummarySpikes") {
+        network_output_scheme_type = SummarySpikes;
     } else {
-        std::cout << "Use network_output_scheme [MeanActivity, BinaryState, Spikes]" << std::endl;
+        std::cout << "Use network_output_scheme [MeanActivity, BinaryState, Spikes, SummarySpikes]" << std::endl;
         return -1;
     }
 
@@ -199,11 +201,8 @@ int main(int argc, char const *argv[])
         net.get_state();
         net.produce_output(output);
     }
+    net.produce_summary(output);
     of.close();
-
-    // if (b_remove_config_file){
-    //     std::remove(argv[1]);
-    // }
 
     return 0;
 }

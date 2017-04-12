@@ -7,7 +7,7 @@
 #include <algorithm>
 
 enum TUpdateScheme { InOrder, BatchRandom, Random };
-enum TOutputScheme { MeanActivityOutput, BinaryStateOutput, SpikesOutput };
+enum TOutputScheme { MeanActivityOutput, BinaryStateOutput, SpikesOutput, SummarySpikes };
 extern std::mt19937_64 mt_random;
 
 #include "neuron.h"
@@ -48,6 +48,7 @@ public:
 
     // std::vector<bool> get_state();
     void produce_output(std::ostream& stream);
+    void produce_summary(std::ostream& stream);
     void get_state();
     void get_internalstate();
     void update_state(double T);

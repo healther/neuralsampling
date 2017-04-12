@@ -87,8 +87,19 @@ void Network::produce_output(std::ostream& stream)
             }
         }
         stream << "\n";
+    } else if (output_scheme==SummarySpikes) {
+
     } else {
         throw;
+    }
+}
+
+void Network::produce_summary(std::ostream& stream)
+{
+    if (output_scheme==SummarySpikes) {
+        for (unsigned int i = 0; i < biases.size(); ++i) {
+            stream << i << " " << neurons[i].get_nspikes() << "\n";
+        }
     }
 }
 
