@@ -4,6 +4,7 @@ from __future__ import division
 import os
 import sys
 import yaml
+import datetime
 
 import numpy as np
 from scipy.optimize import curve_fit
@@ -16,14 +17,12 @@ def sigma(u, u05=0., alpha=1.):
 
 def fit(outfile, minact=0.05, maxact=0.95, **kwargs):
     folder = os.path.dirname(outfile)
-    spikes = []
+    nspikes = Counter()
     with open(os.path.join(folder, 'output'), 'r') as f:
-        next(f)
-        next(f)
+        next(f) # strip status line
         for line in f:
-            for sp in line.strip().split(' '):
-                if sp != '':
-                    spikes.append(int(sp))
+            neuronid, neuron_nspikes = line.strip().split(' ')
+            nspikes[int(neuronid)] = int(neuron_nspikes)
 
     simdict = yaml.load(open(os.path.join(folder, 'sim.yaml'), 'r'))
     rundict = yaml.load(open(os.path.join(folder, 'run.yaml'), 'r'))
@@ -31,7 +30,6 @@ def fit(outfile, minact=0.05, maxact=0.95, **kwargs):
     nsimupdates = simdict['Config']['nupdates']
     biases = rundict['bias']
 
-    nspikes = Counter(spikes)
     activities = [nspikes.get(i, 0)*tau/nsimupdates for i in range(len(biases))]
 
     analysisdict = {}

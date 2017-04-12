@@ -8,17 +8,17 @@ experimentConfig:
   binaryLocation: /work/workspace/scratch/hd_wv385-neuralsampling-0/neuralsampling/bin/neuralsampler
   envfileLocation: /work/workspace/scratch/hd_wv385-neuralsampling-0/neuralsampling/load_env_withmpl.sh
   filesToRemove: []
-  eta: 50.
+  eta: 18000.
 Config:
   neuronType: neuronType
   synapseType: rect
-  nupdates: 1000000
+  nupdates: 100000000
   randomSeed: 42434343
   randomSkip: 1000000
   tauref: tau
   tausyn: tau
   delay: 1
-  outputScheme: Spikes
+  outputScheme: SummarySpikes
   networkUpdateScheme: InOrder
   outputEnv: False
 temperature:
@@ -33,15 +33,15 @@ network:
   etaFunction: ising.eta
   problemName: calibration.create
   parameters:
-    npoints: 100
-    bmin: -7.
-    bmax: 7.
+    npoints: 150
+    bmin: -4.
+    bmax: 6.
     ic: 10000
 analysis:
   analysisFunction: calibration.fit
   parameters:
     nothinguseful: None
-experimentName: Calibration002
+experimentName: Calibration_004
 
 replacements:
   neuronType: [log, erf]
