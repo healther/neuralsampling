@@ -1,5 +1,5 @@
 CXX=g++
-CPPFLAGS=-O2 -std=c++11
+CPPFLAGS=-O2 -std=c++11 -Wall
 LDFLAGS=
 LDLIBS=-lm -lyaml-cpp
 INCLUDEPATH=

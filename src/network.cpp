@@ -45,7 +45,7 @@ Network::Network(std::vector<double> &_biases,
 
 void Network::generate_connected_neuron_ids()
 {
-    int n_connections = 0;
+    unsigned int n_connections = 0;
     connected_neuron_ids.resize(biases.size());
     for (unsigned int i = 0; i < biases.size(); ++i)
     {

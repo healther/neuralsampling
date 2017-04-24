@@ -9,11 +9,11 @@
 
 Neuron::Neuron(const int _tauref, const int _tausyn, const int _delay, const int _state,
     const TActivation _activation_type, const TInteraction _interaction_type):
+    activation_type(_activation_type),
+    interaction_type(_interaction_type),
     tauref(_tauref),
     tausyn(_tausyn),
     delay(_delay),
-    activation_type(_activation_type),
-    interaction_type(_interaction_type),
     interactions(_delay, 0.)
 {
     state = _state;
@@ -119,6 +119,8 @@ double Neuron::activation(const double pot)
         return 1./(1.+std::exp(-pot));
     } else if (Erf==activation_type) {
         return .5 + .5*std::erf(.41631118*pot);
+    } else {
+        throw;
     }
 }
 

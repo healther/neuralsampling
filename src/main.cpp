@@ -91,6 +91,7 @@ int main(int argc, char const *argv[])
         ttype = Const;
     } else {
         std::cout << "Invalid temperature type. Aborting" << std::endl;
+        exit(1);
     }
     Temperature temperature = Temperature(ttype, temperatureNode);
 
@@ -190,7 +191,7 @@ int main(int argc, char const *argv[])
 
     // actual simulation
     double T, Iext;
-    for (int i = 0; i < nupdates; ++i)
+    for (unsigned int i = 0; i < nupdates; ++i)
     {
         T = temperature.get_temperature(i);
         Iext = current.get_temperature(i);
