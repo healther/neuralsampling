@@ -26,6 +26,7 @@ def submit_task(config, tasklistfile):
     ncpus = config['ncpus']
 
     jobcommand = "python {jobcontrolfolder}/execute_taskfile.py {tasklistfile}"
-    jobcommand = jobcommand.format(jobcontrolfolder=jobcontrolfolder, tasklistfile=tasklistfile)
-    jobid = subprocess.check_output(['sbatch', '-c', ncpus, '-p', 'simulation', '--wrap', jobcommand])
-
+    jobcommand = jobcommand.format(jobcontrolfolder=jobcontrolfolder,
+                                    tasklistfile=tasklistfile)
+    subprocess.check_output(['sbatch', '-c', ncpus, '-p', 'simulation',
+                                '--wrap', jobcommand])

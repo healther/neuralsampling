@@ -112,7 +112,7 @@ def expanddict(dict_to_expand, expansions):
     >>> d = { 1: 'blub', 2: {3: 'blub', 4: 'hello'}}
     >>> e = {'blub': ['a', 'b'], 'hello': [11, 12]}
     >>> expanddict(d, e)
-    [{1: 'a', 2: {3: 'a', 4: 11}}, {1: 'b', 2: {3: 'b', 4: 11}}, {1: 'a', 2: {3: 'a', 4: 12}}, {1: 'b', 2: {3: 'b', 4: 12}}]
+    [{1: 'a', 2: {3: 'a', 4: 11}}, {1: 'b', 2: {3: 'b', 4: 11}}, {1: 'a', 2: {3: 'a', 4: 12}}, {1: 'b', 2: {3: 'b', 4: 12}}] # noqa
     """
     expanded_dicts = [dict_to_expand]
     for ident, values in expansions.iteritems():
@@ -125,24 +125,6 @@ def expanddict(dict_to_expand, expansions):
                 tmp.append(copy.deepcopy(d))
         expanded_dicts = tmp
     return expanded_dicts
-
-
-def flatten_dictionary(d, parent_key='', sep='_'):
-    """Return a flat dictionary with concatenated keys for a nested dictionary d.
-
-    >>> d = { 'a': {'aa': 1, 'ab': {'aba': 11}}, 'b': 2, 'c': {'cc': 3}}
-    >>> flatten_dictionary(d)
-    {'a_aa': 1, 'b': 2, 'c_cc': 3, 'a_ab_aba': 11}
-
-    """
-    items = []
-    for k, v in d.items():
-        new_key = parent_key + sep + k if parent_key else k
-        if isinstance(v, collections.MutableMapping):
-            items.extend(flatten_dictionary(v, new_key, sep=sep).items())
-        else:
-            items.append((new_key, v))
-    return dict(items)
 
 
 def generate_folder_template(replacement_dictionary, expanding_dictonary,

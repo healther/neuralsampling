@@ -26,41 +26,42 @@ def get_data(outfile, subsampling=1):
 
 
 def get_lists(Is, As, nIpoints):
-    minI, maxI = min(Is)-.0001, max(Is)+.0001
-    boundaryIs = np.linspace(minI, maxI, nIpoints+1)
+    minI, maxI = min(Is) - .0001, max(Is) + .0001
+    boundaryIs = np.linspace(minI, maxI, nIpoints + 1)
     listIs = [float(I) for I in (boundaryIs[1:] + boundaryIs[:-1]) / 2]
     listAs = [[] for _ in range(nIpoints)]
     try:
         for I, A in zip(Is, As):
-            nid = next(i for i, bI in enumerate(boundaryIs) if bI>=I) - 1
+            nid = next(i for i, bI in enumerate(boundaryIs) if bI >= I) - 1
             listAs[nid].append(A)
     except:
         print(I, A, nid, minI, maxI)
-        print(boundaryIs[nid-1])
+        print(boundaryIs[nid - 1])
         print(listAs[0])
         raise
 
     maxA = max(As)
     for i, As in enumerate(listAs):
-        if max(As)-min(As) < .05 * maxA:
+        if max(As) - min(As) < .05 * maxA:
             listAs[i] = 2 * [(float(np.mean(As)), float(np.std(As)))]
         else:
-            upperbranchAs = [a for a in As if a >  (max(As)+min(As)) / 2]
-            lowerbranchAs = [a for a in As if a <= (max(As)+min(As)) / 2]
-            listAs[i] = [(float(np.mean(upperbranchAs)), float(np.std(upperbranchAs))),
-                         (float(np.mean(lowerbranchAs)), float(np.std(lowerbranchAs)))]
+            upperbranchAs = [a for a in As if a >  (max(As) + min(As)) / 2]
+            lowerbranchAs = [a for a in As if a <= (max(As) + min(As)) / 2]
+            listAs[i] = [(float(np.mean(upperbranchAs)),
+                            float(np.std(upperbranchAs))),
+                         (float(np.mean(lowerbranchAs)),
+                            float(np.std(lowerbranchAs)))]
 
     return listIs, listAs, maxA
 
 
 def get_area_from_lists(listAs, listIs):
     area = 0.
-    for lAl, lIl, lAr, lIr in zip(listAs[:-1], listIs[:-1], listAs[1:], listIs[1:]):
-        # width of the binning
-        dI = lIr - lIl
+    for lAl, lIl, lAr, lIr in zip(listAs[:-1], listIs[:-1],
+                                        listAs[1:], listIs[1:]):
         # activity difference on the left boundary
-        hl = (lAl[0][0]-lAl[1][0])
-        hr = (lAr[0][0]-lAr[1][0])
+        hl = (lAl[0][0] - lAl[1][0])
+        hr = (lAr[0][0] - lAr[1][0])
         # add trapezian area
         area += (lIr - lIl) * (hl + hr) / 2
 
@@ -69,16 +70,16 @@ def get_area_from_lists(listAs, listIs):
 
 def get_remanence_from_lists(listAs, listIs):
     # bin where 0 is
-    nid = next(i for i, bI in enumerate(listIs) if bI>0.) - 1
+    nid = next(i for i, bI in enumerate(listIs) if bI > 0.) - 1
     upperl = listAs[nid][0][0]
     lowerl = listAs[nid][1][0]
-    upperr = listAs[nid+1][0][0]
-    lowerr = listAs[nid+1][1][0]
+    upperr = listAs[nid + 1][0][0]
+    lowerr = listAs[nid + 1][1][0]
     Il = listIs[nid]
-    Ir = listIs[nid+1]
+    Ir = listIs[nid + 1]
 
-    mrup  = (upperr-upperl) * (Ir-0.)/(Ir-Il) + upperl
-    mrlow = (lowerr-lowerl) * (Ir-0.)/(Ir-Il) + lowerl
+    mrup  = (upperr - upperl) * (Ir - 0.) / (Ir - Il) + upperl
+    mrlow = (lowerr - lowerl) * (Ir - 0.) / (Ir - Il) + lowerl
 
     return (mrup, mrlow)
 
@@ -86,18 +87,19 @@ def get_remanence_from_lists(listAs, listIs):
 def get_coercivity_from_lists(listAs, listIs, maxA):
     updone = False
     lowdone = False
-    Icoerlow = -10000.
-    Icoerup = 10000.
+    Icoerclow = -10000.
+    Icoercup = 10000.
     for i, As in enumerate(listAs):
+        dI = listIs[i] - listIs[i - 1]
         if (As[0][0] > 0.5 * maxA) and not updone:
             rightA = As[0][0]
-            leftA  = listAs[i-1][0][0]
-            Icoercup = (listIs[i] - listIs[i-1]) * (rightA - 0.5) / (rightA - leftA) + listIs[i-1]
+            leftA  = listAs[i - 1][0][0]
+            Icoercup = dI * (rightA - 0.5) / (rightA - leftA) + listIs[i - 1]
             updone = True
         if (As[1][0] > 0.5 * maxA) and not lowdone:
             rightA = As[1][0]
-            leftA  = listAs[i-1][1][0]
-            Icoerclow = (listIs[i] - listIs[i-1]) * (rightA - 0.5) / (rightA - leftA) + listIs[i-1]
+            leftA  = listAs[i - 1][1][0]
+            Icoerclow = dI * (rightA - 0.5) / (rightA - leftA) + listIs[i - 1]
             lowdone = True
     return (Icoerclow, Icoercup)
 
@@ -126,7 +128,8 @@ def hysteresis(outfile, nIpoints=100, subsampling=1, plot=False, **kwargs):
     analysisdict = {'As': listAs, 'Is': listIs}
     analysisdict['area'] = get_area_from_lists(listAs, listIs)
     analysisdict['remanenz'] = get_remanence_from_lists(listAs, listIs)
-    analysisdict['coercivity'] = get_coercivity_from_lists(listAs, listIs, maxA)
+    analysisdict['coercivity'] = get_coercivity_from_lists(listAs, listIs,
+                                                                        maxA)
     analysisdict['simdict'] = get_simdict(outfile)
 
     with open(os.path.join(os.path.split(outfile)[0], 'analysis'), 'w') as f:
@@ -136,13 +139,13 @@ def hysteresis(outfile, nIpoints=100, subsampling=1, plot=False, **kwargs):
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
-        from matplotlib.backends.backend_pdf import PdfPages
 
         upperAsmean = [A[0][0] for A in listAs]
         upperAsstd = [A[0][1] for A in listAs]
         lowerAsmean = [A[1][0] for A in listAs]
         lowerAsstd = [A[1][1] for A in listAs]
-        with open(os.path.join(os.path.split(outfile)[0], 'hysteresis.pdf'), 'w') as pdf:
+        with open(os.path.join(os.path.split(outfile)[0],
+                                    'hysteresis.pdf'), 'w') as pdf:
             fig = plt.figure()
             ax = fig.add_subplot(111)
             ax.errorbar(listIs, upperAsmean, upperAsstd, fmt='bx')
@@ -159,7 +162,8 @@ if __name__ == "__main__":
         import doctest
         print(doctest.testmod())
     elif len(sys.argv) == 4:
-        hysteresis(outfile=sys.argv[1], nIpoints=int(sys.argv[2]), subsampling=int(sys.argv[3]), plot=True)
+        hysteresis(outfile=sys.argv[1], nIpoints=int(sys.argv[2]),
+                        subsampling=int(sys.argv[3]), plot=True)
     else:
         print("Don't know what to do.")
         print(sys.argv)

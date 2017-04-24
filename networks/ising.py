@@ -122,7 +122,6 @@ def analysis_mean(outfile, subsampling=1, **kwargs):
         f.write(yaml.dump(analysisdict))
 
 
-
 if __name__ == "__main__":
     import doctest
     print(doctest.testmod())

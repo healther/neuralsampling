@@ -1,4 +1,3 @@
-
 import matplotlib.pyplot as plt
 import yaml
 import numpy as np
@@ -8,7 +7,7 @@ import sys
 from matplotlib.backends.backend_pdf import PdfPages
 
 
-def isinlist(id_list, list_of_list):
+def isinlist(id_list, list_of_lists):
     for i, li in zip(id_list, list_of_lists):
         if i not in li:
             return False
@@ -24,9 +23,9 @@ def reduce_data(collected_file_name, restrictions, order):
             # reduced_dict[k] = v
             dataline = []
             for o in order:
-                if o[0]=='key':
+                if o[0] == 'key':
                     dataline.append(k[o[1]])
-                elif o[0]=='value':
+                elif o[0] == 'value':
                     dataline.append(v[o[1]])
             reduced_data.append(dataline)
 
@@ -39,8 +38,8 @@ def scatter_plot(collected_file_name,
         plotname, plotfolder):
 
     reduced_data = reduce_data(collected_file_name)
-    xdata = len(bundels)*[]
-    ydata = len(bundels)*[]
+    xdata = len(bundels) * []
+    ydata = len(bundels) * []
 
     for rd in reduced_dict.iteritems():
         xdata[bundels.index(rd[bundelind])].append(rd[xid])
@@ -57,7 +56,6 @@ def scatter_plot(collected_file_name,
         plt.savefig(pdf, format='pdf')
 
 
-
 def colormap(collected_file_name,
         restrictions, order,
         xlabel, ylabel, zlabel, xid, yid, zid,
@@ -66,12 +64,17 @@ def colormap(collected_file_name,
 
     Input:
         collected_file_name     string  name of the yaml file with keys
-                                            _-seperated arguments and values as means and std
-        xlabel                  string  key that should be plotted on the xlabel
-        ylabel                  string  key that should be plotted on the ylabel
-        zlabel                  string  key that should select the color of the patch
+                                            _-seperated arguments and values
+                                            as means and std
+        xlabel                  string  key that should be plotted on the
+                                            xlabel
+        ylabel                  string  key that should be plotted on the
+                                            ylabel
+        zlabel                  string  key that should select the color of
+                                            the patch
         restrictions            dict    dictionary of {argument: iterable} with
-                                            iterable containing all applicable values for argument
+                                            iterable containing all applicable
+                                            values for argument
         plotname                string  filename of the output pdf file
         plotfolder              string  folder in which to put the output
     Output:
@@ -79,7 +82,6 @@ def colormap(collected_file_name,
     """
 
     reduced_data = reduce_data(collected_file_name, restrictions, order)
-
 
     xvalues = []
     yvalues = []
@@ -92,24 +94,23 @@ def colormap(collected_file_name,
 
     unique_x = sorted(list(set(xvalues)))
     unique_y = sorted(list(set(yvalues)))
-    n_slices = len(unique_x)*len(unique_y)
+    n_slices = len(unique_x) * len(unique_y)
 
     if n_slices < len(zvalues):
-        zvals = n_slices*[0.]
-        zfreqs = n_slices*[0]
+        zvals = n_slices * [0.]
+        zfreqs = n_slices * [0]
 
         for x, y, z in zip(xvalues, yvalues):
-            ind = len(unique_x)*unique_y.index(y) + unique_x.index(x)
+            ind = len(unique_x) * unique_y.index(y) + unique_x.index(x)
             zvals[int] += z
             zfreqs[int] += 1
 
         for i in range(len(zvals)):
-            zvals[i] = zvals[i]/zfreqs[i]
+            zvals[i] = zvals[i] / zfreqs[i]
 
     zresults = np.zeros((len(unique_x), len(unique_y)))
     for x, y, z in zip(xvalues, yvalues, zvals):
         zresults[unique_x.index(x), unique_y.index(y)] = z
-
 
     with PdfPages(os.path.join(plotfolder, plotname)) as pdf:
         fig = plt.figure()
@@ -123,6 +124,6 @@ def colormap(collected_file_name,
     return fig, ax
 
 if __name__ == '__main__':
-    if len(sys.argv)==1:
+    if len(sys.argv) == 1:
         import doctest
         print(doctest.testmod())

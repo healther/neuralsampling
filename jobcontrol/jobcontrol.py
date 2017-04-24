@@ -11,7 +11,6 @@ import sys
 import datetime
 import errno
 import shutil
-import time
 
 import utils
 import cluster.bwuni
@@ -74,6 +73,7 @@ def action_reset(args):
         for dirpath, dirnames, filenames in os.walk(jobtasklists):
             for filename in filenames:
                 os.remove(os.path.join(dirpath, filename))
+
 
 def action_config(args):
     if len(args) == 0:
@@ -159,7 +159,8 @@ def action_execute(args):
                                 'execute_taskfile.py'), taskfilename])
     elif config['slurmmode'] == 'bwuni':
         # resubmit tasks
-        # taskfilenames = cluster.bwuni.clean_taskfolder(jobtasklists) + taskfilenames
+        # taskfilenames = cluster.bwuni.clean_taskfolder(jobtasklists) +
+        #                                     taskfilenames
         for taskfilename in taskfilenames:
             cluster.bwuni.submit_task(config, taskfilename)
     elif config['slurmmode'] == 'heidelberg':
