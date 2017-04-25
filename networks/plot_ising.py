@@ -17,7 +17,7 @@ def borders(points):
     return out
 
 
-def plot_ising(pdata):
+def plot_ising(pdata, title):
     weights     = np.array(sorted(set(pdata['network_parameters_weight'])))
     biasfactors = np.array(sorted(set(pdata['network_parameters_biasfactor'])))
 
@@ -35,7 +35,9 @@ def plot_ising(pdata):
     cax = ax.pcolor(plot_weights, plot_biasfactors, activities.T,
         vmin=0., vmax=8100., edgecolors='k')
     fig.colorbar(cax)
-    print(activities)
+    ax.set_title(title)
+    ax.set_xlabel('weight')
+    ax.set_ylabel('biasfactor')
 
 
 def plot_ising_run(collected_data_file, plot_npoints=1000):
@@ -60,7 +62,7 @@ def plot_ising_run(collected_data_file, plot_npoints=1000):
 
     pdata = pandas.DataFrame(data)
     for rseed in set(pdata['network_parameters_rseed']):
-        plot_ising(pdata.loc[(pdata['network_parameters_rseed'] == rseed)])
+        plot_ising(pdata.loc[(pdata['network_parameters_rseed'] == rseed)], str(rseed))
 
 
 if __name__ == '__main__':
