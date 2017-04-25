@@ -1,0 +1,9 @@
+[flake8]
+ignore = D203, E126, E127, E128, E221, E222, E402, N806
+exclude =
+    .git,
+    __pycache__,
+    src,
+    build,
+max-complexity = 10
+statistics = True

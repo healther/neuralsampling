@@ -4,7 +4,6 @@ from __future__ import division
 import os
 import sys
 import yaml
-import datetime
 
 import numpy as np
 from scipy.optimize import curve_fit
@@ -12,14 +11,14 @@ from collections import Counter
 
 
 def sigma(u, u05=0., alpha=1.):
-    return 1./(1. + np.exp(-(u - u05) / alpha))
+    return 1. / (1. + np.exp(-(u - u05) / alpha))
 
 
 def fit(outfile, minact=0.05, maxact=0.95, **kwargs):
     folder = os.path.dirname(outfile)
     nspikes = Counter()
     with open(os.path.join(folder, 'output'), 'r') as f:
-        next(f) # strip status line
+        next(f)  # strip status line
         for line in f:
             neuronid, neuron_nspikes = line.strip().split(' ')
             nspikes[int(neuronid)] = int(neuron_nspikes)
@@ -30,14 +29,16 @@ def fit(outfile, minact=0.05, maxact=0.95, **kwargs):
     nsimupdates = simdict['Config']['nupdates']
     biases = rundict['bias']
 
-    activities = [nspikes.get(i, 0)*tau/nsimupdates for i in range(len(biases))]
+    activities = [nspikes.get(i, 0) * tau / nsimupdates
+                            for i in range(len(biases))]
 
     analysisdict = {}
     analysisdict['nspikes'] = nspikes
     analysisdict['activities'] = activities
 
-    biases = [b for b, a in zip(biases, activities) if ((a<maxact) and (a>minact))]
-    activities = [a for a in activities if ((a<maxact) and (a>minact))]
+    biases = [b for b, a in zip(biases, activities)
+                                        if ((a < maxact) and (a > minact))]
+    activities = [a for a in activities if ((a < maxact) and (a > minact))]
 
     popt, pcov = curve_fit(sigma, biases, activities)
 
@@ -59,7 +60,7 @@ def create(npoints, bmin, bmax, ic):
 
     samplers will be distributed uniformely on [bmin, bmax]
     >>> create(3, -2., 2., 0)
-    ([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]], [-2.0, 0.0, 2.0], [0, 0, 0])
+    ([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]], [-2.0, 0.0, 2.0], [0, 0, 0]) # noqa
     """
     biases = np.linspace(bmin, bmax, npoints).astype(float)
     initial_conditions = (np.ones(npoints) * ic).astype(int)
@@ -68,6 +69,6 @@ def create(npoints, bmin, bmax, ic):
 
 
 if __name__ == '__main__':
-    if len(sys.argv)==1:
+    if len(sys.argv) == 1:
         import doctest
         print(doctest.testmod())

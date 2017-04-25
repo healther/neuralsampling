@@ -107,9 +107,12 @@ def run_experiment(experimentfile):
 
     # save experimentfile if we are submitting jobs
     if generate_jobs or write_configs:
-    #    experiment_iteration_name = utils.append_iteration_of_experiment(experimentname)
-    #    shutil.copy(experimentfile, os.path.join('simulations', '01_runs', experiment_iteration_name))
-        shutil.copy(experimentfile, os.path.join('simulations', '01_runs', experimentname))
+        shutil.copy(experimentfile,
+                    os.path.join('simulations', '01_runs', experimentname))
+    #    experiment_iteration_name =
+    #           utils.append_iteration_of_experiment(experimentname)
+    #    shutil.copy(experimentfile, os.path.join('simulations',
+    #                               '01_runs', experiment_iteration_name))
 
     sim_folder_template = utils.generate_folder_template(
                     replacements, dictionary, 'simulations', experimentname)
@@ -159,7 +162,8 @@ def run_experiment(experimentfile):
             datetime.datetime.now(), len(folders)))
         for i, folder in enumerate(folders):
             if i % 1000 == 0:
-                print("{}: {}/{}".format(datetime.datetime.now(), i, len(folders)))
+                print("{}: {}/{}".format(datetime.datetime.now(),
+                                            i, len(folders)))
             _submit_job(folder, eta=eta)
         print("{}: Submitted {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
@@ -189,9 +193,9 @@ def run_experiment(experimentfile):
     if collect_jobs is not False:
         print("{}: Collecting results".format(datetime.datetime.now()))
         get_simparameters_from_template = utils.get_function_from_name(
-                                        'utils.get_simparameters_from_template')
+                                    'utils.get_simparameters_from_template')
         collect = []
-        nNones = 0
+        n_nones = 0
         for simdict, folder in zip(ex_dicts, folders):
             collectdict = {}
             foldertemplate = simdict['folderTemplate']
@@ -207,14 +211,14 @@ def run_experiment(experimentfile):
                 collectdict['analysis'] = analysisdict
             except:
                 collectdict['analysis'] = None
-                nNones += 1
+                n_nones += 1
 
             collect.append(collectdict)
 
         with open(os.path.join('collect', experimentname), 'w') as f:
             yaml.dump(collect, f)
         print("{}: Collected {} results, {} missing".format(
-            datetime.datetime.now(), len(folders)-nNones, nNones))
+            datetime.datetime.now(), len(folders) - n_nones, n_nones))
 
         time.sleep(1.)
 
@@ -241,7 +245,7 @@ def analysis(folder):
     simdict = yaml.load(open(os.path.join(folder, 'sim.yaml'), 'r'))
     analysis_function = utils.get_function_from_name(
                                     simdict['analysis']['analysisFunction'])
-    if analysis_function=="nothing":
+    if analysis_function == "nothing":
         return
     analysis_function(outfile=os.path.join(folder, 'output'),
             **simdict['analysis']['parameters'])

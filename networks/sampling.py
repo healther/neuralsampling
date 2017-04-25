@@ -1,10 +1,10 @@
 """This module implements standard sampling."""
 import sys
-import yaml
 import numpy as np
 
 
-def create_beta_distribution(n, factor, alpha, beta, rseed, ic_low, ic_high, ic_rseed):
+def create_beta_distribution(n, factor, alpha, beta, rseed, ic_low, ic_high,
+                ic_rseed):
     """Create a BM with beta distributed parameters.
 
     Input:
@@ -18,15 +18,16 @@ def create_beta_distribution(n, factor, alpha, beta, rseed, ic_low, ic_high, ic_
         ic_random   int     random seed for the initial conditions
 
     >>> create_beta_distribution(3, 1., .5, .5, 12, 0, 10, 13)
-    ([[0.0, 0.30425651289269606, 0.49974839820651534], [0.30425651289269606, 0.0, 0.32013983380426525], [0.49974839820651534, 0.32013983380426525, 0.0]], [-0.4992597294794353, -0.07487731161190547, 0.32439364137800153], [7, 2, 8])
+    ([[0.0, 0.30425651289269606, 0.49974839820651534], [0.30425651289269606, 0.0, 0.32013983380426525], [0.49974839820651534, 0.32013983380426525, 0.0]], [-0.4992597294794353, -0.07487731161190547, 0.32439364137800153], [7, 2, 8]) # noqa
     """
     np.random.seed(rseed)
-    weights = factor * (.5-np.random.beta(alpha, beta, size=(n, n)))
+    weights = factor * (.5 - np.random.beta(alpha, beta, size=(n, n)))
     weights = np.triu(weights, 1)
     weights += weights.T
-    biases = factor * (.5-np.random.beta(alpha, beta, size=n))
+    biases = factor * (.5 - np.random.beta(alpha, beta, size=n))
     np.random.seed(ic_rseed)
-    initial_conditions = np.random.uniform(ic_low, ic_high, len(biases)).astype(int)
+    initial_conditions = np.random.uniform(ic_low, ic_high,
+                                            len(biases)).astype(int)
 
     return weights.tolist(), biases.tolist(), initial_conditions.tolist()
 
@@ -36,12 +37,14 @@ def create(weights, biases, initial_conditions):
 
     Input:
         weights             string      filename of weights ndarray
-                            ndarray     weight matrix, must be symetric and zero diagonal
+                            ndarray     weight matrix, must be symetric and
+                                        zero diagonal
         biases              string      filename of biases ndarray
                             ndarray     biases vector
         initial_conditions  string      filename of initial_conditions ndarray
                             ndarray     initial_conditions vector
-                            [float, float, int]    uniform initialisation above {low, ..., high}
+                            [float, float, int]    uniform initialisation
+                                        above {low, ..., high}
 
     >>> create([[0., 1.], [1., 0.]], [.5, -.5], [0, 5])
     ([[0.0, 1.0], [1.0, 0.0]], [0.5, -0.5], [0, 5])
@@ -56,12 +59,13 @@ def create(weights, biases, initial_conditions):
         biases = np.array(biases)
     if isinstance(initial_conditions, str):
         initial_conditions = np.loadtxt(initial_conditions)
-    elif len(initial_conditions)==3:
+    elif len(initial_conditions) == 3:
         low = initial_conditions[0]
         high = initial_conditions[1]
         rseed = initial_conditions[2]
         np.random.seed(rseed)
-        initial_conditions = np.random.uniform(low, high, len(biases)).astype(int)
+        initial_conditions = np.random.uniform(low, high,
+                                        len(biases)).astype(int)
     else:
         initial_conditions = np.array(initial_conditions)
 
@@ -69,6 +73,6 @@ def create(weights, biases, initial_conditions):
 
 
 if __name__ == '__main__':
-    if len(sys.argv)==1:
+    if len(sys.argv) == 1:
         import doctest
         print(doctest.testmod())

@@ -2,14 +2,14 @@
 
 All public functions should be sideeffect free.
 """
-### TODO: Move sideeffect functions to different files
+# TODO: Move sideeffect functions to different files
 from __future__ import division, print_function
 
 import collections
 import os
-import yaml
 import itertools as it
 import numpy as np
+
 
 def flatten_dictionary(d, parent_key='', sep='_'):
     """Return a flat dictionary with concatenated keys for a nested dictionary d.
@@ -34,11 +34,11 @@ def ensure_folder_exists(folder):
     try:
         os.makedirs(folder)
     except OSError as e:
-        if e.errno!=17:
+        if e.errno != 17:
             raise
 
 
-### State format transformations
+# State format transformations
 def get_statelist(state, n_neurons):
     """Return list of {0,1}^n_neurons according to state.
 
@@ -66,10 +66,11 @@ def get_statelist(state, n_neurons):
     elif isinstance(state, str):
         return statelist_from_string(state, n_neurons)
     elif isinstance(state, list) or isinstance(state, tuple):
-        if len(state)==n_neurons:
+        if len(state) == n_neurons:
             return state
         else:
-            raise ValueError("Wrong list length {} requires {}".format(len(state), n_neurons))
+            raise ValueError("Wrong list length {} requires {}".format(
+                                                    len(state), n_neurons))
 
 
 def get_statestring(state, n_neurons):
@@ -96,8 +97,9 @@ def statelist_from_string(state, n_neurons):
     ...
     ValueError: Wrong string length 2 requires 3
     """
-    if len(state)!=n_neurons:
-        raise ValueError("Wrong string length {} requires {}".format(len(state), n_neurons))
+    if len(state) != n_neurons:
+        raise ValueError("Wrong string length {} requires {}".format(
+                                                    len(state), n_neurons))
     return [int(s) for s in state]
 
 
@@ -123,7 +125,8 @@ def statestring_from_int(stateint, n_neurons):
     ValueError: State 8 out of bounds 7
     """
     if stateint >= 2**n_neurons:
-        raise ValueError("State {} out of bounds {}".format(stateint, 2**n_neurons-1))
+        raise ValueError("State {} out of bounds {}".format(
+                                            stateint, 2**n_neurons - 1))
     return "{0:0{width}b}".format(stateint, width=n_neurons)
 
 
@@ -149,12 +152,15 @@ def statelist_from_int(stateint, n_neurons):
     ValueError: State 8 out of bounds 7
     """
     if stateint >= 2**n_neurons:
-        raise ValueError("State {} out of bounds {}".format(stateint, 2**n_neurons-1))
+        raise ValueError("State {} out of bounds {}".format(
+                                                stateint, 2**n_neurons - 1))
     return [int(s) for s in "{0:0{width}b}".format(stateint, width=n_neurons)]
 
-### distribution comparisons
+
+# distribution comparisons
 def calculate_dkl(ptheo, fsampl, norm_theo=False):
-    """Calculate the relative entropy when encoding fsampl with the optimal encoding of ptheo.
+    """Calculate the relative entropy when encoding fsampl
+                with the optimal encoding of ptheo.
 
     Input:
         ptheo       list    theoretical probabilities for all states
@@ -171,37 +177,39 @@ def calculate_dkl(ptheo, fsampl, norm_theo=False):
     if norm_theo:
         ptheo /= sum(ptheo)
     totn = np.sum(fsampl)
-    return np.sum(f/totn * np.log(f/totn/p) for p,f in zip(ptheo, fsampl) if f!=0)
+    return np.sum(f / totn * np.log(f / totn / p)
+                            for p, f in zip(ptheo, fsampl) if f != 0)
 
 
-def energies_for_network(w,b, states=None):
+def energies_for_network(w, b, states=None):
     """Calculate the energy of the states, based on weights w and biases b.
 
     Input:
         w       ndarray     weights of the network
         b       ndarray     biases of the network
-        states  list        list of states for which to calculate the energy, default None
+        states  list        list of states for which to calculate the energy,
+                                            default None
 
     Output:
-        energies    list    energy for each state in states, if states is None the energies
-                            for all 2**n states
+        energies    list    energy for each state in states, if states is None
+                                    the energies for all 2**n states
 
     >>> energies_for_network(np.array([[0.,1.],[1.,0.]]), np.array([-.5, .5]))
     [-0.0, -0.5, 0.5, -1.0]
-    >>> energies_for_network(np.array([[0.,1.],[1.,0.]]), np.array([-.5, .5]), [[0,0],[1,1]])
+    >>> energies_for_network(np.array([[0.,1.],[1.,0.]]), np.array([-.5, .5]), [[0,0],[1,1]])  # noqa
     [-0.0, -1.0]
     """
-    if states==None:
-        states = [z for z in it.product([0,1], repeat=len(w))]
-    return [ -.5*np.dot(z, np.dot(w, z))-np.dot(b,z) for z in states]
+    if states is None:
+        states = [z for z in it.product([0, 1], repeat=len(w))]
+    return [-.5 * np.dot(z, np.dot(w, z)) - np.dot(b, z) for z in states]
 
 
-def get_minimal_energy_states(W, b):
-    """Return a list of minmal energy states for BM (W, b).
+def get_minimal_energy_states(weights, b):
+    """Return a list of minmal energy states for BM (weights, b).
 
     Input:
-        W   array   weight matrix
-        b   array   bias vector
+        weights     array   weight matrix
+        b           array   bias vector
 
     Output:
         minimal_states  list    list of the minimal energy states as ints
@@ -209,8 +217,8 @@ def get_minimal_energy_states(W, b):
     >>> get_minimal_energy_states([[0., 1.], [1., 0.]], [-.5, .5])
     array([3])
     """
-    e = energies_for_network(W, b)
-    return np.nonzero(e==min(e))[0]
+    e = energies_for_network(weights, b)
+    return np.nonzero(e == min(e))[0]
 
 
 def probabilities_from_energies(energies):
@@ -232,11 +240,10 @@ def probabilities_from_energies(energies):
     [0.7310585786300049, 0.2689414213699951]
     """
     Z = np.sum(np.exp(-e) for e in energies)
-    probabilities = [np.exp(-e)/Z for e in energies]
+    probabilities = [np.exp(-e) / Z for e in energies]
     return probabilities
 
 
 if __name__ == "__main__":
     import doctest
     print(doctest.testmod())
-
