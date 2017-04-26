@@ -21,8 +21,8 @@ protected:
     const int tauref;
     const int tausyn;
     const int delay;
-    int nspikes;
-    int state;
+    long long int nspikes;
+    long long int state;
     FixedQueue interactions;
 
 public:
@@ -36,9 +36,9 @@ public:
     bool spike(const double pot);
     bool has_spiked();
 
-    int get_internalstate();
-    int get_state();
-    int get_nspikes();
+    long long int get_internalstate();
+    long long int get_state();
+    long long int get_nspikes();
 
     double get_interaction();
     double activation(const double pot);

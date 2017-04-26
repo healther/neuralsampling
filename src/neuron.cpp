@@ -92,17 +92,17 @@ bool Neuron::has_spiked()
 
 
 
-int Neuron::get_internalstate()
+long long int Neuron::get_internalstate()
 {
     return state;
 }
 
-int Neuron::get_state()
+long long int Neuron::get_state()
 {
     return (state<tauref);
 }
 
-int Neuron::get_nspikes()
+long long int Neuron::get_nspikes()
 {
     return nspikes;
 }
