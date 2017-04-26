@@ -30,7 +30,7 @@ private:
     bool boptimized;
 
     void generate_connected_neuron_ids();
-    std::vector<int> get_update_inds(unsigned int len);
+    std::vector<int> get_update_inds();
     double get_potential_for_neuronid(unsigned int id);
 
 public:
@@ -44,7 +44,7 @@ public:
             TInteraction _neuron_interaction_type);
     ~Network() {};
 
-    std::vector<int> states;
+    std::vector<long long int> states;
 
     // std::vector<bool> get_state();
     void produce_output(std::ostream& stream);

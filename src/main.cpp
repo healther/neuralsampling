@@ -14,6 +14,10 @@
 int main(int argc, char const *argv[])
 {
     // report inputfilename and load the yaml content
+    if (argc != 2) {
+        std::cout << "Provide the configuration you wish to run." << std::endl;
+        return 1;
+    }
     std::cout << argv[1] << std::endl;
     YAML::Node baseNode = YAML::LoadFile(argv[1]);
     YAML::Node configNode = baseNode["Config"];
@@ -70,9 +74,9 @@ int main(int argc, char const *argv[])
     }
 
     // get general config
-    int random_seed = configNode["randomSeed"].as<int>();
-    int random_skip = configNode["randomSkip"].as<int>();
-    unsigned int nupdates = configNode["nupdates"].as<int>();
+    long long int random_seed = configNode["randomSeed"].as<long long int>();
+    long long int random_skip = configNode["randomSkip"].as<long long int>();
+    unsigned long long int nupdates = configNode["nupdates"].as<long long int>();
     int tauref = configNode["tauref"].as<int>();
     int tausyn = configNode["tausyn"].as<int>();
     int delay = configNode["delay"].as<int>();
@@ -201,6 +205,10 @@ int main(int argc, char const *argv[])
         net.update_state(T, Iext);
         net.get_state();
         net.produce_output(output);
+        if (i % 100000 == 0)
+        {
+            net.produce_summary(output);
+        }
     }
     net.produce_summary(output);
     of.close();

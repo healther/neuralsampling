@@ -1,16 +1,16 @@
-Config: {neuronType: log, synapseType: rect, nupdates: 100000000,
-    randomSeed: 42424242, randomSkip: 1000000, tauref: 1000,
-    tausyn: 1000, outputScheme: SummarySpikes, delay: 1,
+Config: {neuronType: log, synapseType: rect, nupdates: 11000000,
+    randomSeed: 42434343, randomSkip: 1000000, tauref: 3,
+    tausyn: 3, outputScheme: SummarySpikes, delay: 1,
     networkUpdateScheme: InOrder}
-bias: [-1.5, -0.5, 0.5, 1.5]
+bias: [-4.]
 weight:
 - [0, 0, 0.]
-initialstate: [10000, 10000, 10000, 10000]
+initialstate: [10000]
 temperature:
     type: Const
-    times: [0, 10000001]
+    times: [0, 1100000000]
     values: [1., 1.]
 externalCurrent:
     type: Const
-    times: [0, 10000001]
+    times: [0, 1100000000]
     values: [0., 0.]

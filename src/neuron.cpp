@@ -7,7 +7,8 @@
 
 
 
-Neuron::Neuron(const int _tauref, const int _tausyn, const int _delay, const int _state,
+Neuron::Neuron(const long long int _tauref, const long long int _tausyn,
+    const long long int _delay, const long long int _state,
     const TActivation _activation_type, const TInteraction _interaction_type):
     activation_type(_activation_type),
     interaction_type(_interaction_type),
@@ -49,20 +50,23 @@ void Neuron::update_interaction()
     double relstate = (double)state/(double)tauref;
     double interaction = (relstate < 1.);
     if (interaction_type==Exp) {
-        interaction = (double)tauref/(double)tausyn * std::exp(-relstate)/(1.-std::exp(-(double)tauref/(double)tausyn));
+        interaction = (double)tauref / (double)tausyn * std::exp(-relstate) / \
+                        (1. - std::exp(-(double)tauref / (double)tausyn));
     } else if (interaction_type==Rect) {
         interaction = (state < tauref);
     } else if (interaction_type==Cuto) {
         if (state < tauref)
         {
-            interaction = (double)tauref/(double)tausyn * std::exp(-relstate)/(1.-std::exp(-(double)tauref/(double)tausyn));
+            interaction = (double)tauref/(double)tausyn * std::exp(-relstate)/ \
+                        (1. - std::exp(-(double)tauref / (double)tausyn));
         } else {
             interaction = 0.;
         }
     } else if (interaction_type==Tail) {
         if (state >= tauref)
         {
-            interaction = (double)tauref/(double)tausyn * std::exp(-relstate)/(1.-std::exp(-(double)tauref/(double)tausyn));
+            interaction = (double)tauref/(double)tausyn * std::exp(-relstate)/ \
+                        (1. - std::exp(-(double)tauref / (double)tausyn));
         } else {
             interaction = 1.;
         }
@@ -117,9 +121,9 @@ double Neuron::get_interaction()
 double Neuron::activation(const double pot)
 {
     if (Log==activation_type) {
-        return 1./(1.+std::exp(-pot));
+        return 1. / (1. + std::exp(-pot));
     } else if (Erf==activation_type) {
-        return .5 + .5*std::erf(.41631118*pot);
+        return .5 + .5*std::erf(.41631118 * pot);
     } else {
         throw;
     }

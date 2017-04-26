@@ -59,7 +59,7 @@ void Network::generate_connected_neuron_ids()
         }
     }
     // check if network is sparse enough
-    if (n_connections*4<biases.size()*biases.size())
+    if (n_connections*4 < biases.size()*biases.size())
     {
         boptimized = true;
     }
@@ -98,8 +98,9 @@ void Network::produce_summary(std::ostream& stream)
 {
     if (output_scheme==SummarySpikes) {
         for (unsigned int i = 0; i < biases.size(); ++i) {
-            stream << i << " " << neurons[i].get_nspikes() << "\n";
+            stream << neurons[i].get_nspikes() << " ";
         }
+        stream << std::endl;
     }
 }
 
@@ -119,7 +120,7 @@ void Network::get_internalstate()
     }
 }
 
-std::vector<int> Network::get_update_inds(unsigned int len) {
+std::vector<int> Network::get_update_inds() {
     std::vector<int> update_inds(biases.size()) ;
 
     if (update_scheme==Random) {
@@ -161,7 +162,7 @@ double Network::get_potential_for_neuronid(unsigned int neuronid) {
 void Network::update_state(double T)
 {
     // generate ids to update (depends on the update scheme)
-    std::vector<int> update_inds = get_update_inds(biases.size()) ;
+    std::vector<int> update_inds = get_update_inds() ;
 
     // update neurons in sequence determined above
     for (unsigned int i = 0; i < biases.size(); ++i)
@@ -176,7 +177,7 @@ void Network::update_state(double T)
 void Network::update_state(double T, double Iext)
 {
     // generate ids to update (depends on the update scheme)
-    std::vector<int> update_inds = get_update_inds(biases.size()) ;
+    std::vector<int> update_inds = get_update_inds() ;
 
     // update neurons in sequence determined above
     for (unsigned int i = 0; i < biases.size(); ++i)

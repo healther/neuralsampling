@@ -1,5 +1,5 @@
 CXX=g++
-CPPFLAGS=-O2 -std=c++11 -Wall -ftrapv
+CPPFLAGS=-O1 -std=c++11 -ftrapv -Wall -Wpedantic -Wextra
 LDFLAGS=
 LDLIBS=-lm -lyaml-cpp
 INCLUDEPATH=
@@ -11,6 +11,9 @@ MV=mv
 OBJS=neuralsampler network.o neuron.o
 
 bin: bin/neuralsampler
+
+debug: CPPFLAGS += -DDEBUG -g
+debug: bin
 
 all: bin test doc
 

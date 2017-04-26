@@ -19,22 +19,23 @@ class Temperature
 private:
     const ChangeType change_type;
 
-    int currentposition;
+    long long int currentposition;
     double currenttemperature;
 
     std::vector<double> values;
-    std::vector<int> times;
+    std::vector<long long int> times;
 
-    void update_temperature(int nupdate);
+    void update_temperature(long long int nupdate);
+    void selfcheck();
 
 
 public:
     Temperature(ChangeType type, YAML::Node temperatureNode);
-    Temperature(double T, int nupdates);
+    Temperature(double T, long long int nupdates);
     Temperature();
     ~Temperature() {};
 
-    double get_temperature(int nupdate);
+    double get_temperature(long long int nupdate);
 };
 
 

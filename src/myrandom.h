@@ -3,7 +3,7 @@
 
 #include <random>
 
-std::mt19937_64 mt_random;
+std::mt19937_64 mt_random(42424242);
 std::uniform_real_distribution<double> random_double(0.0,1.0);
 
 #endif // MYRANDOM_H

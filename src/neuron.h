@@ -18,15 +18,16 @@ private:
     const TInteraction interaction_type;
 
 protected:
-    const int tauref;
-    const int tausyn;
-    const int delay;
+    const long long int tauref;
+    const long long int tausyn;
+    const long long int delay;
     long long int nspikes;
     long long int state;
     FixedQueue interactions;
 
 public:
-    Neuron(const int _tauref, const int _tausyn, const int _delay, const int _state,
+    Neuron(const long long int _tauref, const long long int _tausyn,
+        const long long int _delay, const long long int _state,
         const TActivation _activation_type, const TInteraction _interaction_type);
     ~Neuron() {};
 
