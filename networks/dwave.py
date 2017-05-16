@@ -7,6 +7,10 @@ from collections import Counter, defaultdict
 import itertools as it
 import yaml
 
+# crazy hack to be able to import modules from the parent...
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
+sys.path.insert(0, currentdir)
 import utils
 
 
