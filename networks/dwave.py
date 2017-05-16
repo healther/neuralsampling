@@ -98,7 +98,11 @@ def create_dwave(size=1, nr=0, initialstate=10000):
 
     initial_conditions = np.ones_like(biases, dtype=int) * initialstate
 
-    return weights.tolist(), biases.tolist(), initial_conditions.tolist()
+    return (
+                utils.full_matrix_to_sparse_list(weights),
+                biases.tolist(),
+                initial_conditions.tolist()
+            )
 
 
 if __name__ == '__main__':
@@ -108,4 +112,5 @@ if __name__ == '__main__':
     elif len(sys.argv) == 2:
         print(create_dwave(sys.argv[1]))
     elif len(sys.argv) == 4:
-        print(get_energy_file(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])))
+        print(get_energy_file(int(sys.argv[1]), int(sys.argv[2]),
+                        int(sys.argv[3])))

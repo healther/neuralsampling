@@ -58,6 +58,15 @@ def single_index_to_double(n, n_cities):
     return int(n / n_cities) % n_cities, n % n_cities
 
 
+def full_matrix_to_sparse_list(weights):
+    wlist = []
+    for i, wline in enumerate(weights):
+        for j, w in enumerate(wline):
+            if w != 0:
+                wlist.append([i, j, w])
+    return wlist
+
+
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         import doctest
