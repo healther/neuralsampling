@@ -11,7 +11,7 @@ import yaml
 currentdir = os.path.dirname(
     os.path.abspath(inspect.getfile(inspect.currentframe())))
 sys.path.insert(0, currentdir)
-import utils
+import netutils
 
 
 def readinput(filename="size1/size1_rt0.44_0001.txt"):
@@ -26,6 +26,7 @@ def readinput(filename="size1/size1_rt0.44_0001.txt"):
     spin_biases = np.zeros(nsampler)
 
     for i, j, k in idata:
+        # k = -k
         if i == j:
             ni = existing_indices.index(i)
             spin_biases[ni] = k
@@ -49,27 +50,27 @@ def analysis_energies(outfile, subsampling=1, most_common=10, **kwargs):
         next(f)
         for line in it.islice(f, 0, None, subsampling):
             states[line[:-1]] += 1
-    most_common_states = Counter(states).most_common(most_common)
+    most_common_states = [c[0] for c in Counter(states).most_common(most_common)]
 
     # get simulation paramters
     with open(os.path.join(os.path.split(outfile)[0], 'run.yaml'), 'r') as f:
         rundict = yaml.load(f)
-    weights = np.array(rundict['weights'])
-    biases = np.array(rundict['biases'])
+    weights = np.array(netutils.sparse_list_to_full_matrix(rundict['weight']))
+    biases = np.array(rundict['bias'])
 
     energies = []
     for state in most_common_states:
         state_list = [int(i) for i in state]
-        energies.append(get_energy_network(state_list, weights, biases))
+        energies.append(float(get_energy_network(state_list, weights, biases)))
 
-    analysisdict = {'states': state_list, 'energies': energies}
+    analysisdict = {'states': most_common_states, 'energies': energies}
 
     # get simulation paramters
     with open(os.path.join(os.path.split(outfile)[0], 'sim.yaml'), 'r') as f:
         simdict = yaml.load(f)
     foldertemplate = simdict['folderTemplate']
-    simparameterkeys = utils.get_simparameters_from_template(foldertemplate)
-    flatsimdict = utils.flatten_dictionary(simdict)
+    simparameterkeys = netutils.get_simparameters_from_template(foldertemplate)
+    flatsimdict = netutils.flatten_dictionary(simdict)
     for spkey in simparameterkeys:
         analysisdict[spkey] = flatsimdict[spkey]
 
@@ -103,7 +104,7 @@ def create_dwave(size=1, nr=0, initialstate=10000):
     initial_conditions = np.ones_like(biases, dtype=int) * initialstate
 
     return (
-                utils.full_matrix_to_sparse_list(weights),
+                netutils.full_matrix_to_sparse_list(weights),
                 biases.tolist(),
                 initial_conditions.tolist()
             )

@@ -2,6 +2,7 @@ from __future__ import division, print_function
 
 import sys
 import collections
+import numpy as np
 
 
 def flatten_dictionary(d, parent_key='', sep='_'):
@@ -63,8 +64,16 @@ def full_matrix_to_sparse_list(weights):
     for i, wline in enumerate(weights):
         for j, w in enumerate(wline):
             if w != 0:
-                wlist.append([i, j, w])
+                wlist.append([i, j, float(w)])
     return wlist
+
+
+def sparse_list_to_full_matrix(wlist):
+    n = len(set(wl[0] for wl in wlist))
+    weights = np.zeros((n, n))
+    for i, j, w in wlist:
+        weights[i, j] = w
+    return weights
 
 
 if __name__ == '__main__':

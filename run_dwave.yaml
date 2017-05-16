@@ -1,0 +1,47 @@
+experimentConfig:
+  writeConfigs:     True
+  generateJobs:     True
+  submitJobs:       False
+  submitFailedJobs: False
+  executeJobs:      False
+  collectJobs:      False
+  binaryLocation: /work/workspace/scratch/hd_wv385-mnist_learning_hw-0/neuralsampling/bin/neuralsampler
+  envfileLocation: /work/workspace/scratch/hd_wv385-mnist_learning_hw-0/neuralsampling/load_env_withmpl.sh
+  filesToRemove: []
+  eta: 18000.
+Config:
+  neuronType: log
+  synapseType: exp
+  nupdates: 10000000
+  randomSeed: 42434343
+  randomSkip: 1000000
+  tauref: 100
+  tausyn: 100
+  delay: 1
+  outputScheme: BinaryState
+  networkUpdateScheme: InOrder
+  outputEnv: False
+temperature:
+    type: Const
+    times: [0, 10000005]
+    values: [1., .000001]
+externalCurrent:
+    type: Const
+    times: [0, 10010000]
+    values: [0., 0.]
+network:
+  etaFunction: ising.eta
+  problemName: dwave.create_dwave
+  parameters:
+    size: 1
+    nr: nr
+    initialstate: 10000
+analysis:
+  analysisFunction: dwave.analysis_energies
+  parameters:
+    subsampling: 1
+    most_common: 30
+experimentName: Dwave01
+
+replacements:
+  nr: [0, 1, 2, 3, 4, 5]
