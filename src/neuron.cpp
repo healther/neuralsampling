@@ -16,6 +16,7 @@ Neuron::Neuron(const int _tauref, const int _tausyn, const int _delay, const int
     delay(_delay),
     interactions(_delay, 0.)
 {
+    nspikes = 0;
     state = _state;
     for (int i = 0; i < delay; ++i)
     {
