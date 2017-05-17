@@ -16,6 +16,7 @@ import utils
 
 stub = """#!/bin/bash
 
+#MSUB -q singlenode
 #MSUB -l nodes=1:ppn={ncpus}
 #MSUB -l walltime={eta}
 
