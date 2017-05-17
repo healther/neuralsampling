@@ -98,12 +98,12 @@ def create_nn_singleinitial(linearsize, dimension, weight, meanactivity,
     return wlist, b.tolist(), states.tolist()
 
 
-def analysis_mean(outfile, subsampling=1, **kwargs):
+def analysis_mean(outfile, burnin=0, subsampling=1, **kwargs):
     # get results
     activities = []
     with open(outfile, 'r') as f:
         next(f)
-        for line in it.islice(f, 0, None, subsampling):
+        for line in it.islice(f, burnin, None, subsampling):
             activities.append(int(line.split(' ')[-1]))
     mean, std = float(np.mean(activities)), float(np.std(activities))
     nsamples = len(activities)
