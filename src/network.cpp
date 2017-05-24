@@ -135,7 +135,7 @@ void Network::produce_output(std::ostream& stream, double T, double Iext)
 void Network::produce_summary(std::ostream& stream)
 {
     stream.fill('0');
-    stream << "____End or simulation____\n\n\nSummary:\n";
+    stream << "____End of simulation____\n\n\nSummary:\n";
     stream << "NeuronNr NumberOfSpikes\n-----------\n";
     for (std::size_t i = 0; i < biases.size(); ++i) {
         stream << std::setw(5) << i << " " << std::setw(12) << neurons[i].get_nspikes() << "\n";
