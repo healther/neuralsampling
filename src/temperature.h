@@ -7,12 +7,7 @@
 #include <algorithm>
 
 #include "main.h"
-
-    enum ChangeType
-{
-    Const,
-    Linear
-};
+#include "type.h"
 
 class Temperature
 {
@@ -35,6 +30,7 @@ public:
     ~Temperature() {};
 
     double get_temperature(int nupdate);
+    bool check_nupdatemax(int nupdatemax);
 };
 
 

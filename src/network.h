@@ -6,11 +6,11 @@
 #include <random>
 #include <algorithm>
 
-enum TUpdateScheme { InOrder, BatchRandom, Random };
-enum TOutputScheme { MeanActivityOutput, BinaryStateOutput, SpikesOutput, SummarySpikes };
 extern std::mt19937_64 mt_random;
 
+#include "type.h"
 #include "neuron.h"
+#include "config.h"
 
 class Network
 {
@@ -27,6 +27,7 @@ private:
     int tauref;
     int tausyn;
     int delay;
+    bool outputEnv;
     bool boptimized;
 
     void generate_connected_neuron_ids();
@@ -37,17 +38,14 @@ public:
     Network(std::vector<double> &_biases,
             std::vector<std::vector<double> > &_weights,
             std::vector<int> &_initialstate,
-            int _tauref, int _tausyn, int delay,
-            TOutputScheme _output_scheme,
-            TUpdateScheme _update_scheme,
-            TActivation _neuron_activation_type,
-            TInteraction _neuron_interaction_type);
+            Config config);
     ~Network() {};
 
     std::vector<int> states;
 
     // std::vector<bool> get_state();
-    void produce_output(std::ostream& stream);
+    void produce_header(std::ostream& stream);
+    void produce_output(std::ostream& stream, double T, double Iext);
     void produce_summary(std::ostream& stream);
     void get_state();
     void get_internalstate();

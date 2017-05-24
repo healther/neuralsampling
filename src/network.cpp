@@ -1,34 +1,31 @@
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <cmath>
 
 #include <random>
 #include <algorithm>
 
-#include "neuron.h"
 #include "network.h"
-
 
 
 Network::Network(std::vector<double> &_biases,
             std::vector<std::vector<double> > &_weights,
             std::vector<int> &_initialstate,
-            int _tauref, int _tausyn, int _delay,
-            TOutputScheme _output_scheme,
-            TUpdateScheme _update_scheme,
-            TActivation _neuron_activation_type,
-            TInteraction _neuron_interaction_type):
-    output_scheme(_output_scheme),
-    update_scheme(_update_scheme),
-    neuron_activation_type(_neuron_activation_type),
-    neuron_interaction_type(_neuron_interaction_type)
+            Config config):
+    output_scheme(config.outputScheme),
+    update_scheme(config.updateScheme),
+    neuron_activation_type(config.neuronActivationType),
+    neuron_interaction_type(config.neuronInteractionType)
 {
     boptimized = false; // TODO: make const
     biases = _biases;
     weights = _weights;
-    tauref = _tauref;
-    tausyn = _tausyn;
-    delay = _delay;
+    tauref = config.tauref;
+    tausyn = config.tausyn;
+    delay = config.delay;
+    outputEnv = config.outputEnv;
+
     neurons.reserve(biases.size());
     states.resize(biases.size());
     for (unsigned int i = 0; i < biases.size(); ++i)
@@ -65,41 +62,83 @@ void Network::generate_connected_neuron_ids()
     }
 }
 
-void Network::produce_output(std::ostream& stream)
+void Network::produce_header(std::ostream& stream)
 {
-    if (output_scheme==MeanActivityOutput) {
-        int activity = 0;
-        for (unsigned int i = 0; i < biases.size(); ++i)
-        {
-            activity += neurons[i].get_state();
-        }
-        stream << activity << "\n";
-    } else if (output_scheme==BinaryStateOutput) {
-        for (unsigned int i = 0; i < biases.size(); ++i)
-        {
-            stream << neurons[i].get_state();
-        }
-        stream << "\n";
-    } else if (output_scheme==SpikesOutput) {
-        for (unsigned int i = 0; i < biases.size(); ++i) {
-            if (neurons[i].has_spiked()) {
-                stream << i << " ";
-            }
-        }
-        stream << "\n";
-    } else if (output_scheme==SummarySpikes) {
+    if (output_scheme==SummarySpikes) {
 
     } else {
-        throw;
+        stream << "# ";
+        if (outputEnv) {
+            stream << "Temperature Iext ";
+        }
+        if (output_scheme==MeanActivityOutput) {
+            stream << "Activity\n# \n";
+        } else if (output_scheme==MeanActivityEnergyOutput) {
+            stream << "Activity Energy\n# \n";
+        } else if (output_scheme==BinaryStateOutput) {
+            stream << "NeuronStates\n# \n";
+        } else if (output_scheme==SpikesOutput) {
+            stream << "Spikes\n# \n";
+        } else {
+            throw;
+        }
+    }
+}
+
+void Network::produce_output(std::ostream& stream, double T, double Iext)
+{
+    if (output_scheme==SummarySpikes) {
+
+    } else {
+        if (outputEnv) {
+            stream << T << " " << Iext << " ";
+        }
+        if (output_scheme==MeanActivityOutput) {
+            int activity = 0;
+            for (unsigned int i = 0; i < biases.size(); ++i)
+            {
+                activity += neurons[i].get_state();
+            }
+            stream << activity << "\n";
+        } else if (output_scheme==MeanActivityEnergyOutput) {
+            int activity = 0;
+            double energy = 0.0;
+            for (unsigned int i = 0; i < biases.size(); ++i)
+            {
+                activity += neurons[i].get_state();
+                energy += biases[i] * neurons[i].get_state();
+                for (unsigned int j = 0; j < biases.size(); ++j)
+                {
+                    energy += weights[i][j] * neurons[i].get_state() * neurons[j].get_state();
+                }
+            }
+            stream << activity << " " << energy << "\n";
+        } else if (output_scheme==BinaryStateOutput) {
+            for (unsigned int i = 0; i < biases.size(); ++i)
+            {
+                stream << neurons[i].get_state();
+            }
+            stream << "\n";
+        } else if (output_scheme==SpikesOutput) {
+            for (unsigned int i = 0; i < biases.size(); ++i) {
+                if (neurons[i].has_spiked()) {
+                    stream << i << " ";
+                }
+            }
+            stream << "\n";
+        } else {
+            throw;
+        }
     }
 }
 
 void Network::produce_summary(std::ostream& stream)
 {
-    if (output_scheme==SummarySpikes) {
-        for (unsigned int i = 0; i < biases.size(); ++i) {
-            stream << i << " " << neurons[i].get_nspikes() << "\n";
-        }
+    stream.fill('0');
+    stream << "____End or simulation____\n\n\nSummary:\n";
+    stream << "NeuronNr NumberOfSpikes\n-----------\n";
+    for (unsigned int i = 0; i < biases.size(); ++i) {
+        stream << std::setw(5) << i << " " << std::setw(12) << neurons[i].get_nspikes() << "\n";
     }
 }
 
