@@ -102,8 +102,8 @@ int main(int argc, char const *argv[])
         if (!weightNode) {
             std::cout << " Cannot read weightNode" << std::endl;
         }
-        if (!initialstateNode) {
-            std::cout << " Cannot read initialstateNode" << std::endl;
+        if (!initialStateNode) {
+            std::cout << " Cannot read initialStateNode" << std::endl;
         }
         return -1;
     }
