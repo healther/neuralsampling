@@ -11,7 +11,7 @@
 
 Network::Network(std::vector<double> &_biases,
             std::vector<std::vector<double> > &_weights,
-            std::vector<int> &_initialstate,
+            std::vector<int64_t> &_initialstate,
             Config config):
     output_scheme(config.outputScheme),
     update_scheme(config.updateScheme),
@@ -28,7 +28,7 @@ Network::Network(std::vector<double> &_biases,
 
     neurons.reserve(biases.size());
     states.resize(biases.size());
-    for (unsigned int i = 0; i < biases.size(); ++i)
+    for (std::size_t i = 0; i < biases.size(); ++i)
     {
         neurons.push_back(
             Neuron(tauref, tausyn, delay, _initialstate[i],
@@ -42,11 +42,11 @@ Network::Network(std::vector<double> &_biases,
 
 void Network::generate_connected_neuron_ids()
 {
-    unsigned int n_connections = 0;
+    std::size_t n_connections = 0;
     connected_neuron_ids.resize(biases.size());
-    for (unsigned int i = 0; i < biases.size(); ++i)
+    for (std::size_t i = 0; i < biases.size(); ++i)
     {
-        for (unsigned int j = 0; j < biases.size(); ++j)
+        for (std::size_t j = 0; j < biases.size(); ++j)
         {
             if (fabs(weights[i][j])>1E-14)
             {
@@ -56,7 +56,7 @@ void Network::generate_connected_neuron_ids()
         }
     }
     // check if network is sparse enough
-    if (n_connections*4<biases.size()*biases.size())
+    if (n_connections * 4 < biases.size() * biases.size())
     {
         boptimized = true;
     }
@@ -94,33 +94,33 @@ void Network::produce_output(std::ostream& stream, double T, double Iext)
             stream << T << " " << Iext << " ";
         }
         if (output_scheme==MeanActivityOutput) {
-            int activity = 0;
-            for (unsigned int i = 0; i < biases.size(); ++i)
+            int64_t activity = 0;
+            for (std::size_t i = 0; i < biases.size(); ++i)
             {
                 activity += neurons[i].get_state();
             }
             stream << activity << "\n";
         } else if (output_scheme==MeanActivityEnergyOutput) {
-            int activity = 0;
+            int64_t activity = 0;
             double energy = 0.0;
-            for (unsigned int i = 0; i < biases.size(); ++i)
+            for (std::size_t i = 0; i < biases.size(); ++i)
             {
                 activity += neurons[i].get_state();
                 energy += biases[i] * neurons[i].get_state();
-                for (unsigned int j = 0; j < biases.size(); ++j)
+                for (std::size_t j = 0; j < biases.size(); ++j)
                 {
                     energy += weights[i][j] * neurons[i].get_state() * neurons[j].get_state();
                 }
             }
             stream << activity << " " << energy << "\n";
         } else if (output_scheme==BinaryStateOutput) {
-            for (unsigned int i = 0; i < biases.size(); ++i)
+            for (std::size_t i = 0; i < biases.size(); ++i)
             {
                 stream << neurons[i].get_state();
             }
             stream << "\n";
         } else if (output_scheme==SpikesOutput) {
-            for (unsigned int i = 0; i < biases.size(); ++i) {
+            for (std::size_t i = 0; i < biases.size(); ++i) {
                 if (neurons[i].has_spiked()) {
                     stream << i << " ";
                 }
@@ -137,14 +137,14 @@ void Network::produce_summary(std::ostream& stream)
     stream.fill('0');
     stream << "____End or simulation____\n\n\nSummary:\n";
     stream << "NeuronNr NumberOfSpikes\n-----------\n";
-    for (unsigned int i = 0; i < biases.size(); ++i) {
+    for (std::size_t i = 0; i < biases.size(); ++i) {
         stream << std::setw(5) << i << " " << std::setw(12) << neurons[i].get_nspikes() << "\n";
     }
 }
 
 void Network::get_state()
 {
-    for (unsigned int i = 0; i < biases.size(); ++i)
+    for (std::size_t i = 0; i < biases.size(); ++i)
     {
         states[i] = neurons[i].get_state();
     }
@@ -152,18 +152,18 @@ void Network::get_state()
 
 void Network::get_internalstate()
 {
-    for (unsigned int i = 0; i < biases.size(); ++i)
+    for (std::size_t i = 0; i < biases.size(); ++i)
     {
         states[i] = neurons[i].get_internalstate();
     }
 }
 
-std::vector<int> Network::get_update_inds(unsigned int len) {
-    std::vector<int> update_inds(biases.size()) ;
+std::vector<int64_t> Network::get_update_inds() {
+    std::vector<int64_t> update_inds(biases.size()) ;
 
     if (update_scheme==Random) {
-        std::uniform_int_distribution<int> random_ints(0, biases.size()-1);
-        for (unsigned int i = 0; i < biases.size(); ++i) {
+        std::uniform_int_distribution<int64_t> random_ints(0, biases.size()-1);
+        for (std::size_t i = 0; i < biases.size(); ++i) {
             update_inds[i] = random_ints(mt_random);
         }
     } else {
@@ -176,19 +176,19 @@ std::vector<int> Network::get_update_inds(unsigned int len) {
     return update_inds;
 }
 
-double Network::get_potential_for_neuronid(unsigned int neuronid) {
+double Network::get_potential_for_neuronid(int64_t neuronid) {
     double pot = biases[neuronid];
 
     if (boptimized)
     {
-        int conid;
-        for (unsigned int j = 0; j < connected_neuron_ids[neuronid].size(); ++j)
+        int conid = -1;
+        for (std::size_t j = 0; j < connected_neuron_ids[neuronid].size(); ++j)
         {
             conid = connected_neuron_ids[neuronid][j];
             pot += neurons[conid].get_interaction() * weights[neuronid][conid];
         }
     } else {    // not boptimized
-        for (unsigned int j = 0; j < biases.size(); ++j)
+        for (std::size_t j = 0; j < biases.size(); ++j)
         {
             pot += neurons[j].get_interaction() * weights[neuronid][j];
         }
@@ -199,28 +199,18 @@ double Network::get_potential_for_neuronid(unsigned int neuronid) {
 
 void Network::update_state(double T)
 {
-    // generate ids to update (depends on the update scheme)
-    std::vector<int> update_inds = get_update_inds(biases.size()) ;
-
-    // update neurons in sequence determined above
-    for (unsigned int i = 0; i < biases.size(); ++i)
-    {
-        int neuronid = update_inds[i];
-        double pot = get_potential_for_neuronid(neuronid);
-        neurons[neuronid].update_state(pot/T);
-        neurons[neuronid].update_interaction();
-    }
+    update_state(T, 0.);
 }
 
 void Network::update_state(double T, double Iext)
 {
     // generate ids to update (depends on the update scheme)
-    std::vector<int> update_inds = get_update_inds(biases.size()) ;
+    std::vector<int64_t> update_inds = get_update_inds() ;
 
     // update neurons in sequence determined above
-    for (unsigned int i = 0; i < biases.size(); ++i)
+    for (std::size_t i = 0; i < biases.size(); ++i)
     {
-        int neuronid = update_inds[i];
+        int64_t neuronid = update_inds[i];
         double pot = get_potential_for_neuronid(neuronid) + Iext;
         neurons[neuronid].update_state(pot/T);
         neurons[neuronid].update_interaction();

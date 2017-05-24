@@ -7,7 +7,8 @@
 
 
 
-Neuron::Neuron(const int _tauref, const int _tausyn, const int _delay, const int _state,
+Neuron::Neuron(const int64_t _tauref, const int64_t _tausyn,
+    const int64_t _delay, const int64_t _state,
     const TActivation _activation_type, const TInteraction _interaction_type):
     activation_type(_activation_type),
     interaction_type(_interaction_type),
@@ -18,7 +19,7 @@ Neuron::Neuron(const int _tauref, const int _tausyn, const int _delay, const int
 {
     nspikes = 0;
     state = _state;
-    for (int i = 0; i < delay; ++i)
+    for (int64_t i = 0; i < delay; ++i)
     {
         update_interaction();
     }
@@ -92,17 +93,17 @@ bool Neuron::has_spiked()
 
 
 
-int Neuron::get_internalstate()
+int64_t Neuron::get_internalstate()
 {
     return state;
 }
 
-int Neuron::get_state()
+int64_t Neuron::get_state()
 {
     return (state<tauref);
 }
 
-int Neuron::get_nspikes()
+int64_t Neuron::get_nspikes()
 {
     return nspikes;
 }

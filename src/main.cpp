@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <cstdint>
+#include <cstddef>
 
 #include "main.h"
 
@@ -21,21 +23,21 @@ std::vector<double> get_bias_from_node(YAML::Node biasNode)
 }
 
 
-std::vector<std::vector<double>> get_weights_from_node(YAML::Node weightNode, unsigned int biassize)
+std::vector<std::vector<double>> get_weights_from_node(YAML::Node weightNode, std::size_t biassize)
 {
     // read sparse representation of weight matrix in
     std::vector<std::vector<double>> weights(biassize);
-    for(unsigned int i = 0; i < biassize; ++i) {
+    for(std::size_t i = 0; i < biassize; ++i) {
         std::vector<double> weight_line(biassize);
-        for(unsigned int j = 0; j < biassize; ++j) {weight_line[j] = 0.;}
+        for(std::size_t j = 0; j < biassize; ++j) {weight_line[j] = 0.;}
         weights[i] = weight_line;
     }
     // translate in dense matrix
-    int i, j;
+    int64_t i, j;
     double w;
     for(YAML::const_iterator it=weightNode.begin(); it!=weightNode.end(); it++) {
-        i = (*it)[0].as<int>();
-        j = (*it)[1].as<int>();
+        i = (*it)[0].as<int64_t>();
+        j = (*it)[1].as<int64_t>();
         w = (*it)[2].as<double>();
         weights[i][j] = w;
     }
@@ -43,11 +45,11 @@ std::vector<std::vector<double>> get_weights_from_node(YAML::Node weightNode, un
 }
 
 
-std::vector<int> get_initialstate_from_node(YAML::Node initialStateNode)
+std::vector<int64_t> get_initialstate_from_node(YAML::Node initialStateNode)
 {
-    std::vector<int> initialstate;
+    std::vector<int64_t> initialstate;
     for(YAML::const_iterator it=initialStateNode.begin(); it!=initialStateNode.end(); it++) {
-        initialstate.push_back(it->as<int>());
+        initialstate.push_back(it->as<int64_t>());
     }
     return initialstate;
 }
@@ -73,6 +75,10 @@ Temperature get_temperature_from_node(YAML::Node temperatureNode)
 int main(int argc, char const *argv[])
 {
     // report inputfilename and load the yaml content
+    if (argc<=2) {
+        std::cout << "This is a neuralsampler, implemented by Andreas Baumbach, modelled after Buesing et al, 2013" << std::endl;
+        return -1;
+    }
     std::cout << argv[1] << std::endl;
     YAML::Node baseNode = YAML::LoadFile(argv[1]);
     YAML::Node configNode = baseNode["Config"];
@@ -115,7 +121,7 @@ int main(int argc, char const *argv[])
     std::vector<double> bias = get_bias_from_node(biasNode);
     std::vector<std::vector<double>> weights =
                         get_weights_from_node(weightNode, bias.size());
-    std::vector<int> initialstate =
+    std::vector<int64_t> initialstate =
                         get_initialstate_from_node(initialStateNode);
 
     // get general configuration
@@ -171,7 +177,7 @@ int main(int argc, char const *argv[])
     mt_random.discard(config.randomSkip);
 
     // actual simulation
-    for (unsigned int i = 0; i < config.nupdates; ++i)
+    for (int64_t i = 0; i < config.nupdates; ++i)
     {
         T = temperature.get_temperature(i);
         Iext = current.get_temperature(i);

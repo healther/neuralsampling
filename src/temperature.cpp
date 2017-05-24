@@ -21,7 +21,7 @@ Temperature::Temperature():
 }
 
 
-Temperature::Temperature(double T, int nupdates):
+Temperature::Temperature(double T, int64_t nupdates):
     change_type(Const)
 {
     times.push_back(0);
@@ -39,7 +39,7 @@ Temperature::Temperature(ChangeType type, YAML::Node temperatureParameters):
 {
     YAML::Node temperatureTimeNode = temperatureParameters["times"];
     for(YAML::const_iterator it=temperatureTimeNode.begin(); it!=temperatureTimeNode.end(); it++) {
-        times.push_back(it->as<int>());
+        times.push_back(it->as<int64_t>());
     }
     YAML::Node temperatureValueNode = temperatureParameters["values"];
     for(YAML::const_iterator it=temperatureValueNode.begin(); it!=temperatureValueNode.end(); it++) {
@@ -56,7 +56,7 @@ Temperature::Temperature(ChangeType type, YAML::Node temperatureParameters):
 }
 
 
-double Temperature::get_temperature(int nupdate) {
+double Temperature::get_temperature(int64_t nupdate) {
     if (change_type == Const) {
         if (nupdate >= times[currentposition+1]) {
             currentposition++;
@@ -78,6 +78,6 @@ double Temperature::get_temperature(int nupdate) {
 }
 
 
-bool Temperature::check_nupdatemax(int nupdatemax) {
+bool Temperature::check_nupdatemax(int64_t nupdatemax) {
     return times.back() > nupdatemax;
 }

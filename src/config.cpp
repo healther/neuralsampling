@@ -23,22 +23,22 @@ Config::Config() {
 void Config::updateConfig(YAML::Node configNode) {
     if (configNode["randomSeed"])
     {
-        randomSeed = configNode["randomSeed"].as<int>();
+        randomSeed = configNode["randomSeed"].as<int64_t>();
     }
     if (configNode["randomSkip"]) {
-        randomSkip = configNode["randomSkip"].as<int>();
+        randomSkip = configNode["randomSkip"].as<int64_t>();
     }
     if (configNode["nupdates"]) {
-        nupdates = configNode["nupdates"].as<int>();
+        nupdates = configNode["nupdates"].as<int64_t>();
     }
     if (configNode["tauref"]) {
-        tauref = configNode["tauref"].as<int>();
+        tauref = configNode["tauref"].as<int64_t>();
     }
     if (configNode["tausyn"]) {
-        tausyn = configNode["tausyn"].as<int>();
+        tausyn = configNode["tausyn"].as<int64_t>();
     }
     if (configNode["delay"]) {
-        delay = configNode["delay"].as<int>();
+        delay = configNode["delay"].as<int64_t>();
     }
     if (configNode["neuronType"]) {
         std::string neuron_type =
