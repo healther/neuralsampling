@@ -22,26 +22,26 @@ private:
 
     std::vector<double> biases;
     std::vector<std::vector<double> > weights;
-    std::vector<std::vector<int> > connected_neuron_ids;
+    std::vector<std::vector<int64_t> > connected_neuron_ids;
     std::vector<Neuron> neurons;
-    int tauref;
-    int tausyn;
-    int delay;
+    int64_t tauref;
+    int64_t tausyn;
+    int64_t delay;
     bool outputEnv;
     bool boptimized;
 
     void generate_connected_neuron_ids();
-    std::vector<int> get_update_inds(unsigned int len);
-    double get_potential_for_neuronid(unsigned int id);
+    std::vector<int64_t> get_update_inds();
+    double get_potential_for_neuronid(int64_t id);
 
 public:
     Network(std::vector<double> &_biases,
             std::vector<std::vector<double> > &_weights,
-            std::vector<int> &_initialstate,
+            std::vector<int64_t> &_initialstate,
             Config config);
     ~Network() {};
 
-    std::vector<int> states;
+    std::vector<int64_t> states;
 
     // std::vector<bool> get_state();
     void produce_header(std::ostream& stream);

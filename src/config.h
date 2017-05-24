@@ -5,6 +5,7 @@
 #include <vector>
 #include <random>
 #include <algorithm>
+#include <cstdint>
 
 #include "type.h"
 #include "temperature.h"
@@ -12,12 +13,12 @@
 class Config
 {
 public:
-    int randomSeed;
-    int randomSkip;
-    unsigned int nupdates;
-    int tauref;
-    int tausyn;
-    int delay;
+    int64_t randomSeed;
+    int64_t randomSkip;
+    int64_t nupdates;
+    int64_t tauref;
+    int64_t tausyn;
+    int64_t delay;
     TActivation neuronActivationType;
     TInteraction neuronInteractionType;
     TUpdateScheme updateScheme;

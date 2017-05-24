@@ -16,16 +16,17 @@ private:
     const TInteraction interaction_type;
 
 protected:
-    const int tauref;
-    const int tausyn;
-    const int delay;
-    int nspikes;
-    int state;
+    const int64_t tauref;
+    const int64_t tausyn;
+    const int64_t delay;
+    int64_t nspikes;
+    int64_t state;
     FixedQueue interactions;
 
 public:
-    Neuron(const int _tauref, const int _tausyn, const int _delay, const int _state,
-        const TActivation _activation_type, const TInteraction _interaction_type);
+    Neuron(const int64_t _tauref, const int64_t _tausyn, const int64_t _delay,
+        const int64_t _state, const TActivation _activation_type,
+        const TInteraction _interaction_type);
     ~Neuron() {};
 
     void update_state(const double pot);
@@ -34,9 +35,9 @@ public:
     bool spike(const double pot);
     bool has_spiked();
 
-    int get_internalstate();
-    int get_state();
-    int get_nspikes();
+    int64_t get_internalstate();
+    int64_t get_state();
+    int64_t get_nspikes();
 
     double get_interaction();
     double activation(const double pot);
