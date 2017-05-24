@@ -2,6 +2,9 @@ neuralsampler
 test_neuron
 test_network
 *.tmp
+*.pdf
+*.tar.gz
+*blub*
 
 # compiled python
 *.pyc
