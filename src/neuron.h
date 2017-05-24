@@ -2,14 +2,12 @@
 #define NEURON_H
 
 #include <random>
+
 #include "fixed_queue.h"
+#include "type.h"
 
 extern std::mt19937_64 mt_random;
 extern std::uniform_real_distribution<double> random_double;
-
-enum TActivation { Log, Erf, Step };
-enum TInteraction { Rect, Exp, Tail, Cuto };
-
 
 class Neuron
 {

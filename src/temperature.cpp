@@ -76,3 +76,8 @@ double Temperature::get_temperature(int nupdate) {
     }
     return currenttemperature;
 }
+
+
+bool Temperature::check_nupdatemax(int nupdatemax) {
+    return times.back() > nupdatemax;
+}

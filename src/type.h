@@ -1,0 +1,16 @@
+#ifndef TYPE_H
+#define TYPE_H
+enum ChangeType
+{
+    Const,
+    Linear
+};
+
+enum TActivation { Log, Erf, Step };
+enum TInteraction { Rect, Exp, Tail, Cuto };
+enum TUpdateScheme { InOrder, BatchRandom, Random };
+enum TOutputScheme { MeanActivityOutput, MeanActivityEnergyOutput,
+                        BinaryStateOutput, SpikesOutput, SummarySpikes };
+
+
+#endif // TYPE_H
