@@ -73,7 +73,7 @@ Temperature get_temperature_from_node(YAML::Node temperatureNode)
 int main(int argc, char const *argv[])
 {
     // report inputfilename and load the yaml content
-    if (argc<=2) {
+    if (argc<2) {
         std::cout << "This is a neuralsampler, implemented by Andreas Baumbach, modelled after Buesing et al, 2013" << std::endl;
         return -1;
     }
