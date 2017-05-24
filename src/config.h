@@ -5,7 +5,6 @@
 #include <vector>
 #include <random>
 #include <algorithm>
-#include <cstdint>
 
 #include "type.h"
 #include "temperature.h"
