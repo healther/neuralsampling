@@ -12,6 +12,7 @@ import sys
 import datetime
 import time
 import shutil
+import multiprocessing as mp
 
 import utils
 
@@ -59,6 +60,13 @@ python {cwd}/control.py analysis "{folder}" &&
         f.write(content)
 
 
+def _submit_jobs(folders, eta, submit_jobs):
+    p = mp.Pool(submit_jobs)
+    p.map(_submit_job, [{'folder': f, 'eta': eta} for f in folders])
+    p.close()
+    p.join()
+
+
 def _submit_job(folder, eta='None'):
     if eta is 'None':
         sim_config = yaml.load(open(os.path.join(folder, 'sim.yaml'), 'r'))
@@ -68,8 +76,8 @@ def _submit_job(folder, eta='None'):
     eta = str(eta)
     exe = os.environ['JOBCONTROLEXE']
     jobfile = os.path.join(folder, 'job')
-    subprocess.Popen([exe, 'a', jobfile, folder, eta])
-    time.sleep(0.005)   # ensure that jobfiles are named differently
+    subprocess.call([exe, 'a', jobfile, folder, eta])
+    # ensure that jobfiles are named differently
 
 
 def _execute_jobs():
@@ -160,11 +168,7 @@ def run_experiment(experimentfile):
     if submit_jobs:
         print("{}: Submitting {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
-        for i, folder in enumerate(folders):
-            if i % 1000 == 0:
-                print("{}: {}/{}".format(datetime.datetime.now(),
-                                            i, len(folders)))
-            _submit_job(folder, eta=eta)
+        _submit_jobs(folders, eta, submit_jobs)
         print("{}: Submitted {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
 
@@ -173,11 +177,7 @@ def run_experiment(experimentfile):
     if submit_failed_jobs and missing_folders:
         print("{}: Submitting {} jobfiles".format(
             datetime.datetime.now(), len(missing_folders)))
-        for i, folder in enumerate(missing_folders):
-            if i % 1000 == 0:
-                print("{}: {}/{}".format(datetime.datetime.now(),
-                                                i, len(missing_folders)))
-            _submit_job(folder, eta=eta)
+        _submit_jobs(missing_folders, eta, submit_failed_jobs)
         print("{}: Submitted {} jobfiles".format(
             datetime.datetime.now(), len(missing_folders)))
 
