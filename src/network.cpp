@@ -65,7 +65,7 @@ void Network::generate_connected_neuron_ids()
 void Network::produce_header(std::ostream& stream)
 {
     if (output_scheme==SummarySpikes) {
-
+        stream << "# only summary output\n";
     } else {
         stream << "# ";
         if (outputEnv) {
@@ -91,7 +91,7 @@ void Network::produce_output(std::ostream& stream, double T, double Iext)
 
     } else {
         if (outputEnv) {
-            stream << T << " " << Iext << " ";
+            stream << T << " " << Iext << " --- ";
         }
         if (output_scheme==MeanActivityOutput) {
             int64_t activity = 0;
