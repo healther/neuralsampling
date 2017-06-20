@@ -1,46 +1,65 @@
 experimentConfig:
-  writeConfigs: True
-  generateJobs: True
-  submitJobs: False
-  executeJobs: False
-  binaryLocation: /home/hd/hd_hd/hd_wv385/git/neuralsampling/bin/neuralsampler
-  envfileLocation: /home/hd/hd_hd/hd_wv385/git/neuralsampling/load_env.sh
-  filesToRemove:
-    - run.yaml
+  writeConfigs:     True
+  generateJobs:     True
+  submitJobs:       True
+  submitFailedJobs: True
+  executeJobs:      True
+  collectJobs:      True
+  binaryLocation: /work/workspace/scratch/hd_wv385-neuralsampling-0/hysterese/bin/neuralsampler
+  envfileLocation: /work/workspace/scratch/hd_wv385-neuralsampling-0/hysterese/load_env_withmpl.sh
+  filesToRemove: []
+  eta: 600.
 Config:
-  Tmax: 1.
-  Tmin: 1.
   neuronType: log
   synapseType: synapseType
-  nupdates: 1000000
+  nupdates: 200000
   randomSeed: 42434343
   randomSkip: 1000000
-  tauref: 100
-  tausyn: 100
+  tauref: tau
+  tausyn: tau
   delay: 1
   outputScheme: MeanActivity
-  networkUpdateScheme: InOrder
-  removeConfigFile: False
+  networkUpdateScheme: update
+  outputEnv: True
+temperature:
+    type: Const
+    times: [0, 100000001]
+    values: [T, T]
+externalCurrent:
+    type: Const
+    times: [0, 10010000]
+    values: [0., 0.]
 network:
   etaFunction: ising.eta
   problemName: ising.create_nn_singleinitial
   parameters:
-    linearsize: 40
+    linearsize: ls
     dimension: 2
-    weight: 1.5
-    meanactivity: .5
-    zerostatetau: 101
-    onestatetau: 20
-    rseed: 42424242
+    weight: w
+    meanactivity: 0.5
+    zerostatetau: 10001
+    onestatetau: 0
+    rseed: rseed
     weightnoise: 0.
     biasnoise: 0.
-    biasfactor: 1.
-    biasoffset: 0.
+    biasfactor: 0.
+    biasoffset: b
 analysis:
-  analysisFunction: ising.analysis
+  analysisFunction: ising.analysis_mean
   parameters:
-    blub: nothinguseful
-experimentName: TestSampling001
+    subsampling: 1
+    burnin: 100000
+experimentName: CriticalExpLukas000
 
 replacements:
-  synapseType: [rect, exp, tail, cuto]
+  synapseType: [rect, exp]
+  tau: [100]
+  update: [InOrder]
+  w: [0.0, 2.0, 4.0]
+  b: [-2.0, ]
+  rseed: [42424242, ]
+  ls: [10, ]
+  T: [1.6, ]
+rules:
+  network_parameters_onestatetau: [1.5, Config_tausyn]
+  Config_synapseType: [==, rect]

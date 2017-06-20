@@ -8,7 +8,6 @@ import yaml
 import os
 import inspect
 import subprocess
-import sys
 import datetime
 import time
 import shutil
@@ -48,9 +47,9 @@ cd "{folder}" &&
 set +x
 source {envscript} &&
 set -x
-python {cwd}/control.py expand "{folder}" &&
+python {cwd}/control.py -m expand "{folder}" &&
 {binaryLocation} "{folder}/run.yaml" &&
-python {cwd}/control.py analysis "{folder}" &&
+python {cwd}/control.py -m analysis "{folder}" &&
 /usr/bin/touch "{folder}/success"
 
 /usr/bin/rm -f {files_to_remove}
@@ -99,20 +98,16 @@ def _sanity_check(config):
         raise OSError("Environment file {} not found".format(envfileLocation))
 
 
-def run_experiment(experimentfile):
+def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
+        submit_failed_jobs, execute_jobs, collect_jobs):
     print("{}: Starting experiment".format(datetime.datetime.now()))
     dictionary = yaml.load(open(experimentfile, 'r'))
 
     replacements = dictionary.pop('replacements', {})
+    rules = dictionary.pop('rules', {})
     experimentname = dictionary.get('experimentName', '')
 
     experiment_config = dictionary.pop('experimentConfig')
-    write_configs = experiment_config.get('writeConfigs', False)
-    generate_jobs = experiment_config.get('generateJobs', False)
-    submit_jobs = experiment_config.get('submitJobs', False)
-    submit_failed_jobs = experiment_config.get('submitFailedJobs', False)
-    execute_jobs = experiment_config.get('executeJobs', False)
-    collect_jobs = experiment_config.get('collectJobs', False)
     envfile = experiment_config.get('envfileLocation', '')
     binary_location = experiment_config.get('binaryLocation', '')
     files_to_remove = experiment_config.get('filesToRemove', '')
@@ -132,10 +127,12 @@ def run_experiment(experimentfile):
 
     dictionary['folderTemplate'] = sim_folder_template
 
-    _sanity_check(experiment_config)
+    # _sanity_check(experiment_config)
 
     # expand dictionaries
-    ex_dicts = utils.expanddict(dictionary, replacements)
+    ex_dicts = [ex_dict
+                    for ex_dict in utils.expanddict(dictionary, replacements)
+                    if utils.apply_rules(ex_dict, rules)]
 
     # generate skeletons
     t0 = time.time()
@@ -177,7 +174,7 @@ def run_experiment(experimentfile):
         print("{}: Submitted {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
 
-        time.sleep(15.)
+        time.sleep(1.)
 
     if submit_failed_jobs and missing_folders:
         print("{}: Submitting {} jobfiles".format(
@@ -186,7 +183,7 @@ def run_experiment(experimentfile):
         print("{}: Submitted {} jobfiles".format(
             datetime.datetime.now(), len(missing_folders)))
 
-        time.sleep(15.)
+        time.sleep(1.)
 
     if execute_jobs:
         print("{}: Executing jobs".format(datetime.datetime.now()))
@@ -252,21 +249,43 @@ def analysis(folder):
                                     simdict['analysis']['analysisFunction'])
     if analysis_function == "nothing":
         return
-    analysis_function(outfile=os.path.join(folder, 'output'),
+    else:
+        analysis_function(outfile=os.path.join(folder, 'output'),
             **simdict['analysis']['parameters'])
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        import doctest
-        print(doctest.testmod())
-    elif len(sys.argv) == 2:
-        run_experiment(experimentfile=sys.argv[1])
-    elif len(sys.argv) == 3:
-        if sys.argv[1] == 'expand':
-            expand(folder=sys.argv[2])
-        if sys.argv[1] == 'analysis':
-            analysis(folder=sys.argv[2])
+    import argparse
+    parser = argparse.ArgumentParser(description='CnC for neuralsampler.')
+    parser.add_argument('path', type=str)
+    parser.add_argument('--mode', '-m',
+        choices=['execute', 'expand', 'analysis'], default='execute',
+        help='specify the mode in which to run, choose from %(choices)s')
+    parser.add_argument('--write-configs', '-w', dest='write_configs',
+                    action='store_const', const=True, default=False,)
+    parser.add_argument('--generate-jobs', '-g', dest='generate_jobs',
+                    action='store_const', const=True, default=False,)
+    parser.add_argument('--submit-jobs', '-s', dest='submit_jobs',
+                    type=int, default=0)
+    parser.add_argument('--submit-failed-jobs', '-f', dest='submit_failed_jobs',
+                    type=int, default=0)
+    parser.add_argument('--execute-jobs', '-e', dest='execute_jobs',
+                    action='store_const', const=True, default=False,)
+    parser.add_argument('--collect-jobs', '-c', dest='collect_jobs',
+                    action='store_const', const=True, default=False,)
+
+    args = parser.parse_args()
+    print(args)
+    if args.mode == 'execute':
+        run_experiment(experimentfile=args.path,
+            write_configs=args.write_configs, generate_jobs=args.generate_jobs,
+            submit_jobs=args.submit_jobs,
+            submit_failed_jobs=args.submit_failed_jobs,
+            execute_jobs=args.execute_jobs, collect_jobs=args.collect_jobs)
+    elif args.mode == 'expand':
+        expand(folder=args.path)
+    elif args.mode == 'analysis':
+        analysis(folder=args.path)
     else:
         print("Don't know what to do.")
-        print(sys.argv)
+        print(parser.print_help())

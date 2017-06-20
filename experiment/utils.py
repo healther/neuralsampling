@@ -79,6 +79,13 @@ def find_key_from_identifier(dict_to_expand, identifier):
     return keypositions
 
 
+def getFromDict(dataDict, key, *keys):
+    if keys:
+        return getFromDict(dataDict[key], *keys)
+    else:
+        return dataDict[key]
+
+
 def update_dict(dic, value, key, *keys):
     """Set dic[k0][k1]...[kn] = value for keys=[k0, k1, ..., kn].
 
@@ -95,6 +102,75 @@ def update_dict(dic, value, key, *keys):
         update_dict(dic[key], value, *keys)
     else:
         dic[key] = value
+
+
+def _getFactorKey(rule):
+    try:
+        factor = float(rule[1])
+        key2 = rule[2]
+        value2 = None
+    except ValueError:
+        factor = 1
+        key2 = rule[1]
+        if "_" in key2:
+            value2 = None
+        else:
+            value2 = key2
+            key2 = None
+    return factor, key2, value2
+
+
+def apply_rules(expanded_dict, rules):
+    for key, rule in rules.iteritems():
+        try:
+            # factor of different value, rule looks like
+            # Target1Key_Target2Key: [factor, Source1Key_Source2Key_Source3Key]
+            factor = float(rule[0])
+            source_key = rule[1]
+            source_keys = source_key.split('_')
+            oldvalue = getFromDict(expanded_dict, *source_keys)
+            update_dict(expanded_dict, factor * oldvalue, *key.split('_'))
+        except ValueError:
+            if rule[0] == '<':
+                # elimination rule, rule looks like
+                # Target1Key_Target2Key: [<, [factor,] Source1Key_Source2Key_Source3Key]
+                # or
+                # Target1Key_Target2Key: [<, value]
+                factor, key2, value2 = _getFactorKey(rule)
+                value1 = getFromDict(expanded_dict, *key.split('_'))
+                if value2 is None:
+                    value2 = getFromDict(expanded_dict, *key2.split('_'))
+                if not value1 < factor * value2:
+                    return False
+            elif rule[0] == '<=':
+                factor, key2, value2 = _getFactorKey(rule)
+                value1 = getFromDict(expanded_dict, *key.split('_'))
+                if value2 is None:
+                    value2 = getFromDict(expanded_dict, *key2.split('_'))
+                if not value1 <= factor * value2:
+                    return False
+            elif rule[0] == '==':
+                factor, key2, value2 = _getFactorKey(rule)
+                value1 = getFromDict(expanded_dict, *key.split('_'))
+                if value2 is None:
+                    value2 = getFromDict(expanded_dict, *key2.split('_'))
+                if not value1 == factor * value2:
+                    return False
+            elif rule[0] == '>=':
+                factor, key2, value2 = _getFactorKey(rule)
+                value1 = getFromDict(expanded_dict, *key.split('_'))
+                if value2 is None:
+                    value2 = getFromDict(expanded_dict, *key2.split('_'))
+                if not value1 >= factor * value2:
+                    return False
+            elif rule[0] == '>':
+                factor, key2, value2 = _getFactorKey(rule)
+                value1 = getFromDict(expanded_dict, *key.split('_'))
+                if value2 is None:
+                    value2 = getFromDict(expanded_dict, *key2.split('_'))
+                if not value1 > factor * value2:
+                    return False
+        return True
 
 
 def expanddict(dict_to_expand, expansions):
