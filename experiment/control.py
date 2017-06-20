@@ -43,8 +43,11 @@ def _write_configs(ex_dicts, folders):
 
 def _generate_job(folder, envfile, binary_location, files_to_remove):
     stub = """
+set -x
 cd "{folder}" &&
+set +x
 source {envscript} &&
+set -x
 python {cwd}/control.py expand "{folder}" &&
 {binaryLocation} "{folder}/run.yaml" &&
 python {cwd}/control.py analysis "{folder}" &&
@@ -67,7 +70,9 @@ def _submit_jobs(folders, eta, submit_jobs):
     p.join()
 
 
-def _submit_job(folder, eta='None'):
+def _submit_job(argdict):
+    folder = argdict['folder']
+    eta    = argdict['eta']
     if eta is 'None':
         sim_config = yaml.load(open(os.path.join(folder, 'sim.yaml'), 'r'))
         eta_function = utils.get_function_from_name(

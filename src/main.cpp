@@ -182,6 +182,9 @@ int main(int argc, char const *argv[])
         net.update_state(T, Iext);
         net.get_state();
         net.produce_output(output, T, Iext);
+        if (i % 100 == 0) {
+            output.flush();
+        }
     }
     net.produce_summary(output);
     of.close();

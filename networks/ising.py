@@ -138,7 +138,7 @@ def get_energy_from_meanenergy(spikeline):
     return float(spikeline.split()[1])
 
 
-def analysis_mean(outfile, burnin=0, subsampling=1, **kwargs):
+def analysis_mean(outfile, burnin=0, subsampling=1, nupdates=None, **kwargs):
     # get results
     temperatures = []
     externalcurrents = []
@@ -174,19 +174,24 @@ def analysis_mean(outfile, burnin=0, subsampling=1, **kwargs):
             raise NotImplementedError("Unrecognized outputformat "
                                     "{}".format(parameters["OutputEnv"]))
 
-        if parameters['OutputEnv'] != 3:
+        if parameters['OutputEnv'] != 2:
             f.next()
             f.next()
 
-            for line in it.islice(f, burnin, None, subsampling):
-                if line.startswith('____End of simulation____'):
+            for line in it.islice(f, burnin, nupdates + 4, subsampling):
+                try:
+                    if line.startswith('____End of simulation____'):
+                        break
+                    if parameters['OutputEnv']:
+                        env, line = line.split(' --- ')
+                        temperatures.append(float(env.split()[0]))
+                        externalcurrents.append(float(env.split()[1]))
+                    activities.append(get_mean_activity(line))
+                    energies.append(get_energy(line))
+                except ValueError:
+                    # Note; this is a hack for the not detection of the end marker with subsampling, may fail anytime
+                    # should not be necessary if nupdates is set correctly
                     break
-                if parameters['OutputEnv']:
-                    env, line = line.split(' --- ')
-                    temperatures.append(float(env.split()[0]))
-                    externalcurrents.append(float(env.split()[1]))
-                activities.append(get_mean_activity(line))
-                energies.append(get_energy(line))
 
     temperaturemean = float(np.mean(temperatures))
     temperaturestd = float(np.std(temperatures))
