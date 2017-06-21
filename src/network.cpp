@@ -106,11 +106,7 @@ void Network::produce_output(std::ostream& stream, double T, double Iext)
             for (std::size_t i = 0; i < biases.size(); ++i)
             {
                 activity += neurons[i].get_state();
-                energy += biases[i] * neurons[i].get_state();
-                for (std::size_t j = 0; j < biases.size(); ++j)
-                {
-                    energy += weights[i][j] * neurons[i].get_state() * neurons[j].get_state();
-                }
+                energy += get_potential_for_neuronid(i) * neurons[i].get_state();
             }
             stream << activity << " " << energy << "\n";
         } else if (output_scheme==BinaryStateOutput) {
