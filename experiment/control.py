@@ -115,8 +115,19 @@ def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
 
     # save experimentfile if we are submitting jobs
     if generate_jobs or write_configs:
-        shutil.copy(experimentfile,
-                    os.path.join('simulations', '01_runs', experimentname))
+        trackingFileName = os.path.join('simulations', '01_runs', experimentname)
+        if os.path.isfile(trackingFileName):
+            response = raw_input("{} already exists. Do you want to override it? [y/n/a]  ".format(trackingFileName))
+            if response is "y":
+                shutil.copy(experimentfile, trackingFileName)
+            elif response is "n":
+                pass
+            else:
+                print("Aborting")
+                exit()
+        else:
+            shutil.copy(experimentfile, trackingFileName)
+
     #    experiment_iteration_name =
     #           utils.append_iteration_of_experiment(experimentname)
     #    shutil.copy(experimentfile, os.path.join('simulations',
