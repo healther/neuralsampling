@@ -138,7 +138,14 @@ def get_energy_from_meanenergy(spikeline):
     return float(spikeline.split()[1])
 
 
-def analysis_mean(outfile, burnin=0, subsampling=1, nupdates=None, **kwargs):
+def analysis_mean(outfile, burnin=0, subsampling=1, nupdates=None, plot=False, **kwargs):
+    folder = os.path.join(os.path.split(outfile)[0])
+
+    # get simulation parameters
+    with open(os.path.join(folder, 'sim.yaml'), 'r') as f:
+        simdict = yaml.load(f)
+    nneurons = simdict["network"]["parameters"]["linearsize"]**simdict["network"]["parameters"]["dimension"]
+
     # get results
     temperatures = []
     externalcurrents = []
@@ -186,8 +193,8 @@ def analysis_mean(outfile, burnin=0, subsampling=1, nupdates=None, **kwargs):
                         env, line = line.split(' --- ')
                         temperatures.append(float(env.split()[0]))
                         externalcurrents.append(float(env.split()[1]))
-                    activities.append(get_mean_activity(line))
-                    energies.append(get_energy(line))
+                    activities.append(get_mean_activity(line) / nneurons)
+                    energies.append(get_energy(line) / nneurons)
                 except ValueError:
                     # Note; this is a hack for the not detection of the end marker with subsampling, may fail anytime
                     # should not be necessary if nupdates is set correctly
@@ -219,9 +226,6 @@ def analysis_mean(outfile, burnin=0, subsampling=1, nupdates=None, **kwargs):
         'binder': binder,
                     }
 
-    # get simulation parameters
-    with open(os.path.join(os.path.split(outfile)[0], 'sim.yaml'), 'r') as f:
-        simdict = yaml.load(f)
     # foldertemplate = simdict['folderTemplate']
     # simparameterkeys = utils.get_simparameters_from_template(foldertemplate)
     # flatsimdict = utils.flatten_dictionary(simdict)
@@ -229,8 +233,12 @@ def analysis_mean(outfile, burnin=0, subsampling=1, nupdates=None, **kwargs):
     #     analysisdict[spkey] = flatsimdict[spkey]
     analysisdict['simdict'] = simdict
 
-    with open(os.path.join(os.path.split(outfile)[0], 'analysis'), 'w') as f:
+    with open(os.path.join(folder, 'analysis'), 'w') as f:
         f.write(yaml.dump(analysisdict))
+
+    if plot:
+        from plotting import plot_timecourse
+        plot_timecourse(folder, {"activities": activities, "energies": energies}, subsampling)
 
 
 if __name__ == "__main__":
@@ -239,4 +247,8 @@ if __name__ == "__main__":
         import doctest
         print(doctest.testmod())
     elif len(sys.argv) == 2:
-        analysis_mean(sys.argv[1])
+        analysis_mean(sys.argv[1], burnin=int(sys.argv[2]), subsampling=int(sys.argv[3]), nupdates=int(sys.argv[4]), plot=True)
+    elif len(sys.argv) == 5:
+        analysis_mean(sys.argv[1], burnin=int(sys.argv[2]), subsampling=int(sys.argv[3]), nupdates=int(sys.argv[4]), plot=True)
+    else:
+        print("Don't know what to do")
