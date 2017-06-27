@@ -237,6 +237,12 @@ def analysis_mean(outfile, burnin=0, subsampling=1, nupdates=None, plot=False, *
         f.write(yaml.dump(analysisdict))
 
     if plot:
+        import sys
+        import inspect
+# crazy hack to be able to import modules from the parent...
+        currentdir = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        sys.path.insert(0, currentdir)
         from plotting import plot_timecourse
         plot_timecourse(folder, {"activities": activities, "energies": energies}, subsampling)
 
