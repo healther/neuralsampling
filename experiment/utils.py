@@ -120,7 +120,7 @@ def _getFactorKey(rule):
     return factor, key2, value2
 
 
-def apply_rules(expanded_dict, rules):
+def apply_rules(expanded_dict, rules={}):
     for key, rule in rules.iteritems():
         try:
             # factor of different value, rule looks like
@@ -170,7 +170,7 @@ def apply_rules(expanded_dict, rules):
                     value2 = getFromDict(expanded_dict, *key2.split('_'))
                 if not value1 > factor * value2:
                     return False
-        return True
+    return True
 
 
 def expanddict(dict_to_expand, expansions):
