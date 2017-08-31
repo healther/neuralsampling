@@ -221,7 +221,7 @@ def analysis_mean(outfile, burnin=0, subsampling=1, nupdates=None, plot=False,
             f.next()
             f.next()
 
-            for line in it.islice(f, burnin, nupdates + 4, subsampling):
+            for line in it.islice(f, burnin + 4, nupdates + 4, subsampling):
                 try:
                     if line.startswith('____End of simulation____'):
                         break
