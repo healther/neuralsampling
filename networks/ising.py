@@ -105,7 +105,7 @@ def get_mean_from_stateline(stateline):
 
 def get_energy_from_stateline(stateline):
     """Not implemented!"""
-    return None
+    return -1.
 
 
 def get_mean_from_spikes(spikeline):
@@ -115,7 +115,7 @@ def get_mean_from_spikes(spikeline):
 
 def get_energy_from_spikes(spikeline):
     """Not implemented!"""
-    return None
+    return -1.
 
 
 def get_mean_from_mean(spikeline):
@@ -125,7 +125,7 @@ def get_mean_from_mean(spikeline):
 
 def get_energy_from_mean(spikeline):
     """Not implemented!"""
-    return None
+    return -1.
 
 
 def get_mean_from_meanenergy(spikeline):
@@ -185,7 +185,7 @@ def analysis_mean(outfile, burnin=0, subsampling=1, nupdates=None, plot=False, *
             f.next()
             f.next()
 
-            for line in it.islice(f, burnin, nupdates + 4, subsampling):
+            for line in it.islice(f, burnin + 4, nupdates + 4, subsampling):
                 try:
                     if line.startswith('____End of simulation____'):
                         break
