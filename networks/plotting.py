@@ -53,5 +53,17 @@ def plot_timecourse(folder, traces, time, seperate_axis=True):
     plt.savefig(os.path.join(folder, 'timecourse.pdf'))
 
 
-
-
+if __name__=="__main__":
+    import sys
+    folder = sys.argv[1]
+    try:
+        with open(folder + '/output', 'r') as f:
+            f.readline()
+            f.readline()
+            f.readline()
+            activities = []
+            for line in f:
+                activities.append(int(line.split()[-1])/8100.)
+    except ValueError:
+        pass
+    plot_timecourse(folder, {'activities': activities}, 1)

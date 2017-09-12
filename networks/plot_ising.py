@@ -32,14 +32,14 @@ def get_activity_from_pdata(pdata):
 
     activities = np.ma.masked_where(activities==-1, activities)
 
-    return activities
+    return plot_weights, plot_biasfactors, activities
 
 
 def plot_ising(pdatas, title):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     for pdata in pdatas:
-        activities = get_activity_from_pdata(pdata)
+        plot_weights, plot_biasfactors, activities = get_activity_from_pdata(pdata)
         cax = ax.pcolor(plot_weights, plot_biasfactors, activities.T,
             vmin=0.4, vmax=0.6, edgecolors='k')
     fig.colorbar(cax)
@@ -53,7 +53,20 @@ def plot_ising(pdatas, title):
 def get_pdatas(files, interesting_keys, analysis_keys):
     pdatas = []
     for fname in files:
-        pdatas.append(yaml.load(open(fname, 'r')))
+        origdata = yaml.load(open(fname, 'r'))
+        data = []
+        for dd in origdata:
+            if dd['analysis'] is None:
+                continue
+            outdict = {}
+            analysisdict = dd['analysis']
+            for k in interesting_keys:
+                outdict[k] = dd[k]
+            for k in analysis_keys:
+                outdict[k] = analysisdict[k]
+            data.append(outdict)
+        pdatas.append(pandas.DataFrame(data))
+
     return pdatas
 
 
@@ -68,7 +81,9 @@ def plot_ising_runs(filepattern):
     for rseed in set(pdatas[0]['network_parameters_rseed']):
         useddata = [pdata.loc[pdata['network_parameters_rseed']==rseed]
                                                         for pdata in pdatas]
-        title = useddata[0]['Config_synapseType'][0] + '_' + str(rseed)
+        if len(set(useddata[0]['Config_synapseType'])) != 1:
+            raise ValueError("I do not plot different synapse types")
+        title = set(useddata[0]['Config_synapseType']).pop()+ '_' + str(rseed)
         plot_ising(useddata, title)
 
 
