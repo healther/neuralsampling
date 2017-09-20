@@ -3,6 +3,7 @@
 Basic workflow:
     ### TODO
 """
+from __future__ import print_function, division
 
 import yaml
 import os
@@ -12,6 +13,7 @@ import datetime
 import time
 import shutil
 import multiprocessing as mp
+import sys
 
 import utils
 
@@ -165,14 +167,18 @@ def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
     if generate_jobs:
         print("{}: Generating {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
-        for folder in folders:
+        for i, folder in enumerate(folders):
+            print("Generating {}% complete      ".format(i/len(folders)), end='\r')
+            sys.stdout.flush()
             _generate_job(folder, envfile, binary_location, files_to_remove)
         print("{}: Generated {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
     elif missing_folders:
         print("{}: Generating {} jobfiles for failed jobs".format(
             datetime.datetime.now(), len(missing_folders)))
-        for folder in missing_folders:
+        for i, folder in enumerate(missing_folders):
+            print("Generating {}% complete      ".format(i/len(missing_folders)), end='\r')
+            sys.stdout.flush()
             _generate_job(folder, envfile, binary_location, files_to_remove)
         print("{}: Generated {} jobfiles".format(
             datetime.datetime.now(), len(missing_folders)))
@@ -210,7 +216,9 @@ def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
                                     'utils.get_simparameters_from_template')
         collect = []
         n_nones = 0
-        for simdict, folder in zip(ex_dicts, folders):
+        for i, (simdict, folder) in enumerate(zip(ex_dicts, folders)):
+            print("Collecting {:2.1f}% complete      ".format(100*i/len(folders)), end='\r')
+            sys.stdout.flush()
             collectdict = {}
             foldertemplate = simdict['folderTemplate']
             simparameterkeys = get_simparameters_from_template(foldertemplate)
