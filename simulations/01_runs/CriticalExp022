@@ -1,0 +1,63 @@
+experimentConfig:
+  writeConfigs:     True
+  generateJobs:     True
+  submitJobs:       50
+  submitFailedJobs: False
+  executeJobs:      False
+  collectJobs:      True
+  binaryLocation: /work/workspace/scratch/hd_wv385-criticality-0/neuralsampling/bin/neuralsampler
+  envfileLocation: /work/workspace/scratch/hd_wv385-criticality-0/neuralsampling/load_env_withmpl.sh
+  filesToRemove: []
+  eta: 7500.
+Config:
+  neuronType: log
+  synapseType: synapseType
+  nupdates: 1100000
+  randomSeed: 42434343
+  randomSkip: 1000000
+  tauref: tau
+  tausyn: tau
+  delay: 1
+  outputScheme: MeanActivity
+  networkUpdateScheme: update
+  outputEnv: True
+temperature:
+    type: Const
+    times: [0, 100000001]
+    values: [1., 1.]
+externalCurrent:
+    type: Const
+    times: [0, 10010000]
+    values: [0., 0.]
+network:
+  etaFunction: ising.eta
+  problemName: ising.create_nn_singleinitial
+  parameters:
+    linearsize: ls
+    dimension: 2
+    weight: w
+    meanactivity: 0.5
+    zerostatetau: 10001
+    onestatetau: 0
+    rseed: rseed
+    weightnoise: 0.
+    biasnoise: 0.
+    biasfactor: bf
+    biasoffset: 0.
+analysis:
+  analysisFunction: ising.analysis_mean
+  parameters:
+    subsampling: 1
+    burnin: 100000
+    nupdates: 1100000
+    plot: True
+experimentName: CriticalExp022
+
+replacements:
+  synapseType: [exp]
+  tau: [100]
+  update: [InOrder]
+  w: [0.75, 0.7625, 0.775, 0.7875, 0.8, 0.8125, 0.825, 0.8375, 0.85, 0.8625, 0.875, 0.8875, 0.9, 0.9125, 0.925, 0.9375, 0.95, 0.9625, 0.975, 0.9875, 1.0, 1.0125, 1.025, 1.0375, 1.05, 1.0625, 1.075, 1.0875, 1.1, 1.1125, 1.125, 1.1375, 1.15, 1.1625, 1.175, 1.1875, 1.2, 1.2125, 1.225, 1.2375, 1.25]
+  bf: [1.15, 1.16, 1.17, 1.18, 1.19, 1.2, 1.21, 1.22, 1.23, 1.24, 1.25, 1.26, 1.27, 1.28, 1.29, 1.3]
+  rseed: [42424242, 42424243]
+  ls: [90]

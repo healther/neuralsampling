@@ -1,0 +1,62 @@
+experimentConfig:
+  writeConfigs:     True
+  generateJobs:     True
+  submitJobs:       50
+  submitFailedJobs: False
+  executeJobs:      False
+  collectJobs:      True
+  binaryLocation: /work/workspace/scratch/hd_wv385-criticality-0/neuralsampling/bin/neuralsampler
+  envfileLocation: /work/workspace/scratch/hd_wv385-criticality-0/neuralsampling/load_env_withmpl.sh
+  filesToRemove: []
+  eta: 1200.
+Config:
+  neuronType: log
+  synapseType: synapseType
+  nupdates: 200000
+  randomSeed: 42434343
+  randomSkip: 1000000
+  tauref: tau
+  tausyn: tau
+  delay: 1
+  outputScheme: MeanActivity
+  networkUpdateScheme: update
+  outputEnv: True
+temperature:
+    type: Const
+    times: [0, 100000001]
+    values: [1., 1.]
+externalCurrent:
+    type: Const
+    times: [0, 10010000]
+    values: [0., 0.]
+network:
+  etaFunction: ising.eta
+  problemName: ising.create_nn_singleinitial
+  parameters:
+    linearsize: ls
+    dimension: 2
+    weight: w
+    meanactivity: 0.5
+    zerostatetau: 10001
+    onestatetau: 0
+    rseed: rseed
+    weightnoise: 0.
+    biasnoise: 0.
+    biasfactor: bf
+    biasoffset: 0.
+analysis:
+  analysisFunction: ising.analysis_mean
+  parameters:
+    subsampling: 1
+    burnin: 100000
+    nupdates: 200000
+experimentName: CriticalExp005
+
+replacements:
+  synapseType: [exp]
+  tau: [100]
+  update: [InOrder]
+  w: [0.8, 0.82, 0.84, 0.86, 0.88, 0.9, 0.92, 0.94, 0.96, 0.98, 1.0, 1.02, 1.04, 1.06, 1.08, 1.1, 1.12, 1.14, 1.16, 1.18, 1.2, 1.22, 1.24, 1.26, 1.28, 1.3, 1.32, 1.34, 1.36, 1.38, 1.4, 1.42, 1.44, 1.46, 1.48, 1.5, 1.52, 1.54, 1.56, 1.58, 1.6, 1.62, 1.64, 1.66, 1.68, 1.7, 1.72, 1.74, 1.76, 1.78, 1.8, 1.82, 1.84, 1.86, 1.88, 1.9, 1.92, 1.94, 1.96, 1.98, 2.0]
+  bf: [1.18, 1.18175, 1.1835, 1.18525, 1.187, 1.18875, 1.1905, 1.19225, 1.194, 1.19575, 1.1975, 1.19925, 1.201, 1.20275, 1.2045, 1.20625, 1.208, 1.20975, 1.2115, 1.21325, 1.215, 1.21675, 1.2185, 1.22025, 1.222, 1.22375, 1.2255, 1.22725, 1.229, 1.23075, 1.2325, 1.23425, 1.236, 1.23775, 1.2395, 1.24125, 1.243, 1.24475, 1.2465, 1.24825, 1.25]
+  rseed: [42424242, 42424243]
+  ls: [90]
