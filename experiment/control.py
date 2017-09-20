@@ -3,6 +3,7 @@
 Basic workflow:
     ### TODO
 """
+from __future__ import print_function, division
 
 import yaml
 import os
@@ -12,6 +13,7 @@ import datetime
 import time
 import shutil
 import multiprocessing as mp
+import sys
 
 import utils
 
@@ -115,9 +117,11 @@ def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
 
     # save experimentfile if we are submitting jobs
     if generate_jobs or write_configs:
-        trackingFileName = os.path.join('simulations', '01_runs', experimentname)
+        trackingFileName = os.path.join('simulations', '01_runs',
+                                        experimentname)
         if os.path.isfile(trackingFileName):
-            response = raw_input("{} already exists. Do you want to override it? [y/n/a]  ".format(trackingFileName))
+            response = raw_input("{} already exists. Do you want to override "
+                                 "it? [y/n/a]  ".format(trackingFileName))
             if response is "y":
                 shutil.copy(experimentfile, trackingFileName)
             elif response is "n":
@@ -164,14 +168,20 @@ def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
     if generate_jobs:
         print("{}: Generating {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
-        for folder in folders:
+        for i, folder in enumerate(folders):
+            print("Generating {: 3.1f}% complete".format(i/len(folders)),
+                end='\r')
+            sys.stdout.flush()
             _generate_job(folder, envfile, binary_location, files_to_remove)
         print("{}: Generated {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
     elif missing_folders:
         print("{}: Generating {} jobfiles for failed jobs".format(
             datetime.datetime.now(), len(missing_folders)))
-        for folder in missing_folders:
+        for i, folder in enumerate(missing_folders):
+            print("Generating {: 3.1f}% complete"
+                  "".format(i/len(missing_folders)), end='\r')
+            sys.stdout.flush()
             _generate_job(folder, envfile, binary_location, files_to_remove)
         print("{}: Generated {} jobfiles".format(
             datetime.datetime.now(), len(missing_folders)))
@@ -209,7 +219,10 @@ def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
                                     'utils.get_simparameters_from_template')
         collect = []
         n_nones = 0
-        for simdict, folder in zip(ex_dicts, folders):
+        for i, (simdict, folder) in enumerate(zip(ex_dicts, folders)):
+            print("Collecting {: 3.1f}% complete".format(100*i/len(folders)),
+                    end='\r')
+            sys.stdout.flush()
             collectdict = {}
             foldertemplate = simdict['folderTemplate']
             simparameterkeys = get_simparameters_from_template(foldertemplate)
@@ -278,8 +291,8 @@ if __name__ == "__main__":
                     action='store_const', const=True, default=False,)
     parser.add_argument('--submit-jobs', '-s', dest='submit_jobs',
                     type=int, default=0)
-    parser.add_argument('--submit-failed-jobs', '-f', dest='submit_failed_jobs',
-                    type=int, default=0)
+    parser.add_argument('--submit-failed-jobs', '-f',
+                    dest='submit_failed_jobs', type=int, default=0)
     parser.add_argument('--execute-jobs', '-e', dest='execute_jobs',
                     action='store_const', const=True, default=False,)
     parser.add_argument('--collect-jobs', '-c', dest='collect_jobs',
