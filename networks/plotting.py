@@ -1,25 +1,26 @@
 from __future__ import division
 
-import yaml
 import numpy as np
-from scipy.optimize import curve_fit
 import os
 
 import matplotlib
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt # noqa
 
 
 def plot_timecourse(folder, traces, time, seperate_axis=True):
     """
 
     Input:
-        folder  string  path to folder of the simulation, output will be placed there
+        folder  string  path to folder of the simulation, output will be
+                        placed there
         traces  dict    traces to plot
-        time    int     if integer: subsampling step, i.e. entry traces[key][i] = subsampling*i entry of trace
+        time    int     if integer: subsampling step, i.e. entry
+                        traces[key][i] = subsampling*i entry of trace
                 array   if array: times for the traces
                 dict    if dict: time[key] contains the times for traces[key]
-        seperate_axis   if True, all traces are placed on each owns y-scale, otherwise single y-axis
+        seperate_axis   if True, all traces are placed on each owns y-scale,
+                        otherwise single y-axis
 
     Output:
         places a timecourse.pdf with all traces plotted on different axis
@@ -33,7 +34,8 @@ def plot_timecourse(folder, traces, time, seperate_axis=True):
     elif type(time) is dict:
         times = times
     else:
-        raise NotImplementedError("Don't understand time input, needs to be int, array or dict")
+        raise NotImplementedError("Don't understand time input, needs to "
+                                    "be int, array or dict")
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -53,5 +55,17 @@ def plot_timecourse(folder, traces, time, seperate_axis=True):
     plt.savefig(os.path.join(folder, 'timecourse.pdf'))
 
 
-
-
+if __name__ == "__main__":
+    import sys
+    folder = sys.argv[1]
+    try:
+        with open(folder + '/output', 'r') as f:
+            f.readline()
+            f.readline()
+            f.readline()
+            activities = []
+            for line in f:
+                activities.append(int(line.split()[-1])/8100.)
+    except ValueError:
+        pass
+    plot_timecourse(folder, {'activities': activities}, 1)
