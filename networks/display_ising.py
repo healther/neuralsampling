@@ -49,7 +49,7 @@ def plot_timeseries(filename):
             plot_state(get_state(line), plotname=filename+'_{:05d}.pdf'.format(i))
 
 
-def animate(filename, from_timestep, to_timestep):
+def animate(filename, from_timestep=None, to_timestep=None, step=50):
     f = open(filename, 'r')
     #with open(filename, 'r') as f:
     #    frames = [get_state(line.strip()) for line in f]
@@ -68,11 +68,11 @@ def animate(filename, from_timestep, to_timestep):
         i += 1
         print(i)
         im.set_data(frame)
-        lab_text.set_text('Timestep: {}'.format(i))
+        lab_text.set_text('Timestep: {}'.format(i*step))
         return im, lab_text
 
-    ani = animation.FuncAnimation(fig, update, frames=islice(f, 50, 1000000, 50), blit=True, interval=10., save_count=1000000)
-    ani.save(filename + '.mp4', animation.writers['ffmpeg']())
+    ani = animation.FuncAnimation(fig, update, frames=islice(f, from_timestep, to_timestep, step), blit=True, interval=10., save_count=1000000)
+    ani.save(filename + '.mp4', animation.writers['ffmpeg'](fps=30))
 
 def anitest():
     def update_line(num, data, line):
@@ -81,7 +81,7 @@ def anitest():
 
     # Set up formatting for the movie files
     Writer = animation.writers['ffmpeg']
-    writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
+    writer = Writer(fps=30, metadata=dict(artist='Me'), bitrate=1800)
 
 
     fig1 = plt.figure()
@@ -118,4 +118,5 @@ if __name__ == "__main__":
         plot_timestep(filename=sys.argv[1], timestep=int(sys.argv[2]))
     elif len(sys.argv)==4:
         animate(filename=sys.argv[1], from_timestep=int(sys.argv[2]), to_timestep=int(sys.argv[3]))
-
+    elif len(sys.argv)==5:
+        animate(filename=sys.argv[1], from_timestep=int(sys.argv[2]), to_timestep=int(sys.argv[3]), step=int(sys.argv[4]))
