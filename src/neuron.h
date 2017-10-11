@@ -3,8 +3,8 @@
 
 #include <random>
 
-#include "fixed_queue.h"
 #include "type.h"
+#include "fixed_queue.h"
 
 extern std::mt19937_64 mt_random;
 extern std::uniform_real_distribution<double> random_double;

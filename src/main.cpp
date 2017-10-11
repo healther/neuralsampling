@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "main.h"
-
 #include "myrandom.h"
+
 #include "neuron.h"
 #include "network.h"
 #include "temperature.h"
