@@ -56,7 +56,7 @@ void Network::generate_connected_neuron_ids()
         }
     }
     // check if network is sparse enough
-    if (n_connections * 4 < biases.size() * biases.size())
+    if (n_connections * 1.5 < biases.size() * biases.size())
     {
         boptimized = true;
     }
@@ -64,6 +64,7 @@ void Network::generate_connected_neuron_ids()
 
 void Network::produce_header(std::ostream& stream)
 {
+    stream << "# using sparse connectivity: " << boptimized << "\n";
     if (output_scheme==SummarySpikes) {
         stream << "# only summary output\n";
     } else {
@@ -177,11 +178,9 @@ double Network::get_potential_for_neuronid(int64_t neuronid) {
 
     if (boptimized)
     {
-        int conid = -1;
-        for (std::size_t j = 0; j < connected_neuron_ids[neuronid].size(); ++j)
+        for (auto conid = connected_neuron_ids[neuronid].begin(); conid != connected_neuron_ids[neuronid].end(); ++conid)
         {
-            conid = connected_neuron_ids[neuronid][j];
-            pot += neurons[conid].get_interaction() * weights[neuronid][conid];
+            pot += neurons[*conid].get_interaction() * weights[neuronid][*conid];
         }
     } else {    // not boptimized
         for (std::size_t j = 0; j < biases.size(); ++j)

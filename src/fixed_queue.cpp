@@ -13,10 +13,10 @@ FixedQueue::FixedQueue(const int _size, double initial_value) :
 void FixedQueue::add_entry(double value)
 {
     position = (position+1) % size;
-    content[position] = value;
+    content[(position+1) % size] = value;
 }
 
 double FixedQueue::return_entry()
 {
-    return content[(position+1)%size];
+    return content[position];
 }
