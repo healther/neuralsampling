@@ -84,4 +84,4 @@ bin/neuralsampler: src/main.cpp src/main.h src/myrandom.h build/config.o build/n
 	$(CXX) $(INCLUDEPATH) $(LIBPATH) $(LDFLAGS) $(CPPFLAGS) build/fixed_queue.o build/config.o build/neuron.o build/network.o build/temperature.o src/main.cpp $(LDLIBS) -o bin/neuralsampler
 
 prof/profile: src/main.cpp src/main.h src/myrandom.h build/config.o build/neuron.o build/network.o build/fixed_queue.o build/temperature.o
-	$(CXX) $(INCLUDEPATH) $(LIBPATH) $(LDFLAGS) $(CPPFLAGS) -pg build/config.o build/neuron.o build/network.o build/temperature.o src/main.cpp $(LDLIBS) -o prof/profile
+	$(CXX) $(INCLUDEPATH) $(LIBPATH) $(LDFLAGS) $(CPPFLAGS) -pg build/config.o build/neuron.o build/network.o build/fixed_queue.o build/temperature.o src/main.cpp $(LDLIBS) -o prof/profile
