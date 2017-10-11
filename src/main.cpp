@@ -187,6 +187,7 @@ int main(int argc, char const *argv[])
         }
     }
     net.produce_summary(output);
+    output.flush();
     of.close();
 
     return 0;
