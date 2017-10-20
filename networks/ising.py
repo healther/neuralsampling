@@ -109,10 +109,10 @@ def create_nn_uniform_initial(linearsize, dimension, weight, meanactivity,
     states = states.astype(int)
     onestateids = states == 1
     zerostateids = states == 0
-    states[onestateids] = np.random.randint(onestatemin, onestatemax,
-                                                        size=len(onestateids))
-    states[zerostateids] = np.random.randint(zerostatemin, zerostatemax,
-                                                        size=len(zerostateids))
+    states[onestateids] = np.random.randint(onestatetaumin, onestatetaumax,
+                                        size=sum(onestateids))
+    states[zerostateids] = np.random.randint(zerostatetaumin, zerostatetaumax,
+                                        size=len(zerostateids)-sum(onestateids))
 
     # scale weights and noise if applicable
     weights = weight * np.array([wline[2] for wline in wlist])
