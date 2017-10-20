@@ -153,12 +153,14 @@ def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
     t0 = time.time()
     folders = _get_folders(ex_dicts, sim_folder_template)
 
-    print("Generating {} simulations".format(len(folders)))
+    print("{}: Generating {} simulations".format(
+                                        datetime.datetime.now(), len(folders)))
     missing_folders = []
     if write_configs:
         _write_configs(ex_dicts, folders)
     else:
-        for folder in folders:
+        for i, folder in enumerate(folders):
+            print("Generating {: 3.1f}% complete".format(100.*i/len(folders)),
             if not os.path.exists(os.path.join(folder, 'success')):
                 missing_folders.append(folder)
     elapsed_time = time.time() - t0
@@ -169,7 +171,7 @@ def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
         print("{}: Generating {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
         for i, folder in enumerate(folders):
-            print("Generating {: 3.1f}% complete".format(i/len(folders)),
+            print("Generating {: 3.1f}% complete".format(100.*i/len(folders)),
                 end='\r')
             sys.stdout.flush()
             _generate_job(folder, envfile, binary_location, files_to_remove)
@@ -180,7 +182,7 @@ def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
             datetime.datetime.now(), len(missing_folders)))
         for i, folder in enumerate(missing_folders):
             print("Generating {: 3.1f}% complete"
-                  "".format(i/len(missing_folders)), end='\r')
+                  "".format(100.*i/len(missing_folders)), end='\r')
             sys.stdout.flush()
             _generate_job(folder, envfile, binary_location, files_to_remove)
         print("{}: Generated {} jobfiles".format(
