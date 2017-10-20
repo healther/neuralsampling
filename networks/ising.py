@@ -138,13 +138,14 @@ def get_energy_from_meanenergy(spikeline):
     return float(spikeline.split()[1])
 
 
-def analysis_mean(outfile, burnin=0, subsampling=1, nupdates=None, plot=False, **kwargs):
+def analysis_mean(outfile, burnin=0, subsampling=1, nupdates=None, plot=False,
+                    **kwargs):
     folder = os.path.join(os.path.split(outfile)[0])
 
     # get simulation parameters
     with open(os.path.join(folder, 'sim.yaml'), 'r') as f:
         simdict = yaml.load(f)
-    nneurons = simdict["network"]["parameters"]["linearsize"]**simdict["network"]["parameters"]["dimension"]
+    nneurons = simdict["network"]["parameters"]["linearsize"]**simdict["network"]["parameters"]["dimension"]    # noqa
 
     # get results
     temperatures = []
@@ -196,7 +197,8 @@ def analysis_mean(outfile, burnin=0, subsampling=1, nupdates=None, plot=False, *
                     activities.append(get_mean_activity(line) / nneurons)
                     energies.append(get_energy(line) / nneurons)
                 except ValueError:
-                    # Note; this is a hack for the not detection of the end marker with subsampling, may fail anytime
+                    # Note; this is a hack for the not detection of the end
+                    # marker with subsampling, may fail anytime
                     # should not be necessary if nupdates is set correctly
                     break
 
@@ -244,7 +246,8 @@ def analysis_mean(outfile, burnin=0, subsampling=1, nupdates=None, plot=False, *
             os.path.abspath(inspect.getfile(inspect.currentframe())))
         sys.path.insert(0, currentdir)
         from plotting import plot_timecourse
-        plot_timecourse(folder, {"activities": activities, "energies": energies}, subsampling)
+        plot_timecourse(folder, {"activities": activities,
+                                 "energies": energies}, subsampling)
 
 
 if __name__ == "__main__":
@@ -253,8 +256,10 @@ if __name__ == "__main__":
         import doctest
         print(doctest.testmod())
     elif len(sys.argv) == 2:
-        analysis_mean(sys.argv[1], burnin=int(sys.argv[2]), subsampling=int(sys.argv[3]), nupdates=int(sys.argv[4]), plot=True)
+        analysis_mean(sys.argv[1], burnin=int(sys.argv[2]),
+            subsampling=int(sys.argv[3]), nupdates=int(sys.argv[4]), plot=True)
     elif len(sys.argv) == 5:
-        analysis_mean(sys.argv[1], burnin=int(sys.argv[2]), subsampling=int(sys.argv[3]), nupdates=int(sys.argv[4]), plot=True)
+        analysis_mean(sys.argv[1], burnin=int(sys.argv[2]),
+            subsampling=int(sys.argv[3]), nupdates=int(sys.argv[4]), plot=True)
     else:
         print("Don't know what to do")

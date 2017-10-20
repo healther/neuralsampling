@@ -6,14 +6,17 @@
 class FixedQueue
 {
 private:
-    int position;
-    std::vector<double> content;
+
+
 
 protected:
     const int size;
 
 
 public:
+    int position;
+    std::vector<double> content;
+
     FixedQueue(const int _size, double initial_value);
     ~FixedQueue() {};
 

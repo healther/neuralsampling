@@ -80,6 +80,14 @@ def find_key_from_identifier(dict_to_expand, identifier):
 
 
 def getFromDict(dataDict, key, *keys):
+    """Recursive get from nested dicts
+
+    >>> d = { 1: {2: 'blub', 3: 'argh'}, 4: {5: 'use'}}
+    >>> getFromDict(d, 1, 3)
+    'argh'
+    >>> getFromDict(d, 4, 5)
+    'use'
+    """
     if keys:
         return getFromDict(dataDict[key], *keys)
     else:
@@ -188,7 +196,7 @@ def expanddict(dict_to_expand, expansions):
     >>> d = { 1: 'blub', 2: {3: 'blub', 4: 'hello'}}
     >>> e = {'blub': ['a', 'b'], 'hello': [11, 12]}
     >>> expanddict(d, e)
-    [{1: 'a', 2: {3: 'a', 4: 11}}, {1: 'b', 2: {3: 'b', 4: 11}}, {1: 'a', 2: {3: 'a', 4: 12}}, {1: 'b', 2: {3: 'b', 4: 12}}] # noqa
+    [{1: 'a', 2: {3: 'a', 4: 11}}, {1: 'b', 2: {3: 'b', 4: 11}}, {1: 'a', 2: {3: 'a', 4: 12}}, {1: 'b', 2: {3: 'b', 4: 12}}]
     """
     expanded_dicts = [dict_to_expand]
     for ident, values in expansions.iteritems():

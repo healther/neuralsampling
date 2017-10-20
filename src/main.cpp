@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "main.h"
-
 #include "myrandom.h"
+
 #include "neuron.h"
 #include "network.h"
 #include "temperature.h"
@@ -187,6 +187,7 @@ int main(int argc, char const *argv[])
         }
     }
     net.produce_summary(output);
+    output.flush();
     of.close();
 
     return 0;

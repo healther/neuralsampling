@@ -6,7 +6,7 @@ import numpy as np
 
 import matplotlib
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt # noqa
 
 
 def borders(points):
@@ -30,7 +30,7 @@ def get_activity_from_pdata(pdata):
         j, = np.where(biasfactors == pd[1]['network_parameters_biasfactor'])
         activities[i, j] = pd[1]['actmean']
 
-    activities = np.ma.masked_where(activities==-1, activities)
+    activities = np.ma.masked_where(activities == -1, activities)
 
     return plot_weights, plot_biasfactors, activities
 
@@ -39,7 +39,8 @@ def plot_ising(pdatas, title):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     for pdata in pdatas:
-        plot_weights, plot_biasfactors, activities = get_activity_from_pdata(pdata)
+        plot_weights, plot_biasfactors, activities = get_activity_from_pdata(
+                                                                        pdata)
         cax = ax.pcolor(plot_weights, plot_biasfactors, activities.T,
             vmin=0.4, vmax=0.6, edgecolors='k')
     fig.colorbar(cax)
@@ -79,11 +80,11 @@ def plot_ising_runs(filepattern):
     pdatas = get_pdatas(filepattern, interesting_keys, analysis_keys)
 
     for rseed in set(pdatas[0]['network_parameters_rseed']):
-        useddata = [pdata.loc[pdata['network_parameters_rseed']==rseed]
+        useddata = [pdata.loc[pdata['network_parameters_rseed'] == rseed]
                                                         for pdata in pdatas]
         if len(set(useddata[0]['Config_synapseType'])) != 1:
             raise ValueError("I do not plot different synapse types")
-        title = set(useddata[0]['Config_synapseType']).pop()+ '_' + str(rseed)
+        title = set(useddata[0]['Config_synapseType']).pop() + '_' + str(rseed)
         plot_ising(useddata, title)
 
 
@@ -93,7 +94,7 @@ def plot_ising_run(collected_data_file):
     interesting_keys = ['network_parameters_biasfactor',
                         'network_parameters_weight',
                         'network_parameters_rseed',
-                        'Config_synapseType',]
+                        'Config_synapseType', ]
     analysis_keys = ['actmean', 'actstd']
     data = []
 

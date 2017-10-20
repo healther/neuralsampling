@@ -117,10 +117,12 @@ def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
 
     # save experimentfile if we are submitting jobs
     if generate_jobs or write_configs:
-        trackingFileName = os.path.join('simulations', '01_runs', experimentname)
+        trackingFileName = os.path.join('simulations', '01_runs',
+                                        experimentname)
         if os.path.isfile(trackingFileName):
             response = 'n'
-            response = raw_input("{} already exists. Do you want to override it? [y/n/a]  ".format(trackingFileName))
+            response = raw_input("{} already exists. Do you want to override "
+                                 "it? [y/n/a]  ".format(trackingFileName))
             if response is "y":
                 shutil.copy(experimentfile, trackingFileName)
             elif response is "n":
@@ -168,7 +170,8 @@ def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
         print("{}: Generating {} jobfiles".format(
             datetime.datetime.now(), len(folders)))
         for i, folder in enumerate(folders):
-            print("Generating {}% complete      ".format(i/len(folders)), end='\r')
+            print("Generating {: 3.1f}% complete".format(i/len(folders)),
+                end='\r')
             sys.stdout.flush()
             _generate_job(folder, envfile, binary_location, files_to_remove)
         print("{}: Generated {} jobfiles".format(
@@ -177,7 +180,8 @@ def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
         print("{}: Generating {} jobfiles for failed jobs".format(
             datetime.datetime.now(), len(missing_folders)))
         for i, folder in enumerate(missing_folders):
-            print("Generating {}% complete      ".format(i/len(missing_folders)), end='\r')
+            print("Generating {: 3.1f}% complete"
+                  "".format(i/len(missing_folders)), end='\r')
             sys.stdout.flush()
             _generate_job(folder, envfile, binary_location, files_to_remove)
         print("{}: Generated {} jobfiles".format(
@@ -217,7 +221,8 @@ def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
         collect = []
         n_nones = 0
         for i, (simdict, folder) in enumerate(zip(ex_dicts, folders)):
-            print("Collecting {:2.1f}% complete      ".format(100*i/len(folders)), end='\r')
+            print("Collecting {: 3.1f}% complete".format(100*i/len(folders)),
+                    end='\r')
             sys.stdout.flush()
             collectdict = {}
             foldertemplate = simdict['folderTemplate']
@@ -287,8 +292,8 @@ if __name__ == "__main__":
                     action='store_const', const=True, default=False,)
     parser.add_argument('--submit-jobs', '-s', dest='submit_jobs',
                     type=int, default=0)
-    parser.add_argument('--submit-failed-jobs', '-f', dest='submit_failed_jobs',
-                    type=int, default=0)
+    parser.add_argument('--submit-failed-jobs', '-f',
+                    dest='submit_failed_jobs', type=int, default=0)
     parser.add_argument('--execute-jobs', '-e', dest='execute_jobs',
                     action='store_const', const=True, default=False,)
     parser.add_argument('--collect-jobs', '-c', dest='collect_jobs',

@@ -57,6 +57,11 @@ Temperature::Temperature(ChangeType type, YAML::Node temperatureParameters):
 
 
 double Temperature::get_temperature(int64_t nupdate) {
+    if (nupdate >= times.back()) {
+        std::cout << "Trying to access " << nupdate << " but max time is ";
+        std::cout << times.back() << " Aborting." << std::endl;
+        throw;
+    }
     if (change_type == Const) {
         if (nupdate >= times[currentposition+1]) {
             currentposition++;
