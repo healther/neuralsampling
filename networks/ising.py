@@ -97,6 +97,41 @@ def create_nn_singleinitial(linearsize, dimension, weight, meanactivity,
     return wlist, b.tolist(), states.tolist()
 
 
+def create_nn_uniform_initial(linearsize, dimension, weight, meanactivity,
+            zerostatetaumin, zerostatetaumax, onestatetaumin, onestatetaumax,
+            rseed, weightnoise=0., biasnoise=0., biasfactor=1., biasoffset=0.):
+    np.random.seed(rseed)
+
+    wlist = _create_nn_unit_weights(linearsize=linearsize,
+                                            dimension=dimension)
+
+    states = np.random.random(size=linearsize**dimension) < meanactivity
+    states = states.astype(int)
+    onestateids = states == 1
+    zerostateids = states == 0
+    states[onestateids] = np.random.randint(onestatemin, onestatemax,
+                                                        size=len(onestateids))
+    states[zerostateids] = np.random.randint(zerostatemin, zerostatemax,
+                                                        size=len(zerostateids))
+
+    # scale weights and noise if applicable
+    weights = weight * np.array([wline[2] for wline in wlist])
+    if weightnoise != 0.:
+        weights *= np.random.normal(loc=1., scale=weightnoise,
+                                        size=weights.shape)
+    for i, w in enumerate(weights):
+        wlist[i][2] = float(w)
+
+    # generate appropriate bias and add noise if applicable
+    b = _biases_from_weights(wlist)
+    if biasnoise != 0.:
+        b *= np.random.normal(loc=1., scale=biasnoise, size=b.shape)
+    b *= biasfactor
+    b += biasoffset
+
+    return wlist, b.tolist(), states.tolist()
+
+
 def get_mean_from_stateline(stateline):
     """Return the mean activity of the network based on the binary states."""
     mean = sum(int(s) for s in stateline)
