@@ -75,7 +75,7 @@ def plot_ising_runs(filepattern):
     interesting_keys = ['network_parameters_biasfactor',
                         'network_parameters_weight',
                         'network_parameters_rseed',
-                        'Config_synapseType', ]
+                        'Config_synapseType',]
     analysis_keys = ['actmean']
     pdatas = get_pdatas(filepattern, interesting_keys, analysis_keys)
 

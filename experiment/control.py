@@ -120,6 +120,7 @@ def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
         trackingFileName = os.path.join('simulations', '01_runs',
                                         experimentname)
         if os.path.isfile(trackingFileName):
+            response = 'n'
             response = raw_input("{} already exists. Do you want to override "
                                  "it? [y/n/a]  ".format(trackingFileName))
             if response is "y":
