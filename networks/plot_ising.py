@@ -21,8 +21,8 @@ def get_activity_from_pdata(pdata):
     weights     = np.array(sorted(set(pdata['network_parameters_weight'])))
     biasfactors = np.array(sorted(set(pdata['network_parameters_biasfactor'])))
 
-    plot_weights     = borders(weights)
-    plot_biasfactors = borders(biasfactors)
+    plot_weights     = 1./borders(weights)
+    plot_biasfactors = -borders(biasfactors)
 
     activities = -1 * np.ones((len(weights), len(biasfactors)))
     for pd in pdata.iterrows():
