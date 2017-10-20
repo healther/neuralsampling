@@ -160,7 +160,7 @@ def run_experiment(experimentfile, write_configs, generate_jobs, submit_jobs,
         _write_configs(ex_dicts, folders)
     else:
         for i, folder in enumerate(folders):
-            print("Generating {: 3.1f}% complete".format(100.*i/len(folders)),
+            print("Generating {: 3.1f}% complete".format(100.*i/len(folders)))
             if not os.path.exists(os.path.join(folder, 'success')):
                 missing_folders.append(folder)
     elapsed_time = time.time() - t0
