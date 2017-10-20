@@ -3,20 +3,20 @@
 #include "fixed_queue.h"
 
 
-FixedQueue::FixedQueue(const int _size, double initial_value) :
+FixedQueue::FixedQueue(const int _size, float initial_value) :
     size(_size)
 {
     position = 0;
     content.resize(size, initial_value);
 }
 
-void FixedQueue::add_entry(double value)
+void FixedQueue::add_entry(float value)
 {
     position = (position+1) % size;
     content[(position+1) % size] = value;
 }
 
-double FixedQueue::return_entry()
+float FixedQueue::return_entry()
 {
     return content[position];
 }

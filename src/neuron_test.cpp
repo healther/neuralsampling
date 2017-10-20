@@ -40,7 +40,7 @@ SCENARIO("Neuron constructor") {
 
         REQUIRE( n.get_internalstate()==99 );
         REQUIRE( n.get_state()== 1);
-        double f_int = std::exp(-0.99)/(1.-std::exp(-1.));
+        float f_int = std::exp(-0.99)/(1.-std::exp(-1.));
         REQUIRE( n.get_interaction() == f_int );
         REQUIRE( n.activation(0.) == 0.5 );
         REQUIRE( n.activation(1.) == Approx(0.7310585786).epsilon(0.000001));
@@ -72,7 +72,7 @@ SCENARIO("Neuron constructor") {
 
         REQUIRE( n.get_internalstate()==99 );
         REQUIRE( n.get_state()== 1);
-        double f_int = 1.;
+        float f_int = 1.;
         REQUIRE( n.get_interaction() == f_int );
         REQUIRE( n.activation(0.) == 0.5 );
         REQUIRE( n.activation(1.) == Approx(0.7310585786).epsilon(0.000001));
@@ -104,7 +104,7 @@ SCENARIO("Neuron constructor") {
 
         REQUIRE( n.get_internalstate()==99 );
         REQUIRE( n.get_state()== 1);
-        double f_int = std::exp(-0.99)/(1.-std::exp(-1.));
+        float f_int = std::exp(-0.99)/(1.-std::exp(-1.));
         REQUIRE( n.get_interaction() == f_int );
         REQUIRE( n.activation(0.) == 0.5 );
         REQUIRE( n.activation(1.) == Approx(0.7310585786).epsilon(0.000001));
@@ -164,7 +164,7 @@ SCENARIO("Neuron constructor") {
 
         REQUIRE( n.get_internalstate()==99 );
         REQUIRE( n.get_state()== 1);
-        double f_int = std::exp(-0.99)/(1.-std::exp(-1.));
+        float f_int = std::exp(-0.99)/(1.-std::exp(-1.));
         REQUIRE( n.get_interaction() == f_int );
         REQUIRE( n.activation(0.) == 0.5 );
         REQUIRE( n.activation(1.) == Approx(0.7219864828).epsilon(0.000001));
@@ -196,7 +196,7 @@ SCENARIO("Neuron constructor") {
 
         REQUIRE( n.get_internalstate()==99 );
         REQUIRE( n.get_state()== 1);
-        double f_int = 1.;
+        float f_int = 1.;
         REQUIRE( n.get_interaction() == f_int );
         REQUIRE( n.activation(0.) == 0.5 );
         REQUIRE( n.activation(1.) == Approx(0.7219864828).epsilon(0.000001));
@@ -228,7 +228,7 @@ SCENARIO("Neuron constructor") {
 
         REQUIRE( n.get_internalstate()==99 );
         REQUIRE( n.get_state()== 1);
-        double f_int = std::exp(-0.99)/(1.-std::exp(-1.));
+        float f_int = std::exp(-0.99)/(1.-std::exp(-1.));
         REQUIRE( n.get_interaction() == f_int );
         REQUIRE( n.activation(0.) == 0.5 );
         REQUIRE( n.activation(1.) == Approx(0.7219864828).epsilon(0.000001));

@@ -21,7 +21,7 @@ Temperature::Temperature():
 }
 
 
-Temperature::Temperature(double T, int64_t nupdates):
+Temperature::Temperature(float T, int64_t nupdates):
     change_type(Const)
 {
     times.push_back(0);
@@ -43,7 +43,7 @@ Temperature::Temperature(ChangeType type, YAML::Node temperatureParameters):
     }
     YAML::Node temperatureValueNode = temperatureParameters["values"];
     for(YAML::const_iterator it=temperatureValueNode.begin(); it!=temperatureValueNode.end(); it++) {
-        values.push_back(it->as<double>());
+        values.push_back(it->as<float>());
     }
 
     if ( (times[0] <= 0) && (times[1] > 0))
@@ -56,7 +56,7 @@ Temperature::Temperature(ChangeType type, YAML::Node temperatureParameters):
 }
 
 
-double Temperature::get_temperature(int64_t nupdate) {
+float Temperature::get_temperature(int64_t nupdate) {
     if (nupdate >= times.back()) {
         std::cout << "Trying to access " << nupdate << " but max time is ";
         std::cout << times.back() << " Aborting." << std::endl;
@@ -74,7 +74,7 @@ double Temperature::get_temperature(int64_t nupdate) {
         currenttemperature =
             (values[currentposition+1] - values[currentposition]) *
             (nupdate-times[currentposition]) /
-            (double) (times[currentposition+1] - times[currentposition]) +
+            (float) (times[currentposition+1] - times[currentposition]) +
             values[currentposition];
     } else {
         throw;

@@ -27,7 +27,7 @@ Neuron::Neuron(const int64_t _tauref, const int64_t _tausyn,
 
 
 
-void Neuron::update_state(const double pot)
+void Neuron::update_state(const float pot)
 {
     // std::cout << state << std::endl;
     state++;
@@ -47,23 +47,23 @@ void Neuron::update_state(const double pot)
 
 void Neuron::update_interaction()
 {
-    double relstate = (double)state/(double)tauref;
-    double interaction = (relstate < 1.);
+    float relstate = (float)state/(float)tauref;
+    float interaction = (relstate < 1.);
     if (interaction_type==Exp) {
-        interaction = (double)tauref/(double)tausyn * std::exp(-relstate)/(1.-std::exp(-(double)tauref/(double)tausyn));
+        interaction = (float)tauref/(float)tausyn * std::exp(-relstate)/(1.-std::exp(-(float)tauref/(float)tausyn));
     } else if (interaction_type==Rect) {
         interaction = (state < tauref);
     } else if (interaction_type==Cuto) {
         if (state < tauref)
         {
-            interaction = (double)tauref/(double)tausyn * std::exp(-relstate)/(1.-std::exp(-(double)tauref/(double)tausyn));
+            interaction = (float)tauref/(float)tausyn * std::exp(-relstate)/(1.-std::exp(-(float)tauref/(float)tausyn));
         } else {
             interaction = 0.;
         }
     } else if (interaction_type==Tail) {
         if (state >= tauref)
         {
-            interaction = (double)tauref/(double)tausyn * std::exp(-relstate)/(1.-std::exp(-(double)tauref/(double)tausyn));
+            interaction = (float)tauref/(float)tausyn * std::exp(-relstate)/(1.-std::exp(-(float)tauref/(float)tausyn));
         } else {
             interaction = 1.;
         }
@@ -73,13 +73,13 @@ void Neuron::update_interaction()
 
 
 
-bool Neuron::spike(const double pot)
+bool Neuron::spike(const float pot)
 {
     bool bspike = false;
     if (Step==activation_type) {
         bspike = pot>0.;
     } else {
-        double r = random_double(mt_random);
+        float r = random_float(mt_random);
         bspike = activation(pot - std::log(tauref)) > r;
     }
     nspikes += bspike;
@@ -110,12 +110,12 @@ int64_t Neuron::get_nspikes()
 
 
 
-double Neuron::get_interaction()
+float Neuron::get_interaction()
 {
     return interactions.return_entry();
 }
 
-double Neuron::activation(const double pot)
+float Neuron::activation(const float pot)
 {
     if (Log==activation_type) {
         return 1./(1.+std::exp(-pot));

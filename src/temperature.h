@@ -15,9 +15,9 @@ private:
     const ChangeType change_type;
 
     int64_t currentposition;
-    double currenttemperature;
+    float currenttemperature;
 
-    std::vector<double> values;
+    std::vector<float> values;
     std::vector<int64_t> times;
 
     void update_temperature(int64_t nupdate);
@@ -25,11 +25,11 @@ private:
 
 public:
     Temperature(ChangeType type, YAML::Node temperatureNode);
-    Temperature(double T, int64_t nupdates);
+    Temperature(float T, int64_t nupdates);
     Temperature();
     ~Temperature() {};
 
-    double get_temperature(int64_t nupdate);
+    float get_temperature(int64_t nupdate);
     bool check_nupdatemax(int64_t nupdatemax);
 };
 

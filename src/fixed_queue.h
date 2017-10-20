@@ -15,14 +15,14 @@ protected:
 
 public:
     int position;
-    std::vector<double> content;
+    std::vector<float> content;
 
-    FixedQueue(const int _size, double initial_value);
+    FixedQueue(const int _size, float initial_value);
     ~FixedQueue() {};
 
-    void add_entry(double value);
+    void add_entry(float value);
 
-    double return_entry();
+    float return_entry();
 };
 
 

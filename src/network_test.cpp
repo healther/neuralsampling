@@ -10,8 +10,8 @@
 SCENARIO("Network constructor") {
 
     GIVEN("3 Neuron network") {
-        std::vector<double> biases = {0., 1., -1.};
-        std::vector< std::vector<double> > weights = {
+        std::vector<float> biases = {0., 1., -1.};
+        std::vector< std::vector<float> > weights = {
             {0, 1, 0.5},
             {1, 0, 0.3},
             {2, 1, 0.}};

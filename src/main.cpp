@@ -11,32 +11,32 @@
 #include "temperature.h"
 
 
-std::vector<double> get_bias_from_node(YAML::Node biasNode)
+std::vector<float> get_bias_from_node(YAML::Node biasNode)
 {
-    std::vector<double> bias;
+    std::vector<float> bias;
     for(YAML::const_iterator it=biasNode.begin(); it!=biasNode.end(); it++) {
-        bias.push_back(it->as<double>());
+        bias.push_back(it->as<float>());
     }
     return bias;
 }
 
 
-std::vector<std::vector<double>> get_weights_from_node(YAML::Node weightNode, std::size_t biassize)
+std::vector<std::vector<float>> get_weights_from_node(YAML::Node weightNode, std::size_t biassize)
 {
     // read sparse representation of weight matrix in
-    std::vector<std::vector<double>> weights(biassize);
+    std::vector<std::vector<float>> weights(biassize);
     for(std::size_t i = 0; i < biassize; ++i) {
-        std::vector<double> weight_line(biassize);
+        std::vector<float> weight_line(biassize);
         for(std::size_t j = 0; j < biassize; ++j) {weight_line[j] = 0.;}
         weights[i] = weight_line;
     }
     // translate in dense matrix
     int64_t i, j;
-    double w;
+    float w;
     for(YAML::const_iterator it=weightNode.begin(); it!=weightNode.end(); it++) {
         i = (*it)[0].as<int64_t>();
         j = (*it)[1].as<int64_t>();
-        w = (*it)[2].as<double>();
+        w = (*it)[2].as<float>();
         weights[i][j] = w;
     }
     return weights;
@@ -116,8 +116,8 @@ int main(int argc, char const *argv[])
     bool b_output_file = baseNode["outfile"];
 
     // get network configuration
-    std::vector<double> bias = get_bias_from_node(biasNode);
-    std::vector<std::vector<double>> weights =
+    std::vector<float> bias = get_bias_from_node(biasNode);
+    std::vector<std::vector<float>> weights =
                         get_weights_from_node(weightNode, bias.size());
     std::vector<int64_t> initialstate =
                         get_initialstate_from_node(initialStateNode);
@@ -165,7 +165,7 @@ int main(int argc, char const *argv[])
     // and output initial configuration
     net.produce_header(output);
     net.get_state();
-    double T, Iext;
+    float T, Iext;
     T = temperature.get_temperature(0);
     Iext = current.get_temperature(0);
     net.produce_output(output, T, Iext);

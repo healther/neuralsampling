@@ -7,7 +7,7 @@
 #include "fixed_queue.h"
 
 extern std::mt19937_64 mt_random;
-extern std::uniform_real_distribution<double> random_double;
+extern std::uniform_real_distribution<float> random_float;
 
 class Neuron
 {
@@ -29,18 +29,18 @@ public:
         const TInteraction _interaction_type);
     ~Neuron() {};
 
-    void update_state(const double pot);
+    void update_state(const float pot);
     void update_interaction();
 
-    bool spike(const double pot);
+    bool spike(const float pot);
     bool has_spiked();
 
     int64_t get_internalstate();
     int64_t get_state();
     int64_t get_nspikes();
 
-    double get_interaction();
-    double activation(const double pot);
+    float get_interaction();
+    float activation(const float pot);
 };
 
 

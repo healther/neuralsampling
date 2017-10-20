@@ -9,8 +9,8 @@
 #include "network.h"
 
 
-Network::Network(std::vector<double> &_biases,
-            std::vector<std::vector<double> > &_weights,
+Network::Network(std::vector<float> &_biases,
+            std::vector<std::vector<float> > &_weights,
             std::vector<int64_t> &_initialstate,
             Config config):
     output_scheme(config.outputScheme),
@@ -86,7 +86,7 @@ void Network::produce_header(std::ostream& stream)
     }
 }
 
-void Network::produce_output(std::ostream& stream, double T, double Iext)
+void Network::produce_output(std::ostream& stream, float T, float Iext)
 {
     if (output_scheme==SummarySpikes) {
 
@@ -103,7 +103,7 @@ void Network::produce_output(std::ostream& stream, double T, double Iext)
             stream << activity << "\n";
         } else if (output_scheme==MeanActivityEnergyOutput) {
             int64_t activity = 0;
-            double energy = 0.0;
+            float energy = 0.0;
             for (std::size_t i = 0; i < biases.size(); ++i)
             {
                 activity += neurons[i].get_state();
@@ -173,8 +173,8 @@ std::vector<int64_t> Network::get_update_inds() {
     return update_inds;
 }
 
-double Network::get_potential_for_neuronid(int64_t neuronid) {
-    double pot = biases[neuronid];
+float Network::get_potential_for_neuronid(int64_t neuronid) {
+    float pot = biases[neuronid];
 
     if (boptimized)
     {
@@ -192,12 +192,12 @@ double Network::get_potential_for_neuronid(int64_t neuronid) {
     return pot;
 }
 
-void Network::update_state(double T)
+void Network::update_state(float T)
 {
     update_state(T, 0.);
 }
 
-void Network::update_state(double T, double Iext)
+void Network::update_state(float T, float Iext)
 {
     // generate ids to update (depends on the update scheme)
     std::vector<int64_t> update_inds = get_update_inds() ;
@@ -206,7 +206,7 @@ void Network::update_state(double T, double Iext)
     for (std::size_t i = 0; i < biases.size(); ++i)
     {
         int64_t neuronid = update_inds[i];
-        double pot = get_potential_for_neuronid(neuronid) + Iext;
+        float pot = get_potential_for_neuronid(neuronid) + Iext;
         neurons[neuronid].update_state(pot/T);
         neurons[neuronid].update_interaction();
     }
