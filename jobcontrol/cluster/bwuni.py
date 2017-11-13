@@ -22,7 +22,7 @@ stub = """#!/bin/bash
 
 python {jobcontrolfolder}/execute_taskfile.py {tasklistfile} &&
 
-/usr/bin/rm {tasklistfile}*
+/usr/bin/mv {tasklistfile}* {donetasksfolder}
 """
 
 
@@ -58,7 +58,8 @@ def submit_task(config, tasklistfile):
 
     content = stub.format(ncpus=ncpus, eta=eta,
                             tasklistfile=tasklistfile,
-                            jobcontrolfolder=jobcontrolfolder)
+                            jobcontrolfolder=jobcontrolfolder,
+                            donetasksfolder=jobcontrol.donetasksfolder)
     moabfile = os.path.join(jobcontrol.jobtasklists, tasklistfile + '.moab')
     with open(moabfile, 'w') as f:
         f.write(content)

@@ -38,6 +38,8 @@ jobsubmmited = os.path.join(jobfolder, 'submitted')
 utils.ensure_exist(jobsubmmited)
 jobtasklists = os.path.join(jobfolder, 'tasklists')
 utils.ensure_exist(jobtasklists)
+donetasksfolder = os.path.join(jobfolder, 'donetasks')
+utils.ensure_exist(donetasksfolder)
 
 
 # job specification
