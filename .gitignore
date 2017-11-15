@@ -1,6 +1,3 @@
-neuralsampler
-test_neuron
-test_network
 simulations/*
 *.tmp
 *.pdf
