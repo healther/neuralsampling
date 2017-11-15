@@ -19,6 +19,8 @@ protected:
     const int64_t tauref;
     const int64_t tausyn;
     const int64_t delay;
+    const double taurefsyn;
+    const double taurefsynexp;
     int64_t nspikes;
     int64_t state;
     FixedQueue interactions;
@@ -32,7 +34,7 @@ public:
     void update_state(const double pot);
     void update_interaction();
 
-    bool spike(const double pot);
+    int spike(const double pot);
     bool has_spiked();
 
     int64_t get_internalstate();

@@ -77,7 +77,6 @@ int main(int argc, char const *argv[])
         std::cout << "This is a neuralsampler, implemented by Andreas Baumbach, modelled after Buesing et al, 2013" << std::endl;
         return -1;
     }
-    std::cout << argv[1] << std::endl;
     YAML::Node baseNode = YAML::LoadFile(argv[1]);
     YAML::Node configNode = baseNode["Config"];
     YAML::Node biasNode = baseNode["bias"];

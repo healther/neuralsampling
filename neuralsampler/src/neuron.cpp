@@ -15,6 +15,8 @@ Neuron::Neuron(const int64_t _tauref, const int64_t _tausyn,
     tauref(_tauref),
     tausyn(_tausyn),
     delay(_delay),
+    taurefsyn((double)_tauref/(double)_tausyn),
+    taurefsynexp(std::exp(-(double)_tauref/(double)_tausyn)),
     interactions(_delay, 0.)
 {
     nspikes = 0;
@@ -47,23 +49,23 @@ void Neuron::update_state(const double pot)
 
 void Neuron::update_interaction()
 {
-    double relstate = (double)state/(double)tauref;
-    double interaction = (relstate < 1.);
+    double relstateexp = std::exp(-(double)state/(double)tauref);
+    double interaction = (state < tauref);
     if (interaction_type==Exp) {
-        interaction = (double)tauref/(double)tausyn * std::exp(-relstate)/(1.-std::exp(-(double)tauref/(double)tausyn));
+        interaction = taurefsyn * relstateexp/(1.-taurefsynexp);
     } else if (interaction_type==Rect) {
         interaction = (state < tauref);
     } else if (interaction_type==Cuto) {
         if (state < tauref)
         {
-            interaction = (double)tauref/(double)tausyn * std::exp(-relstate)/(1.-std::exp(-(double)tauref/(double)tausyn));
+            interaction = taurefsyn * relstateexp/(1.-taurefsynexp);
         } else {
             interaction = 0.;
         }
     } else if (interaction_type==Tail) {
         if (state >= tauref)
         {
-            interaction = (double)tauref/(double)tausyn * std::exp(-relstate)/(1.-std::exp(-(double)tauref/(double)tausyn));
+            interaction = taurefsyn * relstateexp/(1.-taurefsynexp);
         } else {
             interaction = 1.;
         }
@@ -73,9 +75,9 @@ void Neuron::update_interaction()
 
 
 
-bool Neuron::spike(const double pot)
+int Neuron::spike(const double pot)
 {
-    bool bspike = false;
+    int bspike = false;
     if (Step==activation_type) {
         bspike = pot>0.;
     } else {

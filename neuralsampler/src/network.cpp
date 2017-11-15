@@ -178,7 +178,8 @@ double Network::get_potential_for_neuronid(int64_t neuronid) {
 
     if (boptimized)
     {
-        for (auto conid = connected_neuron_ids[neuronid].begin(); conid != connected_neuron_ids[neuronid].end(); ++conid)
+        for (auto conid = connected_neuron_ids[neuronid].begin();
+             conid != connected_neuron_ids[neuronid].end(); ++conid)
         {
             pot += neurons[*conid].get_interaction() * weights[neuronid][*conid];
         }
