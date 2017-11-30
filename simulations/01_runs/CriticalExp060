@@ -1,0 +1,63 @@
+experimentConfig:
+  writeConfigs:     True
+  generateJobs:     True
+  submitJobs:       50
+  submitFailedJobs: False
+  executeJobs:      False
+  collectJobs:      True
+  binaryLocation: /work/workspace/scratch/hd_wv385-criticality-0/neuralsampling/bin/neuralsampler
+  envfileLocation: /work/workspace/scratch/hd_wv385-criticality-0/neuralsampling/load_env_withmpl.sh
+  filesToRemove: []
+  eta: 5000.
+Config:
+  neuronType: erf
+  synapseType: synapseType
+  nupdates: 1100000
+  randomSeed: 42434343
+  randomSkip: 1000000
+  tauref: tau
+  tausyn: tau
+  delay: 1
+  outputScheme: MeanActivity
+  networkUpdateScheme: update
+  outputEnv: True
+temperature:
+    type: Const
+    times: [0, 100000001]
+    values: [1., 1.]
+externalCurrent:
+    type: Const
+    times: [0, 10010000]
+    values: [0., 0.]
+network:
+  etaFunction: ising.eta
+  problemName: ising.create_nn_singleinitial
+  parameters:
+    linearsize: ls
+    dimension: 2
+    weight: w
+    meanactivity: 0.5
+    zerostatetau: 10001
+    onestatetau: 0
+    rseed: rseed
+    weightnoise: 0.
+    biasnoise: 0.
+    biasfactor: bf
+    biasoffset: 0.
+analysis:
+  analysisFunction: ising.analysis_mean
+  parameters:
+    subsampling: 1
+    burnin: 100000
+    nupdates: 1100000
+    plot: True
+experimentName: CriticalExp060
+
+replacements:
+  synapseType: [rect]
+  tau: [1]
+  update: [InOrder]
+  w: [0.0, 0.025, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25, 0.275, 0.3, 0.325, 0.35, 0.375, 0.4, 0.425, 0.45, 0.475, 0.5, 0.525, 0.55, 0.575, 0.6, 0.625, 0.65, 0.675, 0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975, 1.0, 1.025, 1.05, 1.075, 1.1, 1.125, 1.15, 1.175, 1.2, 1.225, 1.25, 1.275, 1.3, 1.325, 1.35, 1.375, 1.4, 1.425, 1.45, 1.475, 1.5, 1.525, 1.55, 1.575, 1.6, 1.625, 1.65, 1.675, 1.7, 1.725, 1.75, 1.775, 1.8, 1.825, 1.85, 1.875, 1.9, 1.925, 1.95, 1.975, 2.0, 2.025, 2.05, 2.075, 2.1, 2.125, 2.15, 2.175, 2.2, 2.225, 2.25, 2.275, 2.3, 2.325, 2.35, 2.375, 2.4, 2.425, 2.45, 2.475, 2.5]
+  bf: [0.5, 0.51, 0.52, 0.53, 0.54, 0.55, 0.56, 0.57, 0.58, 0.59, 0.6, 0.61, 0.62, 0.63, 0.64, 0.65, 0.66, 0.67, 0.68, 0.69, 0.7, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07, 1.08, 1.09, 1.1, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 1.2, 1.21, 1.22, 1.23, 1.24, 1.25, 1.26, 1.27, 1.28, 1.29, 1.3, 1.31, 1.32, 1.33, 1.34, 1.35, 1.36, 1.37, 1.38, 1.39, 1.4, 1.41, 1.42, 1.43, 1.44, 1.45, 1.46, 1.47, 1.48, 1.49, 1.5]
+  rseed: [42424242, 42424243]
+  ls: [90]
