@@ -1,6 +1,6 @@
 experimentConfig:
-  binaryLocation: /work/workspace/scratch/hd_wv385-criticality-0/float/bin/neuralsampler
-  envfileLocation: /work/workspace/scratch/hd_wv385-criticality-0/float/load_env_withmpl.sh
+  binaryLocation: /work/workspace/scratch/hd_wv385-criticality-0/neuralsampling/bin/neuralsampler
+  envfileLocation: /work/workspace/scratch/hd_wv385-criticality-0/neuralsampling/env_scripts/load_env_withmpl.sh
   filesToRemove: []
   eta: 5000.
 Config:

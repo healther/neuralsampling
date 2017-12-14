@@ -25,14 +25,16 @@ externalCurrent:
     values: [0., 0.]
 network:
   etaFunction: ising.eta
-  problemName: ising.create_nn_singleinitial
+  problemName: ising.create_nn_uniform_initial
   parameters:
     linearsize: ls
     dimension: 2
     weight: w
     meanactivity: 0.5
-    zerostatetau: 10001
-    onestatetau: 75
+    zerostatetaumin: 100
+    zerostatetaumax: 200
+    onestatetaumin: 50
+    onestatetaumax: 100
     rseed: rseed
     weightnoise: 0.
     biasnoise: 0.
@@ -45,7 +47,7 @@ analysis:
     burnin: 100000
     nupdates: 2100000
     plot: True
-experimentName: CriticalExp083
+experimentName: CriticalExp086
 
 replacements:
   synapseType: [rect]

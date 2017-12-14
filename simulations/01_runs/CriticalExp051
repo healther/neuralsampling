@@ -32,7 +32,7 @@ network:
     weight: w
     meanactivity: 0.5
     zerostatetau: 10001
-    onestatetau: 75
+    onestatetau: 0
     rseed: rseed
     weightnoise: 0.
     biasnoise: 0.
@@ -45,11 +45,11 @@ analysis:
     burnin: 100000
     nupdates: 2100000
     plot: True
-experimentName: CriticalExp083
+experimentName: CriticalExp051
 
 replacements:
   synapseType: [rect]
-  tau: [100]
+  tau: [1]
   update: [InOrder]
   w: [1.4, 1.44, 1.48, 1.5, 1.52, 1.54, 1.56, 1.58, 1.6, 1.62, 1.64, 1.66, 1.68, 1.7, 1.72, 1.74, 1.76, 1.78, 1.8, 1.82, 1.84, 1.88, 1.92, 1.96]
   bf: [0.994, 0.995, 0.996, 0.997, 0.998, 0.999, 1., 1.001, 1.002, 1.003, 1.004, 1.005, 1.006, 1.007]

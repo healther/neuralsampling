@@ -7,7 +7,7 @@ Config:
   neuronType: log
   synapseType: synapseType
   nupdates: 1100000
-  randomSeed: 42434343
+  randomSeed: rseed
   randomSkip: 1000000
   tauref: tau
   tausyn: tau
@@ -25,15 +25,17 @@ externalCurrent:
     values: [0., 0.]
 network:
   etaFunction: ising.eta
-  problemName: ising.create_nn_singleinitial
+  problemName: ising.create_nn_uniform_initial
   parameters:
     linearsize: ls
     dimension: 2
     weight: w
-    meanactivity: 0.5
-    zerostatetau: 10001
-    onestatetau: 75
-    rseed: rseed
+    meanactivity: 0.
+    zerostatetaumin: 100
+    zerostatetaumax: 200
+    onestatetaumin: 0
+    onestatetaumax: 100
+    rseed: 42424242
     weightnoise: 0.
     biasnoise: 0.
     biasfactor: bf
@@ -45,7 +47,7 @@ analysis:
     burnin: 100000
     nupdates: 2100000
     plot: True
-experimentName: CriticalExp083
+experimentName: CriticalExp091
 
 replacements:
   synapseType: [rect]

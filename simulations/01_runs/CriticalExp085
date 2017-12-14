@@ -7,7 +7,7 @@ Config:
   neuronType: log
   synapseType: synapseType
   nupdates: 1100000
-  randomSeed: 42434343
+  randomSeed: rseed
   randomSkip: 1000000
   tauref: tau
   tausyn: tau
@@ -32,8 +32,8 @@ network:
     weight: w
     meanactivity: 0.5
     zerostatetau: 10001
-    onestatetau: 75
-    rseed: rseed
+    onestatetau: 0
+    rseed: 42424242
     weightnoise: 0.
     biasnoise: 0.
     biasfactor: bf
@@ -45,7 +45,7 @@ analysis:
     burnin: 100000
     nupdates: 2100000
     plot: True
-experimentName: CriticalExp083
+experimentName: CriticalExp085
 
 replacements:
   synapseType: [rect]
