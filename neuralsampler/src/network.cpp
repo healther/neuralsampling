@@ -137,6 +137,11 @@ void Network::produce_summary(std::ostream& stream)
     for (std::size_t i = 0; i < biases.size(); ++i) {
         stream << std::setw(5) << i << " " << std::setw(12) << neurons[i].get_nspikes() << "\n";
     }
+    get_internalstate();
+    stream << "Internalstate:\n";
+    for (std::size_t i = 0; i < biases.size(); ++i) {
+        stream << std::setw(5) << i << " " << std::setw(5) << neurons[i].get_state() << "\n";
+    }
 }
 
 void Network::get_state()
