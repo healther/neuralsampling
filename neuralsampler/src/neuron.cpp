@@ -49,7 +49,7 @@ void Neuron::update_state(const double pot)
 
 void Neuron::update_interaction()
 {
-    double relstateexp = std::exp(-(double)state/(double)tauref);
+    double relstateexp = std::exp(-(double)state/(double)tausyn);
     double interaction = (state < tauref);
     if (interaction_type==Exp) {
         interaction = taurefsyn * relstateexp/(1.-taurefsynexp);
