@@ -12,6 +12,7 @@ Config::Config() {
     tauref = 1;
     tausyn = 1;
     delay = 1;
+    subsampling = 1;
     neuronActivationType = Log;
     neuronInteractionType = Rect;
     updateScheme = InOrder;
@@ -39,6 +40,9 @@ void Config::updateConfig(YAML::Node configNode) {
     }
     if (configNode["delay"]) {
         delay = configNode["delay"].as<int64_t>();
+    }
+    if (configNode["subsampling"]) {
+        subsampling = configNode["subsampling"].as<int64_t>();
     }
     if (configNode["neuronType"]) {
         std::string neuron_type =

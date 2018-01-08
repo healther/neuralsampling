@@ -180,7 +180,9 @@ int main(int argc, char const *argv[])
         Iext = current.get_temperature(i);
         net.update_state(T, Iext);
         net.get_state();
-        net.produce_output(output, T, Iext);
+        if (i % config.subsampling == 0) {
+            net.produce_output(output, T, Iext);
+        }
         if (i % 100 == 0) {
             output.flush();
         }
