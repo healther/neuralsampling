@@ -22,16 +22,6 @@ test: tests/test_fixed_queue tests/test_neuron tests/test_config tests/test_netw
 	tests/test_neuron
 	tests/test_config
 	tests/test_network
-	python -m generate.analysis
-	python -m generate.cluster
-	python -m generate.collect
-	python -m generate.config
-	python -m generate.control
-	python -m generate.misc
-	python -m generate.plot
-	python -m generate.problem_ising
-	python -m generate.problem_sampling
-	python -m generate.problem_tsp
 
 doc: doc/pdf/TSP.pdf
 

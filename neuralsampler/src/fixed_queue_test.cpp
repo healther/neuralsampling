@@ -11,16 +11,16 @@ SCENARIO("Fixed Queue Constructor") {
         f.add_entry(2);
 
         REQUIRE( f.content[0] == 1 );
-        REQUIRE( f.content[1] == 2 );
-        REQUIRE( f.content[2] == 1 );
+        REQUIRE( f.content[1] == 1 );
+        REQUIRE( f.content[2] == 2 );
         REQUIRE( f.content.size() == 3);
         REQUIRE( f.position == 1 );
         REQUIRE( f.return_entry() == 1);
         REQUIRE( f.return_entry() == 1);
         f.add_entry(3);
-        REQUIRE( f.content[0] == 1 );
-        REQUIRE( f.content[1] == 2 );
-        REQUIRE( f.content[2] == 3 );
+        REQUIRE( f.content[0] == 3 );
+        REQUIRE( f.content[1] == 1 );
+        REQUIRE( f.content[2] == 2 );
     }
 
 
