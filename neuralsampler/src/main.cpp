@@ -122,7 +122,7 @@ int main(int argc, char const *argv[])
                         get_initialstate_from_node(initialStateNode);
 
     // get general configuration
-    Config config = Config();
+    Config config = Config(bias.size());
     config.updateConfig(configNode);
 
     // get temperature

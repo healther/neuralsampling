@@ -19,13 +19,15 @@ public:
     int64_t tausyn;
     int64_t delay;
     int64_t subsampling;
+    int64_t nneurons;
     TActivation neuronActivationType;
     TInteraction neuronInteractionType;
     TUpdateScheme updateScheme;
     TOutputScheme outputScheme;
     bool outputEnv;
+    std::vector<int64_t> outputIndexes;
 
-    Config();
+    Config(int64_t nneurons);
     ~Config() {};
 
     void updateConfig(YAML::Node ConfigNode);

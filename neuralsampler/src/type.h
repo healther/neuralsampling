@@ -9,7 +9,8 @@ enum ChangeType
 enum TActivation { Log, Erf, Step };
 enum TInteraction { Rect, Exp, Tail, Cuto };
 enum TUpdateScheme { InOrder, BatchRandom, Random };
-enum TOutputScheme { BinaryStateOutput, SpikesOutput, SummarySpikes,
+enum TOutputScheme { InternalStateOutput, BinaryStateOutput,
+                     SpikesOutput, SummarySpikes, SummaryStates,
                      MeanActivityOutput, MeanActivityEnergyOutput,
                     };
 

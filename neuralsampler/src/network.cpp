@@ -16,9 +16,9 @@ Network::Network(std::vector<double> &_biases,
     output_scheme(config.outputScheme),
     update_scheme(config.updateScheme),
     neuron_activation_type(config.neuronActivationType),
-    neuron_interaction_type(config.neuronInteractionType)
+    neuron_interaction_type(config.neuronInteractionType),
+    outputIndexes(config.outputIndexes)
 {
-    boptimized = false; // TODO: make const
     biases = _biases;
     weights = _weights;
     tauref = config.tauref;
@@ -27,20 +27,20 @@ Network::Network(std::vector<double> &_biases,
     outputEnv = config.outputEnv;
 
     neurons.reserve(biases.size());
-    states.resize(biases.size());
+    states.resize(outputIndexes.size());
     for (std::size_t i = 0; i < biases.size(); ++i)
     {
         neurons.push_back(
             Neuron(tauref, tausyn, delay, _initialstate[i],
             neuron_activation_type, neuron_interaction_type)
         );
-        states[i] = neurons[i].get_state();
     }
+    get_state();
 
-    generate_connected_neuron_ids();
+    boptimized = generate_connected_neuron_ids();  // TODO: make const
 }
 
-void Network::generate_connected_neuron_ids()
+bool Network::generate_connected_neuron_ids()
 {
     std::size_t n_connections = 0;
     connected_neuron_ids.resize(biases.size());
@@ -58,14 +58,16 @@ void Network::generate_connected_neuron_ids()
     // check if network is sparse enough
     if (n_connections * 1.5 < biases.size() * biases.size())
     {
-        boptimized = true;
+        return true;
+    } else {
+        return false;
     }
 }
 
 void Network::produce_header(std::ostream& stream)
 {
     stream << "# using sparse connectivity: " << boptimized << "\n";
-    if (output_scheme==SummarySpikes) {
+    if (output_scheme==SummarySpikes || output_scheme==SummaryStates) {
         stream << "# only summary output\n";
     } else {
         stream << "# ";
@@ -77,6 +79,8 @@ void Network::produce_header(std::ostream& stream)
         } else if (output_scheme==MeanActivityEnergyOutput) {
             stream << "Activity Energy\n# \n";
         } else if (output_scheme==BinaryStateOutput) {
+            stream << "NeuronStates\n# \n";
+        } else if (output_scheme==InternalStateOutput) {
             stream << "NeuronStates\n# \n";
         } else if (output_scheme==SpikesOutput) {
             stream << "Spikes\n# \n";
@@ -90,6 +94,8 @@ void Network::produce_output(std::ostream& stream, double T, double Iext)
 {
     if (output_scheme==SummarySpikes) {
 
+    } else if (output_scheme==SummaryStates) {
+        summary_states[states]++;
     } else {
         if (outputEnv) {
             stream << T << " " << Iext << " --- ";
@@ -114,6 +120,12 @@ void Network::produce_output(std::ostream& stream, double T, double Iext)
             for (std::size_t i = 0; i < biases.size(); ++i)
             {
                 stream << states[i];
+            }
+            stream << "\n";
+        } else if (output_scheme==InternalStateOutput) {
+            for (std::size_t i = 0; i < biases.size(); ++i)
+            {
+                stream << states[i] << " ";
             }
             stream << "\n";
         } else if (output_scheme==SpikesOutput) {
@@ -141,21 +153,40 @@ void Network::produce_summary(std::ostream& stream)
     for (std::size_t i = 0; i < biases.size(); ++i) {
         stream << std::setw(5) << i << " " << std::setw(5) << neurons[i].get_internalstate() << "\n";
     }
+    if (output_scheme==SummaryStates) {
+        stream << "Summary States:\n";
+        for (auto it=summary_states.begin(); it!=summary_states.end(); ++it) {
+            for (auto it2=it->first.begin(); it2!=it->first.end(); ++it2) {
+                stream << *it2;
+            }
+            stream << " : " << it->second << "\n";
+        }
+        summary_states[states]++;
+    }
 }
 
 void Network::get_state()
 {
-    for (std::size_t i = 0; i < biases.size(); ++i)
+    if (output_scheme==InternalStateOutput) {
+        get_internalstate();
+    } else {
+        get_binary_state();
+    }
+}
+
+void Network::get_binary_state()
+{
+    for (std::size_t i = 0; i < outputIndexes.size(); ++i)
     {
-        states[i] = neurons[i].get_state();
+        states[i] = neurons[outputIndexes[i]].get_state();
     }
 }
 
 void Network::get_internalstate()
 {
-    for (std::size_t i = 0; i < biases.size(); ++i)
+    for (std::size_t i = 0; i < outputIndexes.size(); ++i)
     {
-        states[i] = neurons[i].get_internalstate();
+        states[i] = neurons[outputIndexes[i]].get_internalstate();
     }
 }
 

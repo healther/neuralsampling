@@ -4,7 +4,7 @@
 #include "config.h"
 
 
-Config::Config() {
+Config::Config(int64_t _nneurons) {
     // generate Config with sensible defaults
     randomSeed = 42424242;
     randomSkip = 1000000;
@@ -13,11 +13,13 @@ Config::Config() {
     tausyn = 1;
     delay = 1;
     subsampling = 1;
+    nneurons = _nneurons;
     neuronActivationType = Log;
     neuronInteractionType = Rect;
     updateScheme = InOrder;
     outputScheme = MeanActivityOutput;
     outputEnv = true;
+    outputIndexes = {};
 }
 
 
@@ -96,13 +98,28 @@ void Config::updateConfig(YAML::Node configNode) {
             outputScheme = MeanActivityEnergyOutput;
         } else if (output_scheme=="BinaryState") {
             outputScheme = BinaryStateOutput;
+        } else if (output_scheme=="InternalStateOutput") {
+            outputScheme = InternalStateOutput;
         } else if (output_scheme=="Spikes") {
             outputScheme = SpikesOutput;
         } else if (output_scheme=="SummarySpikes") {
             outputScheme = SummarySpikes;
+        } else if (output_scheme=="SummaryStates") {
+            outputScheme = SummaryStates;
         } else {
-            std::cout << "Use network_output_scheme [MeanActivity, MeanActivityEnergy, BinaryState, Spikes, SummarySpikes]" << std::endl;
+            std::cout << "Use network_output_scheme [MeanActivity, MeanActivityEnergy, BinaryState, InternalStateOutput, Spikes, SummarySpikes, SummaryStates]" << std::endl;
             throw;
+        }
+    }
+    if (configNode["outputIndexes"]) {
+        for (auto it = configNode["outputIndexes"].begin(); it != configNode["outputIndexes"].end(); ++it)
+        {
+            outputIndexes.push_back(it->as<int64_t>());
+        }
+    } else {
+        for (auto i = 0; i < nneurons; ++i)
+        {
+            outputIndexes.push_back(i);
         }
     }
     if (configNode["outputEnv"]) {

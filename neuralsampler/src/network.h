@@ -19,6 +19,7 @@ private:
     const TUpdateScheme update_scheme;
     const TActivation neuron_activation_type;
     const TInteraction neuron_interaction_type;
+    const std::vector<int64_t> outputIndexes;
 
     std::vector<double> biases;
     std::vector<std::vector<double> > weights;
@@ -30,7 +31,7 @@ private:
     bool outputEnv;
     bool boptimized;
 
-    void generate_connected_neuron_ids();
+    bool generate_connected_neuron_ids();
     std::vector<int64_t> get_update_inds();
     double get_potential_for_neuronid(int64_t id);
 
@@ -42,12 +43,14 @@ public:
     ~Network() {};
 
     std::vector<int64_t> states;
+    std::map<std::vector<int64_t>, int64_t> summary_states;
 
     // std::vector<bool> get_state();
     void produce_header(std::ostream& stream);
     void produce_output(std::ostream& stream, double T, double Iext);
     void produce_summary(std::ostream& stream);
     void get_state();
+    void get_binary_state();
     void get_internalstate();
     void update_state(double T);
     void update_state(double T, double Iext);
