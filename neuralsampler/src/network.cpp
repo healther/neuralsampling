@@ -13,18 +13,18 @@ Network::Network(std::vector<double> &_biases,
             std::vector<std::vector<double> > &_weights,
             std::vector<int64_t> &_initialstate,
             Config config):
-    output_scheme(config.outputScheme),
+    output_scheme(config.output.outputScheme),
     update_scheme(config.updateScheme),
     neuron_activation_type(config.neuronActivationType),
     neuron_interaction_type(config.neuronInteractionType),
-    outputIndexes(config.outputIndexes)
+    outputIndexes(config.output.outputIndexes)
 {
     biases = _biases;
     weights = _weights;
     tauref = config.tauref;
     tausyn = config.tausyn;
     delay = config.delay;
-    outputEnv = config.outputEnv;
+    outputEnv = config.output.outputEnv;
 
     neurons.reserve(biases.size());
     states.resize(outputIndexes.size());
@@ -144,7 +144,7 @@ void Network::produce_output(std::ostream& stream, double T, double Iext)
 void Network::produce_summary(std::ostream& stream)
 {
     stream.fill('0');
-    stream << "____End of simulation____\n\n\nSummary:\n";
+    stream << "Summary:\n";
     stream << "NeuronNr NumberOfSpikes\n-----------\n";
     for (std::size_t i = 0; i < biases.size(); ++i) {
         stream << std::setw(5) << i << " " << std::setw(12) << neurons[i].get_nspikes() << "\n";

@@ -8,6 +8,7 @@
 
 #include "type.h"
 #include "temperature.h"
+#include "configOutput.h"
 
 class Config
 {
@@ -23,17 +24,13 @@ public:
     TActivation neuronActivationType;
     TInteraction neuronInteractionType;
     TUpdateScheme updateScheme;
-    TOutputScheme outputScheme;
-    bool outputEnv;
-    std::vector<int64_t> outputIndexes;
+    ConfigOutput output;
 
     Config(int64_t nneurons);
     ~Config() {};
 
     void updateConfig(YAML::Node ConfigNode);
     bool checkTemperature(Temperature temperature);
-
-
 };
 
 

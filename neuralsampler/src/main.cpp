@@ -152,8 +152,8 @@ int main(int argc, char const *argv[])
     std::ostream output(buf);
     // output << "Remove config file at the end: " << b_remove_config_file << std::endl;
     output << "Outputformat OutputEnv Updatescheme Activationtype Interactiontype: "
-        << config.outputScheme
-        << config.outputEnv
+        << config.output.outputScheme
+        << config.output.outputEnv
         << config.updateScheme
         << config.neuronActivationType
         << config.neuronInteractionType
@@ -174,6 +174,7 @@ int main(int argc, char const *argv[])
     mt_random.discard(config.randomSkip);
 
     // actual simulation
+    int outputNumber = 0;
     for (int64_t i = 0; i < config.nupdates; ++i)
     {
         T = temperature.get_temperature(i);
@@ -186,7 +187,13 @@ int main(int argc, char const *argv[])
         if (i % 100 == 0) {
             output.flush();
         }
+        if (i == config.output.outputTimes[outputNumber]) {
+            outputNumber++;
+            output << "Timestep: " << i << "\n\n\n";
+            net.produce_summary(output);
+        }
     }
+    output << "____End of simulation____\n\n\n";
     net.produce_summary(output);
     output.flush();
     of.close();

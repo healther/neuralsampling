@@ -4,7 +4,9 @@
 #include "config.h"
 
 
-Config::Config(int64_t _nneurons) {
+Config::Config(int64_t _nneurons):
+    output(ConfigOutput(_nneurons))
+{
     // generate Config with sensible defaults
     randomSeed = 42424242;
     randomSkip = 1000000;
@@ -17,9 +19,6 @@ Config::Config(int64_t _nneurons) {
     neuronActivationType = Log;
     neuronInteractionType = Rect;
     updateScheme = InOrder;
-    outputScheme = MeanActivityOutput;
-    outputEnv = true;
-    outputIndexes = {};
 }
 
 
@@ -89,41 +88,8 @@ void Config::updateConfig(YAML::Node configNode) {
             throw;
         }
     }
-    if (configNode["outputScheme"]) {
-        std::string output_scheme =
-                configNode["outputScheme"].as<std::string>();
-        if (output_scheme=="MeanActivity") {
-            outputScheme = MeanActivityOutput;
-        } else if (output_scheme=="MeanActivityEnergy") {
-            outputScheme = MeanActivityEnergyOutput;
-        } else if (output_scheme=="BinaryState") {
-            outputScheme = BinaryStateOutput;
-        } else if (output_scheme=="InternalStateOutput") {
-            outputScheme = InternalStateOutput;
-        } else if (output_scheme=="Spikes") {
-            outputScheme = SpikesOutput;
-        } else if (output_scheme=="SummarySpikes") {
-            outputScheme = SummarySpikes;
-        } else if (output_scheme=="SummaryStates") {
-            outputScheme = SummaryStates;
-        } else {
-            std::cout << "Use network_output_scheme [MeanActivity, MeanActivityEnergy, BinaryState, InternalStateOutput, Spikes, SummarySpikes, SummaryStates]" << std::endl;
-            throw;
-        }
-    }
-    if (configNode["outputIndexes"]) {
-        for (auto it = configNode["outputIndexes"].begin(); it != configNode["outputIndexes"].end(); ++it)
-        {
-            outputIndexes.push_back(it->as<int64_t>());
-        }
-    } else {
-        for (auto i = 0; i < nneurons; ++i)
-        {
-            outputIndexes.push_back(i);
-        }
-    }
-    if (configNode["outputEnv"]) {
-        outputEnv = configNode["outputEnv"].as<bool>();
+    if (configNode["output"]) {
+        output.updateConfig(configNode["output"]);
     }
 }
 
