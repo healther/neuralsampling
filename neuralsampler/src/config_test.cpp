@@ -8,7 +8,7 @@
 SCENARIO("Config constructor") {
 
     GIVEN("Default config") {
-        Config config = Config();
+        Config config = Config(10);
 
         REQUIRE( config.randomSeed == 42424242 );
         REQUIRE( config.randomSkip == 1000000 );
@@ -19,15 +19,15 @@ SCENARIO("Config constructor") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == MeanActivityOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 }
 
 SCENARIO("Update config") {
 
     GIVEN("set randomSeed") {
-        Config config = Config();
+        Config config = Config(10);
         YAML::Node node = YAML::Load("randomSeed: 42");
         config.updateConfig(node);
 
@@ -40,12 +40,12 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == MeanActivityOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     GIVEN("set randomSkip") {
-        Config config = Config();
+        Config config = Config(10);
         YAML::Node node = YAML::Load("randomSkip: 42");
         config.updateConfig(node);
 
@@ -58,12 +58,12 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == MeanActivityOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     GIVEN("set nupdates") {
-        Config config = Config();
+        Config config = Config(10);
         YAML::Node node = YAML::Load("nupdates: 42");
         config.updateConfig(node);
 
@@ -76,12 +76,12 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == MeanActivityOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     GIVEN("set tauref") {
-        Config config = Config();
+        Config config = Config(10);
         YAML::Node node = YAML::Load("tauref: 42");
         config.updateConfig(node);
 
@@ -94,12 +94,12 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == MeanActivityOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     GIVEN("set tausyn") {
-        Config config = Config();
+        Config config = Config(10);
         YAML::Node node = YAML::Load("tausyn: 42");
         config.updateConfig(node);
 
@@ -112,12 +112,12 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == MeanActivityOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     GIVEN("set delay") {
-        Config config = Config();
+        Config config = Config(10);
         YAML::Node node = YAML::Load("delay: 42");
         config.updateConfig(node);
 
@@ -130,8 +130,8 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == MeanActivityOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     // GIVEN("set neuronType to fail") {
@@ -141,7 +141,7 @@ SCENARIO("Update config") {
     // }
 
     GIVEN("set neuronType") {
-        Config config = Config();
+        Config config = Config(10);
         YAML::Node node = YAML::Load("neuronType: erf");
         config.updateConfig(node);
 
@@ -154,12 +154,12 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Erf );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == MeanActivityOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     GIVEN("set neuronType") {
-        Config config = Config();
+        Config config = Config(10);
         YAML::Node node = YAML::Load("neuronType: log");
         config.updateConfig(node);
 
@@ -172,8 +172,8 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == MeanActivityOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     // GIVEN("set interactionType to fail") {
@@ -183,7 +183,7 @@ SCENARIO("Update config") {
     // }
 
     GIVEN("set interactionType") {
-        Config config = Config();
+        Config config = Config(10);
         YAML::Node node = YAML::Load("synapseType: exp");
         config.updateConfig(node);
 
@@ -196,12 +196,12 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Exp );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == MeanActivityOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     GIVEN("set interactionType") {
-        Config config = Config();
+        Config config = Config(10);
         YAML::Node node = YAML::Load("synapseType: cuto");
         config.updateConfig(node);
 
@@ -214,12 +214,12 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Cuto );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == MeanActivityOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     GIVEN("set interactionType") {
-        Config config = Config();
+        Config config = Config(10);
         YAML::Node node = YAML::Load("synapseType: tail");
         config.updateConfig(node);
 
@@ -232,12 +232,12 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Tail );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == MeanActivityOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     GIVEN("set updateScheme") {
-        Config config = Config();
+        Config config = Config(10);
         YAML::Node node = YAML::Load("networkUpdateScheme: BatchRandom");
         config.updateConfig(node);
 
@@ -250,12 +250,12 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == BatchRandom );
-        REQUIRE( config.outputScheme == MeanActivityOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     GIVEN("set updateScheme") {
-        Config config = Config();
+        Config config = Config(10);
         YAML::Node node = YAML::Load("networkUpdateScheme: Random");
         config.updateConfig(node);
 
@@ -268,13 +268,13 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == Random );
-        REQUIRE( config.outputScheme == MeanActivityOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     GIVEN("set updateScheme") {
-        Config config = Config();
-        YAML::Node node = YAML::Load("outputScheme: MeanActivityEnergy");
+        Config config = Config(10);
+        YAML::Node node = YAML::Load("output: {outputScheme: MeanActivityEnergy}");
         config.updateConfig(node);
 
         REQUIRE( config.randomSeed == 42424242 );
@@ -286,13 +286,13 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == MeanActivityEnergyOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == MeanActivityEnergyOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     GIVEN("set updateScheme") {
-        Config config = Config();
-        YAML::Node node = YAML::Load("outputScheme: BinaryState");
+        Config config = Config(10);
+        YAML::Node node = YAML::Load("output: {outputScheme: BinaryState}");
         config.updateConfig(node);
 
         REQUIRE( config.randomSeed == 42424242 );
@@ -304,13 +304,13 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == BinaryStateOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == BinaryStateOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     GIVEN("set updateScheme") {
-        Config config = Config();
-        YAML::Node node = YAML::Load("outputScheme: Spikes");
+        Config config = Config(10);
+        YAML::Node node = YAML::Load("output: {outputScheme: Spikes}");
         config.updateConfig(node);
 
         REQUIRE( config.randomSeed == 42424242 );
@@ -322,13 +322,13 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == SpikesOutput );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == SpikesOutput );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     GIVEN("set updateScheme") {
-        Config config = Config();
-        YAML::Node node = YAML::Load("outputScheme: SummarySpikes");
+        Config config = Config(10);
+        YAML::Node node = YAML::Load("output: {outputScheme: SummarySpikes}");
         config.updateConfig(node);
 
         REQUIRE( config.randomSeed == 42424242 );
@@ -340,13 +340,13 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == SummarySpikes );
-        REQUIRE( config.outputEnv == true );
+        REQUIRE( config.output.outputScheme == SummarySpikes );
+        REQUIRE( config.output.outputEnv == true );
     }
 
     GIVEN("set updateScheme") {
-        Config config = Config();
-        YAML::Node node = YAML::Load("outputEnv: false");
+        Config config = Config(10);
+        YAML::Node node = YAML::Load("output: {outputEnv: false}");
         config.updateConfig(node);
 
         REQUIRE( config.randomSeed == 42424242 );
@@ -358,8 +358,8 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronActivationType == Log );
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == InOrder );
-        REQUIRE( config.outputScheme == MeanActivityOutput );
-        REQUIRE( config.outputEnv == false );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == false );
     }
 
 }

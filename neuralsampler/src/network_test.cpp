@@ -16,8 +16,8 @@ SCENARIO("Network constructor") {
             {1, 0, 0.3},
             {2, 1, 0.}};
         std::vector<int64_t> initialstate = {0, 4, 8};
-        Config config = Config();
-        YAML::Node node = YAML::Load("tauref: 5");
+        Config config = Config(3);
+        YAML::Node node = YAML::Load("tauref: 5\noutput: {outputIndexes: [0, 1, 2]}");
         config.updateConfig(node);
 
         Network n(biases, weights, initialstate, config);
