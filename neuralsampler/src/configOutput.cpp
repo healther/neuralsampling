@@ -48,10 +48,10 @@ void ConfigOutput::updateConfig(YAML::Node configOutputNode) {
         }
     }
     if (configOutputNode["outputTimes"]) {
-        outputIndexes.clear();
+        outputTimes.clear();
         for (auto it = configOutputNode["outputTimes"].begin(); it != configOutputNode["outputTimes"].end(); ++it)
         {
-            outputIndexes.push_back(it->as<int64_t>());
+            outputTimes.push_back(it->as<int64_t>());
         }
     }
     if (configOutputNode["outputEnv"]) {
