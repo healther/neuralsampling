@@ -36,10 +36,10 @@ private:
     double get_potential_for_neuronid(int64_t id);
 
 public:
-    Network(std::vector<double> &_biases,
-            std::vector<std::vector<double> > &_weights,
-            std::vector<int64_t> &_initialstate,
-            Config config);
+    Network(const std::vector<double> &_biases,
+            const std::vector<std::vector<double> > &_weights,
+            const std::vector<int64_t> &_initialstate,
+            const Config& config);
     ~Network() {};
 
     std::vector<int64_t> states;

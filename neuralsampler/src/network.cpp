@@ -9,10 +9,10 @@
 #include "network.h"
 
 
-Network::Network(std::vector<double> &_biases,
-            std::vector<std::vector<double> > &_weights,
-            std::vector<int64_t> &_initialstate,
-            Config config):
+Network::Network(const std::vector<double> &_biases,
+            const std::vector<std::vector<double> > &_weights,
+            const std::vector<int64_t> &_initialstate,
+            const Config& config):
     output_scheme(config.output.outputScheme),
     update_scheme(config.updateScheme),
     neuron_activation_type(config.neuronActivationType),

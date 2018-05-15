@@ -40,14 +40,14 @@ void ConfigOutput::updateConfig(YAML::Node configOutputNode) {
             throw;
         }
     }
-    if (configOutputNode["outputIndexes"]) {
+    if (configOutputNode["outputIndexes"] && (configOutputNode["outputIndexes"].size() > 0)) {
         outputIndexes.clear();
         for (auto it = configOutputNode["outputIndexes"].begin(); it != configOutputNode["outputIndexes"].end(); ++it)
         {
             outputIndexes.push_back(it->as<int64_t>());
         }
     }
-    if (configOutputNode["outputTimes"]) {
+    if (configOutputNode["outputTimes"] && (configOutputNode["outputTimes"] > 0)) {
         outputTimes.clear();
         for (auto it = configOutputNode["outputTimes"].begin(); it != configOutputNode["outputTimes"].end(); ++it)
         {
