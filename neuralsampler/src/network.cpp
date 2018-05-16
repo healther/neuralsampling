@@ -10,20 +10,15 @@
 
 
 Network::Network(const std::vector<double> &_biases,
-            const std::vector<std::vector<double> > &_weights,
-            const std::vector<int64_t> &_initialstate,
-            const Config& config):
+                 const std::vector<std::vector<double> > &_weights,
+                 const std::vector<int64_t> &_initialstate,
+                 const Config& config):
     output_scheme(config.output.outputScheme),
     update_scheme(config.updateScheme),
-    neuron_activation_type(config.neuronActivationType),
-    neuron_interaction_type(config.neuronInteractionType),
-    outputIndexes(config.output.outputIndexes)
+    outputIndexes(config.output.outputIndexes),
+    biases(_biases),
+    weights(_weights)
 {
-    biases = _biases;
-    weights = _weights;
-    tauref = config.tauref;
-    tausyn = config.tausyn;
-    delay = config.delay;
     outputEnv = config.output.outputEnv;
 
     neurons.reserve(biases.size());
@@ -31,8 +26,10 @@ Network::Network(const std::vector<double> &_biases,
     for (std::size_t i = 0; i < biases.size(); ++i)
     {
         neurons.push_back(
-            Neuron(tauref, tausyn, delay, _initialstate[i],
-            neuron_activation_type, neuron_interaction_type)
+            Neuron(config.tauref, config.tausyn, config.delay,
+                   _initialstate[i], config.neuronUpdate, 
+                   config.neuronActivationType,
+                   config.neuronInteractionType, config.neuronIntegrationType)
         );
     }
     get_state();

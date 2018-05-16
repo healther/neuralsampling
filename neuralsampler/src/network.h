@@ -17,17 +17,12 @@ class Network
 private:
     const TOutputScheme output_scheme;
     const TUpdateScheme update_scheme;
-    const TActivation neuron_activation_type;
-    const TInteraction neuron_interaction_type;
     const std::vector<int64_t> outputIndexes;
 
-    std::vector<double> biases;
-    std::vector<std::vector<double> > weights;
+    const std::vector<double> biases;
+    const std::vector<std::vector<double> > weights;
     std::vector<std::vector<int64_t> > connected_neuron_ids;
     std::vector<Neuron> neurons;
-    int64_t tauref;
-    int64_t tausyn;
-    int64_t delay;
     bool outputEnv;
     bool boptimized;
 

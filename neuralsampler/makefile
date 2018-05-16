@@ -54,6 +54,9 @@ build/neuron.o: src/neuron.cpp src/neuron.h src/type.h src/fixed_queue.h
 build/configOutput.o: src/configOutput.cpp src/configOutput.h src/type.h src/main.h
 	$(OCXX) -c src/configOutput.cpp -o build/configOutput.o
 
+build/configNeuronUpdate.o: src/configNeuronUpdate.cpp src/configNeuronUpdate.h src/type.h
+	$(OCXX) -c src/configNeuronUpdate.cpp -o build/configNeuronUpdate.o
+
 build/config.o: src/config.cpp src/config.h src/configOutput.h  src/type.h src/temperature.h src/main.h
 	$(OCXX) -c src/config.cpp -o build/config.o
 
@@ -74,8 +77,8 @@ tests/test_config: src/config_test.cpp src/type.h src/main.h build/temperature.o
 	$(TESTCXX) src/config_test.cpp build/config.o build/configOutput.o build/temperature.o $(LDLIBS) -o tests/test_config
 
 
-bin/neuralsampler: src/main.cpp src/main.h src/myrandom.h build/config.o build/configOutput.o build/neuron.o build/network.o build/fixed_queue.o build/temperature.o
-	$(CXX) $(INCLUDEPATH) $(LIBPATH) $(LDFLAGS) $(CPPFLAGS) build/fixed_queue.o build/config.o build/configOutput.o build/neuron.o build/network.o build/temperature.o src/main.cpp $(LDLIBS) -o bin/neuralsampler
+bin/neuralsampler: src/main.cpp src/main.h src/myrandom.h build/config.o build/configOutput.o build/configNeuronUpdate.o build/neuron.o build/network.o build/fixed_queue.o build/temperature.o
+	$(CXX) $(INCLUDEPATH) $(LIBPATH) $(LDFLAGS) $(CPPFLAGS) build/fixed_queue.o build/config.o build/configOutput.o build/configNeuronUpdate.o build/neuron.o build/network.o build/temperature.o src/main.cpp $(LDLIBS) -o bin/neuralsampler
 
 prof/profile: src/main.cpp src/main.h src/myrandom.h build/config.o build/neuron.o build/network.o build/fixed_queue.o build/temperature.o
 	$(CXX) $(INCLUDEPATH) $(LIBPATH) $(LDFLAGS) $(CPPFLAGS) -pg build/config.o build/neuron.o build/network.o build/fixed_queue.o build/temperature.o src/main.cpp $(LDLIBS) -o prof/profile

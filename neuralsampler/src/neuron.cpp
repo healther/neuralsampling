@@ -6,12 +6,16 @@
 
 
 
-
 Neuron::Neuron(const int64_t _tauref, const int64_t _tausyn,
-    const int64_t _delay, const int64_t _state,
-    const TActivation _activation_type, const TInteraction _interaction_type):
+    const int64_t _delay, const int64_t _state, 
+    const ConfigNeuronUpdate _neuronUpdate,
+    const TActivation _activation_type, 
+    const TInteraction _interaction_type,
+    const TIntegration _integration_type):
     activation_type(_activation_type),
     interaction_type(_interaction_type),
+    integration_type(_integration_type),
+    neuronUpdate(_neuronUpdate),
     tauref(_tauref),
     tausyn(_tausyn),
     delay(_delay),
@@ -31,6 +35,12 @@ Neuron::Neuron(const int64_t _tauref, const int64_t _tausyn,
 
 void Neuron::update_state(const double pot)
 {
+    if ( integration_type == MemoryLess )
+    {
+        membrane_potential = pot;
+    } else {
+        membrane_potential += (pot - neuronUpdate.mu) / neuronUpdate.theta + neuronUpdate.sigma * random_normal(mt_random);
+    }
     // std::cout << state << std::endl;
     state++;
     // A neuron is not allowed to spike if it is in the refractory time,
@@ -40,7 +50,7 @@ void Neuron::update_state(const double pot)
     // are allowed to spike.
     if (state >= tauref)
     {
-        if (spike(pot))
+        if (spike(membrane_potential))
         {
             state = 0;
         }

@@ -3,8 +3,6 @@
 
 #include <ostream>
 #include <vector>
-#include <random>
-#include <algorithm>
 
 #include "type.h"
 #include "temperature.h"

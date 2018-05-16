@@ -9,6 +9,7 @@
 #include "type.h"
 #include "temperature.h"
 #include "configOutput.h"
+#include "configNeuronUpdate.h"
 
 class Config
 {
@@ -24,6 +25,8 @@ public:
     TActivation neuronActivationType;
     TInteraction neuronInteractionType;
     TUpdateScheme updateScheme;
+    TIntegration neuronIntegrationType;
+    ConfigNeuronUpdate neuronUpdate;
     ConfigOutput output;
 
     Config(int64_t nneurons);

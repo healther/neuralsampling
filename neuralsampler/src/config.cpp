@@ -19,6 +19,8 @@ Config::Config(int64_t _nneurons):
     neuronActivationType = Log;
     neuronInteractionType = Rect;
     updateScheme = InOrder;
+    neuronIntegrationType = MemoryLess;
+    neuronUpdate = ConfigNeuronUpdate();
 }
 
 
@@ -90,6 +92,24 @@ void Config::updateConfig(YAML::Node configNode) {
     }
     if (configNode["output"]) {
         output.updateConfig(configNode["output"]);
+    }
+    if (configNode["neuronIntegrationType"]) {
+        std::string neuron_integration_type =
+                configNode["neuronIntegrationType"].as<std::string>();
+        if (neuron_integration_type=="MemoryLess") {
+            neuronIntegrationType = MemoryLess;
+        } else if (neuron_integration_type=="OU") {
+            neuronIntegrationType = OU;
+        } else {
+            std::cout << "Use neuronIntegrationType [MemoryLess, OU]" << std::endl;
+            throw;
+        }
+    }
+    if (configNode["neuronUpdate"]) {
+        neuronUpdate = ConfigNeuronUpdate(
+                            configNode["neuronUpdate"]["theta"].as<double>(),
+                            configNode["neuronUpdate"]["mu"].as<double>(),
+                            configNode["neuronUpdate"]["sigma"].as<double>());
     }
 }
 
