@@ -36,6 +36,10 @@ public:
         const TActivation _activation_type,
         const TInteraction _interaction_type, 
         const TIntegration _integration_type);
+    Neuron(const int64_t _tauref, const int64_t _tausyn, const int64_t _delay,
+        const int64_t _state,
+        const TActivation _activation_type,
+        const TInteraction _interaction_type);
     ~Neuron() {};
 
     void update_state(const double pot);

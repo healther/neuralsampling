@@ -8,6 +8,15 @@
 
 Neuron::Neuron(const int64_t _tauref, const int64_t _tausyn,
     const int64_t _delay, const int64_t _state, 
+    const TActivation _activation_type, 
+    const TInteraction _interaction_type):
+    Neuron(_tauref, _tausyn, _delay, _state, ConfigNeuronUpdate(), _activation_type, _interaction_type, MemoryLess)
+{
+}
+
+
+Neuron::Neuron(const int64_t _tauref, const int64_t _tausyn,
+    const int64_t _delay, const int64_t _state, 
     const ConfigNeuronUpdate _neuronUpdate,
     const TActivation _activation_type, 
     const TInteraction _interaction_type,
