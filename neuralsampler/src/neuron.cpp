@@ -44,11 +44,13 @@ Neuron::Neuron(const int64_t _tauref, const int64_t _tausyn,
 
 void Neuron::update_state(const double pot)
 {
-    if ( integration_type == MemoryLess )
+    double effective_pot = pot;
+    if ( integration_type == OU )
     {
-        membrane_potential = pot;
-    } else {
-        membrane_potential += (pot - neuronUpdate.mu) / neuronUpdate.theta + neuronUpdate.sigma * random_normal(mt_random);
+        // membrane_potential tracks the OU part of the membrane
+        // with OU parameters being held in neuronUpdate
+        membrane_potential += (membrane_potential - neuronUpdate.mu) / neuronUpdate.theta + neuronUpdate.sigma * random_normal(mt_random);
+        effective_pot += membrane_potential;
     }
     // std::cout << state << std::endl;
     state++;
@@ -59,7 +61,7 @@ void Neuron::update_state(const double pot)
     // are allowed to spike.
     if (state >= tauref)
     {
-        if (spike(membrane_potential))
+        if (spike(effective_pot))
         {
             state = 0;
         }
