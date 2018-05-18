@@ -54,8 +54,10 @@ void Config::updateConfig(YAML::Node configNode) {
             neuronActivationType = Log;
         } else if (neuron_type=="erf") {
             neuronActivationType = Erf;
+        } else if (neuron_type=="step") {
+            neuronActivationType = Step;
         } else {
-            std::cout << "Invalid neuron type. Aborting." << std::endl;
+            std::cout << "Invalid neuron type. Implemented are [log, erf, step]. Aborting." << std::endl;
             throw;
         }
     }
