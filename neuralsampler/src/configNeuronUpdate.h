@@ -10,7 +10,7 @@ public:
     double mu;
     double sigma;
 
-    ConfigNeuronUpdate() {theta=0.; mu=0.; sigma=0.;};
+    ConfigNeuronUpdate() {theta=1.; mu=0.; sigma=0.;};
     ConfigNeuronUpdate(const double _theta, const double _mu, 
     				   const double _sigma) {
     theta = _theta;

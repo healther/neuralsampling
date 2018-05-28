@@ -362,4 +362,23 @@ SCENARIO("Update config") {
         REQUIRE( config.output.outputEnv == false );
     }
 
+    GIVEN("set neuronUpdate") {
+        Config config = Config(10);
+        YAML::Node node = YAML::Load("neuronUpdate: {theta: 2.0}");
+        config.updateConfig(node);
+
+        REQUIRE( config.randomSeed == 42424242 );
+        REQUIRE( config.randomSkip == 1000000 );
+        REQUIRE( config.nupdates == 100000 );
+        REQUIRE( config.tauref == 1 );
+        REQUIRE( config.tausyn == 1 );
+        REQUIRE( config.delay == 1 );
+        REQUIRE( config.neuronActivationType == Log );
+        REQUIRE( config.neuronInteractionType == Rect );
+        REQUIRE( config.updateScheme == InOrder );
+        REQUIRE( config.output.outputScheme == MeanActivityOutput );
+        REQUIRE( config.output.outputEnv == false );
+        REQUIRE( config.neuronUpdate.theta == 2. );
+    }
+
 }
