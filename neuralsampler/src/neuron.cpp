@@ -38,6 +38,7 @@ Neuron::Neuron(const int64_t _tauref, const int64_t _tausyn,
     {
         update_interaction();
     }
+    membrane_potential = -10.;
 }
 
 
