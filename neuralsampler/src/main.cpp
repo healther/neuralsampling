@@ -82,33 +82,42 @@ int main(int argc, char const *argv[])
     YAML::Node biasNode = baseNode["bias"];
     if (!biasNode) {
         YAML::Node biasFileNode = baseNode["biasFile"];
-        biasNode = YAML::LoadFile(biasFileNode.as<std::string>());
+        if (!biasFileNode) {
+            biasNode = YAML::LoadFile(biasFileNode.as<std::string>());
+        } else {
+            std::cout << "Didn't find either bias or biasFile. Aborting!";
+            throw;
+        }
     }
     YAML::Node weightNode = baseNode["weight"];
     if (!weightNode) {
         YAML::Node weightFileNode = baseNode["weightFile"];
-        weightNode = YAML::LoadFile(weightFileNode.as<std::string>());
+        if (!weightFileNode) {
+            weightNode = YAML::LoadFile(weightFileNode.as<std::string>());
+        } else {
+            std::cout << "Didn't find either weight or weightFile. Aborting!";
+            throw;
+        }
     }
     YAML::Node initialStateNode = baseNode["initialstate"];
     if (!initialStateNode) {
         YAML::Node initialStateFileNode = baseNode["initialstateFile"];
-        initialStateNode = YAML::LoadFile(initialStateFileNode.as<std::string>());
+        if (!initialStateNode) {
+            initialStateNode = YAML::LoadFile(initialStateFileNode.as<std::string>());
+        } else {
+            std::cout << "Didn't find either initialstate or initialstateFile. Aborting!";
+            throw;
+        }
     }
     YAML::Node temperatureNode = baseNode["temperature"];
+    if (!temperatureNode) {
+        std::cout << "Didn't find either temperature. Aborting!";
+            throw;
+    }
     YAML::Node currentNode = baseNode["externalCurrent"];
-
-    if (!biasNode || !weightNode || !initialStateNode) {
-        std::cout << "Corrupted configuration file" << std::endl;
-        if (!biasNode) {
-            std::cout << " Cannot read biasNode" << std::endl;
-        }
-        if (!weightNode) {
-            std::cout << " Cannot read weightNode" << std::endl;
-        }
-        if (!initialStateNode) {
-            std::cout << " Cannot read initialStateNode" << std::endl;
-        }
-        return -1;
+    if (!currentNode) {
+        std::cout << "Didn't find either externalCurrent. Aborting!";
+            throw;
     }
 
     YAML::Node simulationFolderNode = baseNode["outfile"];
@@ -150,7 +159,6 @@ int main(int argc, char const *argv[])
         buf = std::cout.rdbuf();
     }
     std::ostream output(buf);
-    // output << "Remove config file at the end: " << b_remove_config_file << std::endl;
     output << "Outputformat OutputEnv Updatescheme Activationtype Interactiontype: "
         << config.output.outputScheme
         << config.output.outputEnv
