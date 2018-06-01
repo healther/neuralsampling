@@ -377,7 +377,7 @@ SCENARIO("Update config") {
         REQUIRE( config.neuronInteractionType == Rect );
         REQUIRE( config.updateScheme == InOrder );
         REQUIRE( config.output.outputScheme == MeanActivityOutput );
-        REQUIRE( config.output.outputEnv == false );
+        REQUIRE( config.output.outputEnv == true );
         REQUIRE( config.neuronUpdate.theta == 2. );
     }
 
