@@ -50,8 +50,12 @@ void Neuron::update_state(const double pot)
     {
         // membrane_potential tracks the OU part of the membrane
         // with OU parameters being held in neuronUpdate
-        double noise = random_normal(mt_random);
-        membrane_potential += (neuronUpdate.mu - membrane_potential) * neuronUpdate.theta + neuronUpdate.sigma * noise;
+        double noise;
+        for (int64_t i = 0; i < neuronUpdate.nsteps; ++i)
+        {
+            noise = random_normal(mt_random);
+            membrane_potential += neuronUpdate.tau * ((neuronUpdate.mu - membrane_potential) * neuronUpdate.theta + neuronUpdate.sigma * noise);
+        }
         effective_pot += membrane_potential;
     }
     // std::cout << state << std::endl;
