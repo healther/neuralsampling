@@ -47,7 +47,7 @@ void ConfigOutput::updateConfig(YAML::Node configOutputNode) {
             outputIndexes.push_back(it->as<int64_t>());
         }
     }
-    if (configOutputNode["outputTimes"] && (configOutputNode["outputTimes"] > 0)) {
+    if (configOutputNode["outputTimes"] && (configOutputNode["outputTimes"].as<int64_t>() > 0)) {
         outputTimes.clear();
         for (auto it = configOutputNode["outputTimes"].begin(); it != configOutputNode["outputTimes"].end(); ++it)
         {
