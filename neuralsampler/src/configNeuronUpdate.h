@@ -11,17 +11,13 @@ public:
     double theta;
     double mu;
     double sigma;
-    int64_t nsteps;
-    double tau;
 
     ConfigNeuronUpdate() {theta=1.; mu=0.; sigma=0.;};
     ConfigNeuronUpdate(const double _theta, const double _mu, 
-                       const double _sigma, const int64_t _nsteps) {
-    theta = _theta;
-    mu = _mu;
-    sigma = _sigma;
-    nsteps = _nsteps;
-    tau = 1. / (double) nsteps;
+                       const double _sigma) {
+        theta = _theta;
+        mu = _mu;
+        sigma = _sigma;
     };
     ~ConfigNeuronUpdate() {};
 };

@@ -7,8 +7,8 @@
 
 
 Neuron::Neuron(const int64_t _tauref, const int64_t _tausyn,
-    const int64_t _delay, const int64_t _state, 
-    const TActivation _activation_type, 
+    const int64_t _delay, const int64_t _state,
+    const TActivation _activation_type,
     const TInteraction _interaction_type):
     Neuron(_tauref, _tausyn, _delay, _state, ConfigNeuronUpdate(), _activation_type, _interaction_type, MemoryLess)
 {
@@ -16,9 +16,9 @@ Neuron::Neuron(const int64_t _tauref, const int64_t _tausyn,
 
 
 Neuron::Neuron(const int64_t _tauref, const int64_t _tausyn,
-    const int64_t _delay, const int64_t _state, 
+    const int64_t _delay, const int64_t _state,
     const ConfigNeuronUpdate _neuronUpdate,
-    const TActivation _activation_type, 
+    const TActivation _activation_type,
     const TInteraction _interaction_type,
     const TIntegration _integration_type):
     activation_type(_activation_type),
@@ -38,7 +38,7 @@ Neuron::Neuron(const int64_t _tauref, const int64_t _tausyn,
     {
         update_interaction();
     }
-    membrane_potential = -10.;
+    membrane_potential = 0.;
 }
 
 
@@ -50,15 +50,10 @@ void Neuron::update_state(const double pot)
     {
         // membrane_potential tracks the OU part of the membrane
         // with OU parameters being held in neuronUpdate
-        double noise;
-        for (int64_t i = 0; i < neuronUpdate.nsteps; ++i)
-        {
-            noise = random_normal(mt_random);
-            membrane_potential += neuronUpdate.tau * ((neuronUpdate.mu - membrane_potential) * neuronUpdate.theta + neuronUpdate.sigma * noise);
-        }
+        double noise = random_normal(mt_random);
+        membrane_potential += (neuronUpdate.mu - membrane_potential) * neuronUpdate.theta + neuronUpdate.sigma * noise;
         effective_pot += membrane_potential;
     }
-    // std::cout << state << std::endl;
     state++;
     // A neuron is not allowed to spike if it is in the refractory time,
     // i.e. if its state is larger than zero, the statespace here is

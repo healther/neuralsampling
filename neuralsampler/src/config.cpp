@@ -111,8 +111,8 @@ void Config::updateConfig(YAML::Node configNode) {
         neuronUpdate = ConfigNeuronUpdate(
                             configNode["neuronUpdate"]["theta"].as<double>(),
                             configNode["neuronUpdate"]["mu"].as<double>(0.0),
-                            configNode["neuronUpdate"]["sigma"].as<double>(1.0),
-                            configNode["neuronUpdate"]["nsteps"].as<int64_t>(1));
+                            configNode["neuronUpdate"]["sigma"].as<double>(1.0)
+                            );
     }
 }
 
