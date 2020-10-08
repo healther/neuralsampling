@@ -6,9 +6,7 @@
 #include "main.h"
 #include "myrandom.h"
 
-#include "neuron.h"
 #include "network.h"
-#include "temperature.h"
 
 
 std::vector<double> get_bias_from_node(YAML::Node biasNode)
@@ -53,22 +51,6 @@ std::vector<int64_t> get_initialstate_from_node(YAML::Node initialStateNode)
 }
 
 
-Temperature get_temperature_from_node(YAML::Node temperatureNode)
-{
-    std::string temperature_type = temperatureNode["type"].as<std::string>();
-    ChangeType ttype;
-    if (temperature_type=="Linear") {
-        ttype = Linear;
-    } else if (temperature_type=="Const") {
-        ttype = Const;
-    } else {
-        std::cout << "Invalid temperature type. Aborting" << std::endl;
-        throw;
-    }
-    Temperature temperature = Temperature(ttype, temperatureNode);
-    return temperature;
-}
-
 
 int main(int argc, char const *argv[])
 {
@@ -109,16 +91,6 @@ int main(int argc, char const *argv[])
             throw;
         }
     }
-    YAML::Node temperatureNode = baseNode["temperature"];
-    if (!temperatureNode) {
-        std::cout << "Didn't find either temperature. Aborting!";
-            throw;
-    }
-    YAML::Node currentNode = baseNode["externalCurrent"];
-    if (!currentNode) {
-        std::cout << "Didn't find either externalCurrent. Aborting!";
-            throw;
-    }
 
     YAML::Node simulationFolderNode = baseNode["outfile"];
     bool b_output_file = baseNode["outfile"];
@@ -134,22 +106,6 @@ int main(int argc, char const *argv[])
     Config config = Config(bias.size());
     config.updateConfig(configNode);
 
-    // get temperature
-    Temperature temperature = get_temperature_from_node(temperatureNode);
-    if (!config.checkTemperature(temperature)) {
-        std::cout << "Temperature range not sufficient for " <<
-                config.nupdates << " update steps. Aborting" << std::endl;
-        return -1;
-    }
-
-    // get external current
-    Temperature current = get_temperature_from_node(currentNode);
-    if (!config.checkTemperature(current)) {
-        std::cout << "Current range not sufficient for " <<
-                config.nupdates << " update steps. Aborting" << std::endl;
-        return -1;
-    }
-
     std::streambuf *buf;
     std::ofstream of;
     if (b_output_file) {
@@ -159,47 +115,17 @@ int main(int argc, char const *argv[])
         buf = std::cout.rdbuf();
     }
     std::ostream output(buf);
-    output << "Outputformat OutputEnv Updatescheme Activationtype Interactiontype: "
-        << config.output.outputScheme
-        << config.output.outputEnv
-        << config.updateScheme
-        << config.neuronActivationType
-        << config.neuronInteractionType
-        << std::endl;
 
-    Network net(bias, weights, initialstate, config);
-
-    // and output initial configuration
-    net.produce_header(output);
-    net.get_state();
-    double T, Iext;
-    T = temperature.get_temperature(0);
-    Iext = current.get_temperature(0);
-    net.produce_output(output, T, Iext);
+    Network net(bias, weights, initialstate);
 
     // seed random number generator and discard for higher entropy
     mt_random.seed(config.randomSeed);
     mt_random.discard(config.randomSkip);
 
     // actual simulation
-    int outputNumber = 0;
     for (int64_t i = 0; i < config.nupdates; ++i)
     {
-        T = temperature.get_temperature(i);
-        Iext = current.get_temperature(i);
-        net.update_state(T, Iext);
-        net.get_state();
-        if (i % config.subsampling == 0) {
-            net.produce_output(output, T, Iext);
-        }
-        if (i % 100 == 0) {
-            output.flush();
-        }
-        if (i == config.output.outputTimes[outputNumber]) {
-            outputNumber++;
-            output << "Timestep: " << i << "\n\n\n";
-            net.produce_summary(output);
-        }
+        net.update_state();
     }
     output << "____End of simulation____\n\n\n";
     net.produce_summary(output);

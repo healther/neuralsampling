@@ -4,13 +4,11 @@
 #include <ostream>
 #include <vector>
 
-#include "type.h"
-#include "temperature.h"
+#include "main.h"
 
 class ConfigOutput
 {
 public:
-    TOutputScheme outputScheme;
     bool outputEnv;
     std::vector<int64_t> outputIndexes;
     std::vector<int64_t> outputTimes;
