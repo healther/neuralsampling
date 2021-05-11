@@ -23,18 +23,25 @@ protected:
     const int64_t tauref;
     const int64_t tausyn;
     const int64_t delay;
+    const int64_t num_interactions;
     const double taurefsyn;
     const double taurefsynexp;
     double membrane_potential;
     int64_t nspikes;
-    int64_t state;
+    std::vector<int64_t> state;
     FixedQueue interactions;
 
 public:
     Neuron(const int64_t _tauref, const int64_t _tausyn, const int64_t _delay,
+        const int64_t _num_interactions,
         const int64_t _state, const ConfigNeuronUpdate _neuronUpdate,
         const TActivation _activation_type,
-        const TInteraction _interaction_type, 
+        const TInteraction _interaction_type,
+        const TIntegration _integration_type);
+    Neuron(const int64_t _tauref, const int64_t _tausyn, const int64_t _delay,
+        const int64_t _state, const ConfigNeuronUpdate _neuronUpdate,
+        const TActivation _activation_type,
+        const TInteraction _interaction_type,
         const TIntegration _integration_type);
     Neuron(const int64_t _tauref, const int64_t _tausyn, const int64_t _delay,
         const int64_t _state,

@@ -27,7 +27,8 @@ Network::Network(const std::vector<double> &_biases,
     {
         neurons.push_back(
             Neuron(config.tauref, config.tausyn, config.delay,
-                   _initialstate[i], config.neuronUpdate, 
+                   config.num_interactions,
+                   _initialstate[i], config.neuronUpdate,
                    config.neuronActivationType,
                    config.neuronInteractionType, config.neuronIntegrationType)
         );

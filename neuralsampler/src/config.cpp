@@ -14,6 +14,7 @@ Config::Config(int64_t _nneurons):
     tauref = 1;
     tausyn = 1;
     delay = 1;
+    num_interactions = 1;
     subsampling = 1;
     nneurons = _nneurons;
     neuronActivationType = Log;
@@ -43,6 +44,9 @@ void Config::updateConfig(YAML::Node configNode) {
     }
     if (configNode["delay"]) {
         delay = configNode["delay"].as<int64_t>();
+    }
+    if (configNode["delay"]) {
+        num_interactions = configNode["num_interactions"].as<int64_t>();
     }
     if (configNode["subsampling"]) {
         subsampling = configNode["subsampling"].as<int64_t>();

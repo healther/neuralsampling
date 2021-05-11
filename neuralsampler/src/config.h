@@ -20,6 +20,7 @@ public:
     int64_t tauref;
     int64_t tausyn;
     int64_t delay;
+    int64_t num_interactions;
     int64_t subsampling;
     int64_t nneurons;
     TActivation neuronActivationType;
