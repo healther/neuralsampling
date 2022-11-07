@@ -96,31 +96,36 @@ void Neuron::update_state(const double pot)
 
 void Neuron::update_interaction()
 {
+    double norm = 1.;
     double total_interaction = 0.;
     for (int64_t i = 0; i < num_interactions; ++i)
     {
         double relstateexp = std::exp(-(double)state[i]/(double)tausyn);
         double interaction = (state[i] < tauref);
         if (interaction_type==Exp) {
-            interaction = taurefsyn * relstateexp/(1.-taurefsynexp);
+            norm = tausyn;
+            interaction = relstateexp;
         } else if (interaction_type==Rect) {
+            norm = tauref;
             interaction = (state[i] < tauref);
         } else if (interaction_type==Cuto) {
+            norm = tausyn * (1. - taurefsynexp);
             if (state[i] < tauref)
             {
-                interaction = taurefsyn * relstateexp/(1.-taurefsynexp);
+                interaction = relstateexp;
             } else {
                 interaction = 0.;
             }
         } else if (interaction_type==Tail) {
+            norm = (tauref + tausyn) * taurefsynexp;
             if (state[i] >= tauref)
             {
-                interaction = taurefsyn * relstateexp/(1.-taurefsynexp);
+                interaction = relstateexp;
             } else {
-                interaction = 1.;
+                interaction = taurefsynexp;
             }
         }
-        total_interaction += interaction;
+        total_interaction += interaction * tauref / norm;
     }
     interactions.add_entry(total_interaction);
 }
